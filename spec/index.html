@@ -1,0 +1,2613 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex"><!-- 초안. 하나를 고르면 이 줄을 지운다 -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>언틸리티 — 사양서 발췌</title>
+<meta name="description" content="회의를 놓치지 않게 화면을 통째로 덮는 macOS 앱, 언틸리티. 소개문이 아니라 사양서입니다 — 주장마다 조항 번호와 실측값을 붙였고, 제외 조건표는 여기서 직접 돌려 볼 수 있습니다.">
+<meta name="color-scheme" content="light dark">
+<meta property="og:type" content="website">
+<meta property="og:title" content="언틸리티 — 사양서 발췌">
+<meta property="og:description" content="회의 시작 전에 화면 전체를 덮고, 닫기 전에는 사라지지 않습니다. 주장마다 조항 번호와 실측값을 붙인 사양서 형식의 소개.">
+<meta property="og:image" content="../assets/alert-ember.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/icon.png" type="image/png">
+<link rel="apple-touch-icon" href="../assets/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;600&family=JetBrains+Mono:wght@400;700&family=Noto+Serif+KR:wght@300&display=swap">
+<style>
+/* ══════════════════════════════════════════════════════════════════
+   언틸리티 — 사양서 그 자체 (SPEC AS A PAGE)
+   토큰 → 뼈대 → 조판 → 부품 → 절별 → 반응형 → 움직임
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ───────────────────────────── 토큰 */
+:root{
+  color-scheme: light;
+
+  --paper:#F6F3EC;  --paper-2:#FFFDF8;  --paper-3:#EBE6DA;
+  --rule:#DCD5C7;   --rule-2:#C6BCA8;
+  --ink:#171512;    --ink-2:#4A453C;    --ink-3:#8A8275;
+  --amber:#B4700F;  --amber-soft:rgba(180,112,15,.10); --amber-line:rgba(180,112,15,.38);
+  --teal:#0F6F84;   --plum:#573375;
+  --pass:#1F6B3A;   --pass-soft:rgba(31,107,58,.10);
+  --fail:#A32A1F;   --fail-soft:rgba(163,42,31,.08);
+  --shade:rgba(23,21,18,.05);
+  --lift: 0 1px 0 rgba(23,21,18,.03), 0 22px 44px -32px rgba(23,21,18,.34);
+
+  --t-display: clamp(34px, 5vw, 56px);
+  --t-h2:      clamp(26px, 3vw, 34px);
+  --t-h3:      clamp(19px, 1.5vw, 21px);
+  --t-lead:    clamp(18px, 1.5vw, 21px);
+  --t-body:    clamp(16px, 1.05vw, 17px);
+  --t-small:   clamp(13.5px, .95vw, 14px);
+  --t-micro:   clamp(12px, .85vw, 12.5px);
+  --t-code:    clamp(13px, .9vw, 13.5px);
+
+  --lh-body:1.78; --lh-mono:1.68; --lh-tight:1.5; --lh-code:1.62;
+
+  --f-sans: "IBM Plex Sans KR", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  --f-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, "Consolas", monospace;
+  --f-serif:"Noto Serif KR", ui-serif, Georgia, "Apple SD Gothic Neo", serif;
+
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px;
+  --sp-6:32px; --sp-7:48px; --sp-8:72px; --sp-9:clamp(56px,9vw,112px);
+
+  --e-out: cubic-bezier(.16,.9,.3,1);
+  --e-io:  cubic-bezier(.4,0,.2,1);
+  --e-soft:cubic-bezier(.2,.7,.3,1);
+
+  --col: 760px;
+}
+
+[data-theme="dark"]{
+  color-scheme: dark;
+  --paper:#100F13;  --paper-2:#17161C;  --paper-3:#1D1B23;
+  --rule:rgba(242,238,230,.13); --rule-2:rgba(242,238,230,.24);
+  --ink:#F2EEE6;    --ink-2:rgba(242,238,230,.72); --ink-3:rgba(242,238,230,.46);
+  --amber:#FFB829;  --amber-soft:rgba(255,184,41,.11); --amber-line:rgba(255,184,41,.42);
+  --teal:#A8EBF7;   --plum:#C285D6;
+  --pass:#6FD59A;   --pass-soft:rgba(111,213,154,.11);
+  --fail:#FF8C7A;   --fail-soft:rgba(255,140,122,.11);
+  --shade:rgba(242,238,230,.05);
+  --lift: 0 1px 0 rgba(0,0,0,.2), 0 22px 44px -32px rgba(0,0,0,.8);
+}
+
+/* ───────────────────────────── 뼈대 */
+*,*::before,*::after{ box-sizing:border-box }
+html{ -webkit-text-size-adjust:100%; scroll-behavior:smooth; scroll-padding-top:72px }
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:var(--f-sans); font-weight:400; font-size:var(--t-body); line-height:var(--lh-body);
+  letter-spacing:normal; word-break:keep-all; overflow-wrap:anywhere; font-variant-ligatures:none;
+  overflow-x:hidden; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+img,video,canvas{ max-width:100%; display:block }
+a{ color:inherit }
+button{ font:inherit; color:inherit }
+:focus-visible{ outline:2px solid var(--amber); outline-offset:3px; border-radius:2px }
+.skip{
+  position:fixed; left:12px; top:-60px; z-index:90; padding:10px 16px; border-radius:6px;
+  background:var(--ink); color:var(--paper); text-decoration:none; font:600 14px/1 var(--f-sans);
+  transition:top .22s var(--e-out);
+}
+.skip:focus{ top:12px }
+
+.col{ width:min(var(--col), 100% - 32px); margin-inline:auto; position:relative }
+.mid{ width:min(1040px, 100% - 32px); margin-inline:auto }
+.wide{ width:min(1240px, 100% - 32px); margin-inline:auto }
+.sec{ padding: var(--sp-9) 0; position:relative }
+.sec + .sec{ border-top:1px solid var(--rule) }
+
+/* ───────────────────────────── 조판 */
+h1,h2,h3,h4{ margin:0; font-weight:600; letter-spacing:normal }
+h1{ font-size:var(--t-display); line-height:1.12; font-weight:600 }
+h2{ font-size:var(--t-h2); line-height:1.28 }
+h3{ font-size:var(--t-h3); line-height:1.45 }
+p{ margin:0 0 1.15em }
+p:last-child{ margin-bottom:0 }
+strong,b{ font-weight:600 }
+.lead{ font-size:var(--t-lead); line-height:1.6; color:var(--ink-2) }
+.muted{ color:var(--ink-2) }
+.dim{ color:var(--ink-3) }
+.mono{ font-family:var(--f-mono); font-variant-numeric:tabular-nums }
+.num{ font-family:var(--f-mono); font-variant-numeric:tabular-nums; letter-spacing:-.01em }
+.nb{ white-space:nowrap }
+code, .code{ font-family:var(--f-mono); font-size:.92em; font-variant-numeric:tabular-nums }
+.clause{ font-family:var(--f-mono); white-space:nowrap; color:var(--amber); font-weight:700; font-size:.9em }
+
+.eyebrow{
+  display:inline-block; font-family:var(--f-mono); font-size:var(--t-micro); font-weight:700;
+  line-height:var(--lh-mono); color:var(--amber); text-transform:uppercase; letter-spacing:.14em;
+}
+.eyebrow.ko{ text-transform:none; letter-spacing:normal }
+.sech{ margin-bottom:var(--sp-6) }
+.sech .eyebrow{ margin-bottom:var(--sp-3) }
+.sech h2 + p{ margin-top:var(--sp-4) }
+
+.hr{ height:1px; background:var(--rule); border:0; margin:var(--sp-6) 0 }
+.hr-thick{ height:2px; background:var(--ink); opacity:.85; border:0; margin:var(--sp-5) 0 }
+
+/* 본문 옆 여백 각주 */
+.ln{ position:relative }
+.note{
+  margin:var(--sp-4) 0 var(--sp-5); padding-left:var(--sp-4);
+  border-left:2px solid var(--amber-line);
+  font-family:var(--f-serif); font-weight:300; font-size:var(--t-small); line-height:1.75; color:var(--ink-2);
+}
+.note b{ font-weight:300; color:var(--ink); font-family:var(--f-mono); font-size:.92em }
+@media (min-width:1400px){
+  .note{
+    position:absolute; left:calc(100% + 26px); top:.2em; width:192px;
+    margin:0; padding-left:13px; border-left:1px solid var(--rule-2);
+  }
+}
+
+/* 세리프 인용 — 판정 기록 */
+.record{
+  margin:var(--sp-5) 0; padding:var(--sp-4) 0 var(--sp-4) var(--sp-5);
+  border-left:2px solid var(--rule-2);
+  font-family:var(--f-serif); font-weight:300; font-size:var(--t-small); line-height:1.85; color:var(--ink-2);
+}
+.record .rl{
+  display:block; font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono);
+  color:var(--ink-3); margin-bottom:6px; letter-spacing:.08em; text-transform:uppercase;
+}
+
+/* ───────────────────────────── 상단 고정 바 */
+.topbar{
+  position:fixed; inset:0 0 auto 0; z-index:40; height:44px;
+  background:var(--paper-2); border-bottom:1px solid var(--rule);
+  transform:translateY(-102%); transition:transform .34s var(--e-out);
+  display:flex; align-items:center;
+}
+.topbar.on{ transform:translateY(0) }
+.topbar .inner{
+  width:min(1240px, 100% - 32px); margin-inline:auto;
+  display:flex; align-items:center; gap:var(--sp-4);
+  font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); color:var(--ink-3);
+}
+.topbar .tb-name{ color:var(--ink); font-weight:700; letter-spacing:.1em }
+.topbar .tb-mid{ flex:1 1 auto; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+.progress{ position:absolute; left:0; bottom:-1px; height:2px; width:100%; background:transparent }
+.progress i{
+  display:block; height:100%; background:var(--amber); transform:scaleX(0); transform-origin:0 50%;
+}
+
+/* ───────────────────────────── 좌측 조항 레일 */
+.rail{ display:none }
+@media (min-width:1200px){
+  .rail{
+    display:block; position:fixed; top:50%; transform:translateY(-50%);
+    left:16px; width:158px; z-index:30;
+  }
+  #doc, .foot, .topbar{ padding-left:190px }
+}
+.rail ol{ list-style:none; margin:0; padding:0 }
+.rail a{
+  display:block; padding:3px 0 3px 12px; border-left:2px solid transparent;
+  font-family:var(--f-mono); font-size:var(--t-micro); line-height:1.9; color:var(--ink-3);
+  text-decoration:none; transition:color .3s var(--e-soft), border-color .3s var(--e-soft);
+}
+.rail a:hover{ color:var(--ink-2) }
+.rail a[aria-current="true"]{ color:var(--ink); border-left-color:var(--amber) }
+.rail .rail-h{
+  font-family:var(--f-mono); font-size:10.5px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-3); padding-left:14px; margin-bottom:var(--sp-3);
+}
+
+/* ───────────────────────────── 부품: 버튼 */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  height:48px; padding:0 22px; border-radius:6px; border:1px solid var(--rule-2);
+  background:var(--paper-2); color:var(--ink); text-decoration:none;
+  font-family:var(--f-sans); font-weight:600; font-size:15px; line-height:1; cursor:pointer;
+  transition:background .3s var(--e-soft), border-color .3s var(--e-soft), color .3s var(--e-soft);
+}
+.btn:hover{ background:var(--paper-3); border-color:var(--ink-3) }
+.btn-primary{ background:var(--ink); color:var(--paper); border-color:var(--ink) }
+.btn-primary:hover{ background:var(--ink-2); border-color:var(--ink-2) }
+.btn[disabled]{ cursor:default; opacity:1 }
+.btn-primary[disabled]{ background:var(--paper-3); color:var(--ink-3); border-color:var(--rule-2) }
+.btn-primary[disabled]:hover{ background:var(--paper-3); border-color:var(--rule-2) }
+.btn .dot{ width:7px; height:7px; border-radius:50%; background:var(--amber); flex:0 0 auto }
+.btn .arr{ font-family:var(--f-mono); font-weight:400 }
+.tlink{
+  font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); color:var(--ink-3);
+  text-decoration:none; border-bottom:1px solid var(--rule-2); padding-bottom:2px;
+  transition:color .3s var(--e-soft), border-color .3s var(--e-soft);
+}
+.tlink:hover{ color:var(--ink); border-color:var(--ink) }
+
+.tbtn{
+  appearance:none; background:transparent; border:1px solid var(--rule-2); border-radius:5px;
+  padding:5px 10px; cursor:pointer;
+  font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); color:var(--ink-3);
+  transition:color .25s var(--e-soft), border-color .25s var(--e-soft), background .25s var(--e-soft);
+}
+.tbtn:hover{ color:var(--ink); border-color:var(--ink-3) }
+.tbtn[aria-pressed="true"], .tbtn.on{ color:var(--ink); border-color:var(--ink); background:var(--shade) }
+
+/* ───────────────────────────── 부품: 계기판 */
+.gauges{
+  display:grid; grid-template-columns:repeat(4,1fr);
+  border-top:1px solid var(--ink); border-bottom:1px solid var(--rule);
+}
+.gauge{ padding:18px 18px 20px; border-left:1px solid var(--rule) }
+.gauge:first-child{ border-left:0; padding-left:0 }
+.gauge b{
+  display:block; font-family:var(--f-mono); font-weight:700; font-size:clamp(25px,3.3vw,34px);
+  line-height:1.08; letter-spacing:-.01em; font-variant-numeric:tabular-nums; color:var(--ink);
+}
+.gauge b .u{ font-size:.5em; font-weight:400; color:var(--ink-3); margin-left:3px }
+.gauge span{
+  display:block; margin-top:9px; font-family:var(--f-mono); font-size:var(--t-micro);
+  line-height:var(--lh-mono); color:var(--ink-3);
+}
+.gauge span em{ font-style:normal; color:var(--ink-2) }
+
+/* ───────────────────────────── 부품: 알림 미니어처 무대 */
+.stage{
+  --dw:1920; --k:.29;
+  position:relative; width:100%; aspect-ratio: 1920 / 1080;
+  border:1px solid var(--rule-2); border-radius:10px; overflow:hidden;
+  background:#17141C; box-shadow:var(--lift);
+}
+.stage canvas.bg{ position:absolute; inset:0; width:100%; height:100% }
+.scr{
+  position:absolute; left:50%; top:50%; width:1920px; height:1080px;
+  transform:translate(-50%,-50%) scale(var(--k)); transform-origin:50% 50%;
+  --accent:#FFB829; --sink:#fff; --on-accent:#21140D;
+  color:var(--sink); font-family:-apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
+  letter-spacing:normal;
+}
+.scr .scrim{
+  position:absolute; left:calc(27% - 20.7%); top:calc(7% - 18.9%);
+  width:calc(46% + 41.4%); height:calc(86% + 37.8%);
+  background:radial-gradient(ellipse at center, rgba(9,8,11,.60) 0%, rgba(9,8,11,.432) 50%, rgba(9,8,11,0) 100%);
+  pointer-events:none;
+}
+.scr .clock{ position:absolute; top:20px; right:26px; font-size:14px; font-weight:500; line-height:1.2; color:rgba(255,255,255,.55) }
+.scr .column{
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:46%; display:flex; flex-direction:column; align-items:center; text-align:center;
+}
+.scr .a-head{ font-size:14px; font-weight:600; line-height:1.2; color:rgba(255,255,255,.65) }
+.scr .a-block{ margin-top:34px; width:100%; display:flex; flex-direction:column; align-items:center }
+.scr .a-titlerow{ display:flex; align-items:center; gap:12px; max-width:100% }
+.scr .a-bar{ width:5px; height:41px; border-radius:2.5px; background:var(--accent); flex:0 0 auto }
+.scr .a-title{
+  font-size:44px; font-weight:700; line-height:1.2; color:var(--sink); text-align:left;
+  font-family:var(--sfont, inherit);
+  display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden;
+}
+.scr .a-range{ margin-top:6px; font-size:24px; font-weight:500; line-height:1.2; color:rgba(255,255,255,.9); font-family:var(--sfont, inherit) }
+.scr .a-count{ margin-top:6px; font-size:15px; font-weight:400; line-height:1.2; color:rgba(255,255,255,.62) }
+.scr .a-chips{ margin-top:14px; display:flex; gap:8px; flex-wrap:wrap; justify-content:center }
+.scr .chip{
+  padding:5px 11px; border-radius:8px; background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.13); font-size:13px; font-weight:500; line-height:1.2; color:rgba(255,255,255,.75);
+}
+.scr .chip.svc{ color:var(--accent); border-color:rgba(255,255,255,.22) }
+.scr .a-actions{ margin-top:44px; display:flex; flex-direction:column; align-items:center }
+.scr .pill{
+  height:44px; min-width:230px; border-radius:11px; border:0; display:flex; align-items:center; justify-content:center;
+  font-size:16px; font-weight:600; line-height:1; cursor:pointer; padding:0 20px; font-family:inherit;
+}
+.scr .pill.primary{ background:var(--accent); color:var(--on-accent) }
+.scr .pill.outline{ margin-top:10px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.30); color:rgba(255,255,255,.95) }
+.scr .a-snoozelabel{ margin-top:26px; font-size:13px; font-weight:600; line-height:1.2; color:rgba(255,255,255,.5) }
+.scr .a-snooze{ margin-top:10px; display:flex; gap:10px }
+.scr .sn{
+  border-radius:10px; padding:7px 15px; background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.14);
+  display:flex; flex-direction:column; align-items:center;
+}
+.scr .sn.first{ background:rgba(255,255,255,.13); border:1.5px solid rgba(255,184,41,.85) }
+.scr .sn .t{ font-size:15px; font-weight:600; line-height:1.2; color:rgba(255,255,255,.92) }
+.scr .sn .t i{ font-style:normal; font-weight:700; font-size:12px; color:var(--accent); margin-left:8px }
+.scr .sn .s{ margin-top:1px; font-size:12px; font-weight:400; line-height:1.2; color:rgba(255,255,255,.55) }
+.scr .a-hints{ margin-top:34px; display:flex; gap:12px; align-items:center }
+.scr .hint{ display:flex; gap:6px; align-items:center }
+.scr .kc{
+  padding:3px 7px; border-radius:5px; background:rgba(255,255,255,.10); border:1px solid rgba(255,255,255,.16);
+  font-size:11px; font-weight:600; line-height:1.2; color:rgba(255,255,255,.7); font-family:var(--f-mono);
+}
+.scr .hint span{ font-size:12px; font-weight:400; line-height:1.2; color:rgba(255,255,255,.45) }
+.scr button.kc{ cursor:pointer }
+
+.figcap{
+  margin-top:10px; font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); color:var(--ink-3);
+}
+.figcap b{ color:var(--ink-2); font-weight:400 }
+</style>
+<style>
+/* ═══════════════════════════ 절: 표제지 ═══════════════════════════ */
+#masthead{ padding-top: clamp(40px,7vw,86px); padding-bottom: clamp(48px,7vw,84px); overflow:hidden }
+.clausewall{
+  position:absolute; inset:-10% -5% auto -5%; height:140%; z-index:0; pointer-events:none;
+  font-family:var(--f-mono); font-size:13px; line-height:2.6; color:var(--ink);
+  opacity:.032; user-select:none; white-space:pre-wrap; word-break:break-all;
+  mask-image:linear-gradient(to bottom, transparent, #000 18%, #000 62%, transparent 96%);
+  -webkit-mask-image:linear-gradient(to bottom, transparent, #000 18%, #000 62%, transparent 96%);
+}
+.clausewall div{ animation: wallUp 60s linear infinite }
+@keyframes wallUp{ from{ transform:translateY(0) } to{ transform:translateY(-50%) } }
+#masthead > .col{ position:relative; z-index:1 }
+
+.docmeta{
+  display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-3) var(--sp-5);
+  padding:10px 0; border-top:1px solid var(--ink); border-bottom:1px solid var(--rule);
+  font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); color:var(--ink-3);
+}
+.docmeta .k{ color:var(--ink); font-weight:700; letter-spacing:.14em }
+.docmeta .sep{ color:var(--rule-2) }
+.docmeta .push{ margin-left:auto }
+.mast-h1{ margin-top:var(--sp-7) }
+.mast-sub{ margin-top:var(--sp-4); max-width:36ch }
+.mast-body{ margin-top:var(--sp-5); max-width:58ch; color:var(--ink-2) }
+.mast-gauges{ margin-top:var(--sp-7) }
+.mast-cta{ margin-top:var(--sp-6); display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-3) var(--sp-4) }
+.mast-note{ margin-top:var(--sp-4); font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); color:var(--ink-3) }
+.mast-icon{ display:none }
+@media (min-width:1400px){
+  .mast-icon{
+    display:block; position:absolute; left:calc(100% + 26px); top:2px; width:192px;
+  }
+  .mast-icon img{ width:104px; height:104px; border-radius:21px }
+}
+
+/* ═══════════════════════════ 절: §0 왜 ═══════════════════════════ */
+.versus{
+  margin-top:var(--sp-7); display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-7);
+  align-items:start;
+}
+.versus > div{ min-width:0 }
+.versus .vs-left{ position:relative; padding-right:var(--sp-7); border-right:1px solid var(--rule) }
+.bannerbox{
+  position:relative; height:190px; border-radius:12px; background:var(--paper-3);
+  border:1px solid var(--rule); overflow:hidden; display:flex; align-items:flex-start; justify-content:flex-end;
+  padding:18px;
+}
+.bannerghost{
+  position:absolute; top:18px; right:18px; width:min(344px,100%); height:78px; border-radius:14px;
+  border:1px dashed var(--rule-2); display:flex; align-items:center; justify-content:center;
+  font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); color:var(--ink-3);
+}
+.banner{
+  position:relative; width:min(344px,100%); height:78px; border-radius:14px;
+  background:#FBF9F5; border:1px solid rgba(23,21,18,.10);
+  box-shadow:0 10px 26px -14px rgba(23,21,18,.5);
+  display:flex; align-items:center; gap:12px; padding:0 14px; z-index:1;
+  animation:bannerLoop 8s var(--e-io) infinite;
+}
+[data-theme="dark"] .banner{ background:#282730; border-color:rgba(255,255,255,.1) }
+.banner .ic{ width:38px; height:38px; border-radius:9px; background:var(--rule-2); flex:0 0 auto }
+.banner .tx{ min-width:0 }
+.banner .tx b{ display:block; font-size:13px; font-weight:600; line-height:1.35; color:var(--ink) }
+.banner .tx span{ display:block; font-size:12px; line-height:1.35; color:var(--ink-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.banner .tm{ margin-left:auto; font-family:var(--f-mono); font-size:11px; color:var(--ink-3) }
+@keyframes bannerLoop{
+  0%{ transform:translate(14px,-6px); opacity:0 }
+  3%{ transform:translate(0,0); opacity:1 }
+  62.5%{ transform:translate(0,0); opacity:1 }
+  67.5%{ transform:translate(0,-12px); opacity:0 }
+  100%{ transform:translate(0,-12px); opacity:0 }
+}
+.vs-right .stage{ animation:vsFlash 8s linear infinite }
+@keyframes vsFlash{
+  0%,62.5%{ box-shadow:var(--lift), 0 0 0 0 rgba(180,112,15,0) }
+  66%{ box-shadow:var(--lift), 0 0 0 2px var(--amber-line) }
+  72%{ box-shadow:var(--lift), 0 0 0 0 rgba(180,112,15,0) }
+  100%{ box-shadow:var(--lift), 0 0 0 0 rgba(180,112,15,0) }
+}
+.vs-closed{
+  position:absolute; inset:0; display:none; align-items:center; justify-content:center; flex-direction:column;
+  gap:var(--sp-4); background:var(--paper-3); z-index:3; padding:var(--sp-4); text-align:center;
+}
+.stage.closed .vs-closed{ display:flex }
+.stage.closed .scr, .stage.closed canvas.bg{ opacity:0; transition:opacity .3s var(--e-io) }
+.vs-closed p{ font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); color:var(--ink-3) }
+
+/* ═══════════════════════════ 절: F2 판정기 ═══════════════════════════ */
+.adj{
+  margin-top:var(--sp-7);
+  display:grid; grid-template-columns:300px minmax(0,1fr) 400px; gap:var(--sp-5);
+  align-items:start;
+}
+.panel{
+  border:1px solid var(--rule); border-radius:10px; background:var(--paper-2); overflow:hidden;
+}
+.panel > h3, .panel > .ph{
+  margin:0; padding:11px 14px; border-bottom:1px solid var(--rule); background:var(--paper-3);
+  font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); font-weight:700;
+  color:var(--ink-2); display:flex; align-items:center; gap:10px;
+}
+.panel .pb{ padding:14px }
+
+.presets{ display:flex; flex-wrap:wrap; gap:6px }
+.ctl{ margin-top:var(--sp-4); padding-top:var(--sp-4); border-top:1px solid var(--rule) }
+.ctl:first-child{ margin-top:0; padding-top:0; border-top:0 }
+.ctl-h{
+  font-family:var(--f-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-3); margin-bottom:10px;
+}
+.sw{
+  display:flex; align-items:center; justify-content:space-between; gap:10px; width:100%;
+  background:transparent; border:0; padding:6px 0; cursor:pointer; text-align:left;
+}
+.sw .lab{ font-size:var(--t-small); line-height:1.5; color:var(--ink-2) }
+.sw .lab code{ display:block; font-size:11px; color:var(--ink-3); line-height:1.5 }
+.sw .tr{
+  flex:0 0 auto; width:38px; height:22px; border-radius:11px; background:var(--rule);
+  border:1px solid var(--rule-2); position:relative; transition:background .25s var(--e-soft), border-color .25s var(--e-soft);
+}
+.sw .tr::after{
+  content:""; position:absolute; top:2px; left:2px; width:16px; height:16px; border-radius:50%;
+  background:var(--paper-2); transition:transform .25s var(--e-out);
+  box-shadow:0 1px 3px rgba(23,21,18,.3);
+}
+.sw[aria-checked="true"] .tr{ background:var(--amber); border-color:var(--amber) }
+.sw[aria-checked="true"] .tr::after{ transform:translateX(16px) }
+.sw[aria-checked="true"] .lab{ color:var(--ink) }
+
+.seg{ display:flex; border:1px solid var(--rule-2); border-radius:6px; overflow:hidden }
+.seg button{
+  flex:1; padding:7px 4px; background:transparent; border:0; border-left:1px solid var(--rule);
+  cursor:pointer; font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); color:var(--ink-3);
+  transition:background .25s var(--e-soft), color .25s var(--e-soft);
+}
+.seg button:first-child{ border-left:0 }
+.seg button[aria-checked="true"]{ background:var(--ink); color:var(--paper) }
+
+.sld{ margin-bottom:var(--sp-4) }
+.sld:last-child{ margin-bottom:0 }
+.sld .row{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; margin-bottom:6px }
+.sld .row label{ font-size:var(--t-small); color:var(--ink-2) }
+.sld .row output{ font-family:var(--f-mono); font-size:var(--t-small); font-variant-numeric:tabular-nums; color:var(--ink) }
+input[type=range]{
+  -webkit-appearance:none; appearance:none; width:100%; height:20px; background:transparent; cursor:pointer; margin:0;
+}
+input[type=range]::-webkit-slider-runnable-track{ height:2px; background:var(--rule-2); border-radius:2px }
+input[type=range]::-moz-range-track{ height:2px; background:var(--rule-2); border-radius:2px }
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none; width:14px; height:14px; border-radius:50%;
+  background:var(--ink); margin-top:-6px; border:0;
+}
+input[type=range]::-moz-range-thumb{ width:14px; height:14px; border-radius:50%; background:var(--ink); border:0 }
+
+/* 판정표 */
+.rules{ width:100%; border-collapse:collapse; table-layout:fixed }
+.rules caption{ text-align:left; padding:0 0 10px; font-family:var(--f-mono); font-size:var(--t-micro); color:var(--ink-3); line-height:var(--lh-mono) }
+.rules tbody tr{ border-top:1px solid var(--rule) }
+.rules tbody tr:first-child{ border-top:0 }
+.rules td{ padding:0; vertical-align:middle }
+.rules .cell{
+  display:grid; grid-template-columns:34px 1fr auto; align-items:center; gap:12px;
+  min-height:52px; padding:7px 12px 7px 0; position:relative;
+  border-left:4px solid transparent; padding-left:12px;
+  transition:background .3s var(--e-io), border-color .25s var(--e-out);
+}
+.rules .no{
+  width:24px; height:24px; border-radius:5px; background:var(--shade); border:1px solid var(--rule);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--f-mono); font-size:12px; font-weight:700; color:var(--ink-3);
+  transition:background .25s var(--e-soft), color .25s var(--e-soft), border-color .25s var(--e-soft);
+}
+.rules .cond{ min-width:0 }
+.rules .cond .cx{
+  display:block; font-family:var(--f-mono); font-size:var(--t-code); line-height:var(--lh-code); color:var(--ink);
+  overflow-x:auto; white-space:nowrap; scrollbar-width:thin;
+}
+.rules .cond .ko{ display:block; font-size:var(--t-small); line-height:1.5; color:var(--ink-3); margin-top:2px }
+.rules .mark{ font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); color:transparent; white-space:nowrap }
+.rules tr.scan .cell{ background:var(--shade) }
+.rules tr.ok .cell .no{ background:var(--pass-soft); color:var(--pass); border-color:transparent }
+.rules tr.ok .mark{ color:var(--pass) }
+.rules tr.hit .cell{ background:var(--fail-soft); border-left-color:var(--fail) }
+.rules tr.hit .cell .no{ background:var(--fail); color:#fff; border-color:var(--fail) }
+.rules tr.hit .mark{ color:var(--fail); font-weight:700 }
+.rules tr.dead .cell{ opacity:.38 }
+.verdict{
+  margin-top:var(--sp-4); padding:12px 14px; border-radius:8px; border:1px solid var(--rule);
+  background:var(--paper-2); font-family:var(--f-mono); font-size:var(--t-small); line-height:var(--lh-mono);
+  color:var(--ink-2); display:flex; align-items:center; gap:10px; min-height:52px;
+}
+.verdict .badge{
+  flex:0 0 auto; padding:3px 9px; border-radius:4px; font-size:11px; font-weight:700; letter-spacing:.06em;
+  background:var(--shade); color:var(--ink-3);
+}
+.verdict.pass{ border-color:var(--pass); background:var(--pass-soft) }
+.verdict.pass .badge{ background:var(--pass); color:var(--paper-2) }
+.verdict.fail{ border-color:var(--fail); background:var(--fail-soft) }
+.verdict.fail .badge{ background:var(--fail); color:#fff }
+
+/* 코드 / 로그 패널 */
+.tabs{ display:flex; gap:0; border-bottom:1px solid var(--rule); background:var(--paper-3) }
+.tabs button{
+  padding:10px 14px; background:transparent; border:0; border-right:1px solid var(--rule); cursor:pointer;
+  font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); color:var(--ink-3);
+  transition:color .25s var(--e-soft), background .25s var(--e-soft);
+}
+.tabs button[aria-selected="true"]{ color:var(--ink); background:var(--paper-2); font-weight:700 }
+.codewrap{ max-height:300px; overflow:auto; background:var(--paper-2); scroll-behavior:smooth }
+.codewrap.plain{ scroll-behavior:auto }
+.cl{ display:flex; gap:0; align-items:flex-start; min-width:max-content; transition:background .25s var(--e-io) }
+.cl .lnum{
+  flex:0 0 auto; width:44px; padding:1px 10px 1px 0; text-align:right; user-select:none;
+  font-family:var(--f-mono); font-size:11.5px; line-height:1.7; color:var(--ink-3); opacity:.7;
+  border-right:1px solid var(--rule);
+}
+.cl pre{
+  margin:0; padding:1px 12px; flex:0 0 auto;
+  font-family:var(--f-mono); font-size:12.5px; line-height:1.7; color:var(--ink-2); white-space:pre;
+}
+.cl.on{ background:var(--shade) }
+.cl.hit{ background:var(--fail-soft) }
+.cl.hit pre{ color:var(--ink) }
+.cl.hit .lnum{ color:var(--fail); opacity:1; font-weight:700 }
+.c-cm{ color:var(--ink-3); font-style:normal }
+.c-kw{ color:var(--plum); font-style:normal }
+.c-ty{ color:var(--teal); font-style:normal }
+.c-en{ color:var(--amber); font-style:normal }
+
+.logwrap{
+  max-height:210px; min-height:150px; overflow:auto; background:var(--paper-3); padding:12px 14px;
+  font-family:var(--f-mono); font-size:12.5px; line-height:1.85; color:var(--ink-2); white-space:pre-wrap;
+}
+.logwrap .lg-t{ color:var(--ink); font-weight:700 }
+.logwrap .lg-a{ color:var(--amber); font-weight:700 }
+.logwrap .lg-f{ color:var(--fail) }
+.logwrap .lg-p{ color:var(--pass) }
+.logwrap .caret{ display:inline-block; width:7px; height:1.05em; background:var(--amber); vertical-align:-2px; animation:blink .53s steps(1) infinite }
+@keyframes blink{ 50%{ opacity:0 } }
+
+.pin{
+  margin-top:10px; padding:10px 12px; border-left:2px solid var(--amber); background:var(--amber-soft);
+  font-size:var(--t-small); line-height:1.65; color:var(--ink-2); border-radius:0 6px 6px 0;
+}
+.pin code{ color:var(--ink) }
+.minislot{ margin-top:var(--sp-4) }
+.minislot .stage{ opacity:0; transform:scale(1.06); transition:opacity .42s var(--e-out), transform .52s var(--e-out) }
+.minislot.up .stage{ opacity:1; transform:scale(1) }
+.minislot .flash{
+  position:absolute; left:50%; top:50%; width:60%; aspect-ratio:1; transform:translate(-50%,-50%) scale(.25);
+  border-radius:50%; background:radial-gradient(circle, rgba(255,214,150,.95) 0%, rgba(255,184,41,.35) 45%, rgba(255,184,41,0) 70%);
+  opacity:0; pointer-events:none; z-index:2;
+}
+.minislot.up .flash{ animation:miniFlash 1.1s var(--e-out) forwards }
+@keyframes miniFlash{
+  0%{ opacity:0; transform:translate(-50%,-50%) scale(.25) }
+  22%{ opacity:.95 }
+  55%{ opacity:.5 }
+  100%{ opacity:0; transform:translate(-50%,-50%) scale(1.35) }
+}
+.f3panel{ margin-top:var(--sp-5) }
+#miniStage{ --dw:1440; aspect-ratio:1440 / 1080 }
+.f3panel .rules .cell{ min-height:44px }
+</style>
+<style>
+/* ═══════════════════════════ 절: F3 ═══════════════════════════ */
+.twocol{ margin-top:var(--sp-7); display:grid; grid-template-columns:minmax(0,340px) minmax(0,1fr); gap:var(--sp-7) }
+.invalid{ list-style:none; margin:0; padding:0 }
+.invalid li{
+  padding:11px 0 11px 30px; border-top:1px solid var(--rule); position:relative;
+  font-size:var(--t-small); line-height:1.6; color:var(--ink-2);
+}
+.invalid li:first-child{ border-top:0 }
+.invalid li::before{
+  content:attr(data-n); position:absolute; left:0; top:12px;
+  font-family:var(--f-mono); font-size:11px; color:var(--amber); font-weight:700;
+}
+.invalid li b{ display:block; color:var(--ink); font-weight:600 }
+
+.console{
+  border:1px solid var(--rule-2); border-radius:10px; background:var(--paper-3); overflow:hidden;
+  box-shadow:var(--lift);
+}
+.console .ch{
+  padding:9px 14px; border-bottom:1px solid var(--rule); background:var(--paper-2);
+  font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); color:var(--ink-3);
+  display:flex; align-items:center; gap:10px;
+}
+.console .cb{ padding:12px 14px; min-height:340px; overflow-x:auto }
+.console .lgrow{
+  display:grid; grid-template-columns:78px minmax(0,1fr); gap:12px;
+  font-family:var(--f-mono); font-size:12.5px; line-height:1.9; color:var(--ink-2);
+  opacity:0; transform:translateY(3px); white-space:pre;
+}
+.console .lgrow.in{ opacity:1; transform:none; transition:opacity .28s var(--e-out), transform .28s var(--e-out) }
+.console .lgrow .ts{ color:var(--ink-3) }
+.console .lg-t{ color:var(--ink) }
+.console .lg-p{ color:var(--pass) }
+.console .lg-f{ color:var(--fail) }
+.console .lg-a{ color:var(--amber); font-weight:700 }
+
+.chart{ margin-top:var(--sp-7) }
+.chart svg{ width:100%; height:auto; display:block; overflow:visible }
+.chart .ax{ stroke:var(--rule-2); stroke-width:1 }
+.chart .lim{ stroke:var(--fail); stroke-width:1.5; stroke-dasharray:6 5; stroke-dashoffset:0 }
+.chart .tickline{ stroke:var(--rule); stroke-width:1 }
+.chart .band{ fill:var(--amber); opacity:.9 }
+.chart text{ font-family:var(--f-mono); font-size:11px; fill:var(--ink-3) }
+.chart text.strong{ fill:var(--ink); font-weight:700 }
+.chart text.failc{ fill:var(--fail) }
+.chart .mtick{ stroke:var(--amber); stroke-width:2; stroke-linecap:round }
+
+/* ═══════════════════════════ 절: F4 ═══════════════════════════ */
+.shots{ margin-top:var(--sp-7); display:flex; flex-direction:column; gap:var(--sp-9) }
+.shot{ display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:var(--sp-7); align-items:center }
+.shot.flip{ grid-template-columns:300px minmax(0,1fr) }
+.shot.flip .shot-img{ order:2 }
+.shot.flip .shot-txt{ order:1 }
+.shot.full{ grid-template-columns:1fr }
+.shot-img{ position:relative }
+.shot-img img, .shot-img video{
+  width:100%; height:auto; border-radius:10px; border:1px solid var(--rule-2); background:#0c0c10;
+  box-shadow:var(--lift);
+}
+.shot-txt h3{ margin-bottom:var(--sp-3) }
+.shot-txt p{ font-size:var(--t-small); line-height:1.75; color:var(--ink-2) }
+
+.meas{ width:100%; border-collapse:collapse; margin-top:var(--sp-5) }
+.meas caption{
+  text-align:left; padding-bottom:10px; font-family:var(--f-mono); font-size:var(--t-micro);
+  line-height:var(--lh-mono); color:var(--ink-3);
+}
+.meas th, .meas td{
+  padding:11px 12px; border-top:1px solid var(--rule); text-align:left; vertical-align:top;
+  font-family:var(--f-mono); font-size:var(--t-small); line-height:var(--lh-mono);
+}
+.meas th{ color:var(--ink); font-weight:400; width:36% }
+.meas td.v{ width:22%; color:var(--ink-3) }
+.meas td.v.set{ color:var(--ink) }
+.meas td.v.set.hot{ color:var(--amber); font-weight:700 }
+.meas td.why{ color:var(--ink-2); font-family:var(--f-sans) }
+.meas tr.reveal td.v{ opacity:0 }
+.meas tr.reveal.in td.v{ opacity:1; transition:opacity .38s var(--e-out) }
+
+/* ═══════════════════════════ 절: 배경 ═══════════════════════════ */
+.bdgrid{ margin-top:var(--sp-7); display:grid; grid-template-columns:minmax(0,420px) minmax(0,1fr); gap:var(--sp-7); align-items:start }
+.stack{ list-style:none; margin:0; padding:0 }
+.stack li{
+  display:grid; grid-template-columns:minmax(0,1fr) 46px; align-items:center; gap:12px;
+  padding:7px 11px; margin-bottom:4px; border-radius:5px; background:var(--shade);
+  font-family:var(--f-mono); font-size:11.5px; line-height:1.7; color:var(--ink-2);
+  border-left:2px solid transparent; transition:background .3s var(--e-io), color .3s var(--e-io), border-color .3s var(--e-io);
+}
+.stack li .d{ text-align:right; color:var(--ink-3); font-variant-numeric:tabular-nums }
+.stack li.live{ background:var(--paper-3); color:var(--ink); border-left-color:var(--rule-2) }
+.stack.hot li.live{ border-left-color:var(--amber); color:var(--ink); background:var(--amber-soft) }
+.stack li.top{ color:var(--ink-3) }
+
+.livewrap{ position:relative }
+.livecanvas{
+  position:relative; width:100%; height:380px; border-radius:10px; overflow:hidden;
+  border:1px solid var(--rule-2); background:#17141C; box-shadow:var(--lift); touch-action:pan-y;
+}
+.livecanvas canvas{ position:absolute; inset:0; width:100%; height:100% }
+.livehud{
+  position:absolute; left:12px; bottom:12px; z-index:2; pointer-events:none;
+  font-family:var(--f-mono); font-size:11px; line-height:1.7; color:rgba(255,255,255,.62);
+  text-shadow:0 1px 3px rgba(0,0,0,.7);
+}
+.livehud b{ color:rgba(255,255,255,.92); font-weight:700 }
+.livetag{
+  position:absolute; right:12px; top:12px; z-index:2; pointer-events:none;
+  font-family:var(--f-mono); font-size:11px; line-height:1.7; color:rgba(255,255,255,.6);
+  text-shadow:0 1px 3px rgba(0,0,0,.7); text-align:right;
+}
+.bdctl{ margin-top:var(--sp-4); display:flex; flex-wrap:wrap; gap:8px; align-items:center }
+.bdctl .lbl{ font-family:var(--f-mono); font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-3); margin-right:2px }
+.perf{ margin-top:var(--sp-7); display:grid; grid-template-columns:repeat(3,1fr); border-top:1px solid var(--ink); border-bottom:1px solid var(--rule) }
+.perf div{ padding:16px 16px 18px; border-left:1px solid var(--rule) }
+.perf div:first-child{ border-left:0; padding-left:0 }
+.perf b{ display:block; font-family:var(--f-mono); font-weight:700; font-size:22px; line-height:1.2; font-variant-numeric:tabular-nums }
+.perf span{ display:block; margin-top:7px; font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); color:var(--ink-3) }
+
+/* ═══════════════════════════ 절: F12 ═══════════════════════════ */
+.term{
+  margin-top:var(--sp-6); border:1px solid var(--rule-2); border-radius:10px; overflow:hidden;
+  background:var(--paper-3); box-shadow:var(--lift); max-width:860px;
+}
+.term .th{
+  display:flex; align-items:center; gap:10px; padding:9px 14px;
+  border-bottom:1px solid var(--rule); background:var(--paper-2);
+  font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); color:var(--ink-3);
+}
+.term .th .push{ margin-left:auto }
+.term .tb{
+  padding:14px; font-family:var(--f-mono); font-size:var(--t-code); line-height:1.95;
+  color:var(--ink-2); white-space:pre-wrap; min-height:190px;
+}
+.term .tb .pr{ color:var(--amber); font-weight:700 }
+.term .tb .out{ color:var(--ink-3) }
+.term .tb .hi{ color:var(--amber); font-weight:700 }
+.copybtn{ display:inline-flex; align-items:center; gap:7px }
+.copybtn svg{ width:12px; height:12px; flex:0 0 auto }
+.mini2{ margin-top:var(--sp-5); display:grid; grid-template-columns:repeat(2,minmax(0,220px)); gap:0; border-top:1px solid var(--ink); border-bottom:1px solid var(--rule) }
+.mini2 div{ padding:14px 16px; border-left:1px solid var(--rule) }
+.mini2 div:first-child{ border-left:0; padding-left:0 }
+.mini2 b{ display:block; font-family:var(--f-mono); font-weight:700; font-size:21px; line-height:1.2; font-variant-numeric:tabular-nums }
+.mini2 span{ display:block; margin-top:6px; font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); color:var(--ink-3) }
+.pathline{
+  margin-top:var(--sp-5); padding:10px 12px; border:1px solid var(--rule); border-radius:6px;
+  background:var(--paper-2); font-family:var(--f-mono); font-size:var(--t-code); line-height:var(--lh-mono);
+  color:var(--ink-2); overflow-x:auto; white-space:nowrap;
+}
+
+/* ═══════════════════════════ 절: 테스트 ═══════════════════════════ */
+.bars{ margin-top:var(--sp-7); max-width:900px }
+.bar{
+  display:grid; grid-template-columns:190px minmax(0,1fr) 42px; align-items:center; gap:14px;
+  padding:5px 0; border-top:1px solid var(--rule); position:relative;
+}
+.bar:first-child{ border-top:0 }
+.bar .fn{ font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); color:var(--ink-2); white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+.bar .track{ height:10px; background:var(--shade); border-radius:2px; overflow:hidden }
+.bar .fill{ display:block; height:100%; width:var(--w); background:var(--ink-3); border-radius:2px; transform:scaleX(0); transform-origin:0 50% }
+.bar.key .fill{ background:var(--amber) }
+.bar.key .fn{ color:var(--ink); font-weight:700 }
+.bar .ct{ font-family:var(--f-mono); font-size:var(--t-micro); text-align:right; color:var(--ink-3); font-variant-numeric:tabular-nums; opacity:0 }
+.bars.in .fill{ transform:scaleX(1); transition:transform .52s var(--e-out); transition-delay:var(--dly) }
+.bars.in .ct{ opacity:1; transition:opacity .3s var(--e-io); transition-delay:calc(var(--dly) + .42s) }
+.bar .cover{
+  position:absolute; right:52px; top:50%; transform:translateY(-50%);
+  font-family:var(--f-mono); font-size:11px; color:var(--ink-3); opacity:0; pointer-events:none;
+  background:var(--paper); padding:0 6px; transition:opacity .2s var(--e-io);
+}
+.bar:hover .cover{ opacity:1 }
+.quad{ margin-top:var(--sp-7); display:grid; grid-template-columns:repeat(4,1fr); border-top:1px solid var(--ink); border-bottom:1px solid var(--rule) }
+.quad div{ padding:15px 14px 17px; border-left:1px solid var(--rule) }
+.quad div:first-child{ border-left:0; padding-left:0 }
+.quad b{ display:block; font-family:var(--f-mono); font-weight:700; font-size:20px; line-height:1.2; font-variant-numeric:tabular-nums }
+.quad span{ display:block; margin-top:6px; font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); color:var(--ink-3) }
+
+/* ═══════════════════════════ 절: 기록 ═══════════════════════════ */
+.tl{ margin-top:var(--sp-7); position:relative; padding-left:34px }
+.tl::before{ content:""; position:absolute; left:5px; top:6px; bottom:6px; width:1px; background:var(--rule) }
+.tl .axis-fill{ position:absolute; left:5px; top:6px; width:1px; background:var(--amber); height:0; transition:height .8s var(--e-out) }
+.tl .stamp{
+  position:relative; margin-bottom:var(--sp-5);
+  font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); color:var(--ink-3);
+}
+.tl .stamp::before{ content:""; position:absolute; left:-34px; top:8px; width:11px; height:11px; border-radius:50%; background:var(--paper); border:1px solid var(--rule-2) }
+.jcard{
+  position:relative; max-width:640px; margin-bottom:var(--sp-6); padding:18px 20px;
+  border:1px solid var(--rule); border-radius:10px; background:var(--paper-2);
+  opacity:0; transform:translateX(-10px);
+}
+.jcard.in{ opacity:1; transform:none; transition:opacity .42s var(--e-out), transform .42s var(--e-out) }
+.jcard::before{
+  content:""; position:absolute; left:-34px; top:22px; width:11px; height:11px; border-radius:50%;
+  background:var(--amber); border:2px solid var(--paper);
+}
+.jcard.open{ background:var(--shade); border-left:3px solid var(--rule-2) }
+.jcard.open::before{ background:var(--ink-3) }
+.jcard.open.in{ transition-delay:.12s }
+.jhead{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:10px }
+.jbadge{
+  font-family:var(--f-mono); font-size:11px; font-weight:700; letter-spacing:.06em;
+  padding:3px 8px; border-radius:4px; background:var(--fail-soft); color:var(--fail);
+}
+.jcard.open .jbadge{ background:var(--shade); color:var(--ink-3) }
+.jsrc{ font-family:var(--f-mono); font-size:11px; color:var(--ink-3) }
+.jcard h3{ font-size:18px; line-height:1.5; margin-bottom:8px }
+.jcard p{ font-size:var(--t-small); line-height:1.75; color:var(--ink-2) }
+.jfix{
+  margin-top:12px; padding-top:10px; border-top:1px solid var(--rule);
+  font-family:var(--f-mono); font-size:var(--t-micro); line-height:var(--lh-mono); color:var(--pass);
+}
+.jcard.open .jfix{ color:var(--ink-3) }
+
+/* ═══════════════════════════ 절: 설치 ═══════════════════════════ */
+.warn{
+  margin-top:var(--sp-5); padding:18px 20px 18px 22px; background:var(--amber-soft);
+  border-radius:0 8px 8px 0; position:relative;
+}
+.warn::before{
+  content:""; position:absolute; left:0; top:0; width:3px; height:100%; background:var(--amber);
+  transform:scaleY(0); transform-origin:50% 0;
+}
+.warn.in::before{ transform:scaleY(1); transition:transform .5s var(--e-out) }
+.warn p{ font-size:var(--t-body); line-height:1.7 }
+.warn strong{ color:var(--ink) }
+
+.steps{ list-style:none; margin:var(--sp-7) 0 0; padding:0; counter-reset:st }
+.steps li{
+  display:grid; grid-template-columns:38px minmax(0,1fr); gap:14px; padding:14px 0;
+  border-top:1px solid var(--rule); color:var(--ink-3);
+  transition:color .4s var(--e-io);
+}
+.steps li.lit{ color:var(--ink) }
+.steps li.done{ color:var(--ink-2) }
+.steps li::before{
+  counter-increment:st; content:counter(st, decimal-leading-zero);
+  font-family:var(--f-mono); font-size:var(--t-micro); line-height:1.9; color:var(--ink-3);
+}
+.steps li.lit::before{ color:var(--amber); font-weight:700 }
+.steps li p{ font-size:var(--t-small); line-height:1.75; margin:0 }
+.steps li em{ font-style:normal; font-weight:600; color:var(--ink) }
+.steps li.lit em{ color:var(--ink) }
+
+.settings-fig{ margin-top:var(--sp-6) }
+.settings-fig img{ width:100%; max-width:320px; border-radius:8px; border:1px solid var(--rule-2); box-shadow:var(--lift) }
+@media (min-width:1400px){
+  .settings-fig{
+    position:absolute; left:calc(100% + 26px); top:0; width:192px; margin:0;
+  }
+  .settings-fig img{ max-width:192px }
+}
+
+.ctablock{
+  margin-top:var(--sp-7); padding:var(--sp-6); border:1px solid var(--rule-2); border-radius:10px;
+  background:var(--paper-2); box-shadow:var(--lift);
+}
+.ctablock .row{ display:flex; flex-wrap:wrap; align-items:center; gap:var(--sp-4) }
+.ctablock .st{
+  margin-top:var(--sp-4); font-family:var(--f-mono); font-size:var(--t-micro);
+  line-height:var(--lh-mono); color:var(--ink-3);
+}
+
+.faq{ margin-top:var(--sp-7) }
+details{ border-top:1px solid var(--rule) }
+details:last-of-type{ border-bottom:1px solid var(--rule) }
+summary{
+  list-style:none; cursor:pointer; padding:16px 30px 16px 0; position:relative;
+  font-size:var(--t-body); font-weight:600; line-height:1.6;
+}
+summary::-webkit-details-marker{ display:none }
+summary::after{
+  content:"+"; position:absolute; right:4px; top:16px;
+  font-family:var(--f-mono); font-size:16px; color:var(--ink-3);
+  transition:transform .24s var(--e-out);
+}
+details[open] summary::after{ transform:rotate(45deg) }
+details .ans{ padding:0 0 18px; font-size:var(--t-small); line-height:1.8; color:var(--ink-2) }
+details .ans code{ color:var(--ink) }
+
+/* ═══════════════════════════ 푸터 ═══════════════════════════ */
+.foot{ border-top:1px solid var(--ink); padding:var(--sp-7) 0 var(--sp-8) }
+.foot .fr{ display:flex; align-items:flex-start; gap:var(--sp-5); flex-wrap:wrap }
+.foot img{ width:36px; height:36px; border-radius:8px; flex:0 0 auto }
+.foot .ft{
+  font-family:var(--f-mono); font-size:var(--t-micro); line-height:1.95; color:var(--ink-3);
+}
+.foot .ft b{ color:var(--ink-2); font-weight:400 }
+
+/* ═══════════════════════════ 반응형 ═══════════════════════════ */
+@media (max-width:1100px){
+  .adj{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); }
+  .adj .adj-a{ grid-column:1 / -1 }
+  .bdgrid{ grid-template-columns:1fr }
+}
+@media (max-width:900px){
+  .versus{ grid-template-columns:1fr; gap:var(--sp-6) }
+  .versus .vs-left{ padding-right:0; border-right:0; padding-bottom:var(--sp-6); border-bottom:1px solid var(--rule) }
+  .twocol{ grid-template-columns:1fr; gap:var(--sp-6) }
+  .shot, .shot.flip{ grid-template-columns:1fr; gap:var(--sp-4) }
+  .shot.flip .shot-img{ order:0 } .shot.flip .shot-txt{ order:0 }
+  .adj{ grid-template-columns:1fr }
+  .perf{ grid-template-columns:1fr }
+  .perf div{ border-left:0; border-top:1px solid var(--rule); padding-left:0 }
+  .perf div:first-child{ border-top:0 }
+  .quad{ grid-template-columns:repeat(2,1fr) }
+  .quad div:nth-child(3){ border-left:0 }
+  .quad div:nth-child(n+3){ border-top:1px solid var(--rule) }
+}
+@media (max-width:700px){
+  :root{ --col:100% }
+  .stage, #miniStage{ --dw:1120; aspect-ratio:1120 / 1080 }
+  .gauges{ grid-template-columns:repeat(2,1fr) }
+  .gauge{ padding:16px 14px }
+  .gauge:nth-child(odd){ border-left:0; padding-left:0 }
+  .gauge:nth-child(n+3){ border-top:1px solid var(--rule) }
+  .bar{ grid-template-columns:minmax(0,1fr) 34px; row-gap:4px }
+  .bar .track{ grid-column:1 / -1 }
+  .bar .cover{ display:none }
+  .mini2{ grid-template-columns:1fr }
+  .mini2 div{ border-left:0; border-top:1px solid var(--rule); padding-left:0 }
+  .mini2 div:first-child{ border-top:0 }
+  .rules .cell{ grid-template-columns:28px minmax(0,1fr); grid-auto-rows:min-content; padding:10px 10px 10px 10px; gap:8px 10px }
+  .rules .mark{ grid-column:2; text-align:left }
+  .codewrap{ max-height:260px } .logwrap{ max-height:190px }
+  .livecanvas{ height:280px }
+  .bannerbox{ height:150px }
+  .tl{ padding-left:26px }
+  .tl .stamp::before, .jcard::before{ left:-26px }
+  .term .tb{ font-size:12px }
+  .foot .fr{ gap:var(--sp-4) }
+}
+@media (max-width:420px){
+  .versus .stage, .minislot .stage{ margin-inline:-16px; width:calc(100% + 32px); border-radius:0; border-left:0; border-right:0 }
+}
+
+/* ═══════════════════════════ 움직임 줄이기 ═══════════════════════════ */
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto }
+  .clausewall div{ animation:none }
+  .banner{ animation:none; opacity:0 }
+  .vs-right .stage{ animation:none }
+  .minislot .stage{ transition:none }
+  .minislot.up .flash{ animation:none; opacity:0 }
+  .logwrap .caret{ animation:none }
+  .bars.in .fill{ transition:none }
+  .bars.in .ct{ transition:none }
+  .jcard{ transition:none }
+  .console .lgrow.in{ transition:none }
+  .warn.in::before{ transition:none }
+  .tl .axis-fill{ transition:none }
+}
+/* ── 도식 진입 */
+#accBand{ transform:scaleX(0); transform-origin:56px 186px }
+#limLine{ opacity:0 }
+#accTicks line{ opacity:0 }
+.chart.in #accBand{ transform:scaleX(1); transition:transform .62s var(--e-out) .12s }
+.chart.in #limLine{ opacity:1; transition:opacity .5s var(--e-io) }
+.chart.in #accTicks line{ opacity:1; transition:opacity .4s var(--e-io) .5s }
+@media (prefers-reduced-motion: reduce){
+  #accBand{ transform:scaleX(1) } #limLine, #accTicks line{ opacity:1 }
+  .chart.in #accBand, .chart.in #limLine, .chart.in #accTicks line{ transition:none }
+}
+/* ── 판정기 우측 열 */
+.adj-c .panel + .panel{ margin-top:12px }
+.adj-c .ph .rng{ margin-left:auto; color:var(--ink-3); font-weight:400 }
+
+.reduced .banner{ animation:none; opacity:0 }
+</style>
+</head>
+<body>
+<a class="skip" href="#doc">본문으로 건너뛰기</a>
+
+<div class="topbar" id="topbar">
+  <div class="inner">
+    <span class="tb-name">SPEC / UNTILLITY</span>
+    <span class="sep">·</span>
+    <span class="tb-mid" id="tbSection">§0 왜</span>
+    <span class="dim">rev. 2026-09-17</span>
+    <button type="button" class="tbtn" data-theme-toggle>어둡게</button>
+  </div>
+  <div class="progress"><i id="progressBar"></i></div>
+</div>
+
+<nav class="rail" id="rail" aria-label="절 목차">
+  <div class="rail-h">목차</div>
+  <ol>
+    <li><a href="#why">§0 왜</a></li>
+    <li><a href="#f2">F2 판정</a></li>
+    <li><a href="#f3">F3 발화</a></li>
+    <li><a href="#f4">F4 덮기</a></li>
+    <li><a href="#backdrop">배경</a></li>
+    <li><a href="#f12">F12</a></li>
+    <li><a href="#tests">테스트</a></li>
+    <li><a href="#journal">기록</a></li>
+    <li><a href="#get">설치</a></li>
+  </ol>
+</nav>
+
+<main id="doc">
+
+<!-- ══════════════════════════ 표제지 ══════════════════════════ -->
+<header class="sec" id="masthead">
+  <div class="clausewall" aria-hidden="true"><div id="wall"></div></div>
+  <div class="col">
+    <div class="docmeta">
+      <span class="k">SPEC / UNTILLITY</span>
+      <span class="sep">·</span><span>rev. 2026-09-17</span>
+      <span class="sep">·</span><span>상태: 개정 중</span>
+      <span class="sep">·</span><span>대상 macOS 15.2+</span>
+      <span class="push"><button type="button" class="tbtn" data-theme-toggle>어둡게</button></span>
+    </div>
+
+    <div class="mast-icon" aria-hidden="true">
+      <img src="../assets/icon.png" width="256" height="256" alt="" decoding="async">
+      <p class="figcap">그림 0 — 앱 아이콘</p>
+    </div>
+
+    <h1 class="mast-h1">회의를 놓치지 않게,<br>화면을 통째로 덮습니다</h1>
+    <p class="lead mast-sub">다른 앱이 전체 화면이든, 다른 Space에 있든 그 위에 뜹니다. 닫기 전에는 안 사라집니다.</p>
+    <p class="mast-body">이 페이지는 소개문이 아니라 사양서입니다. 주장마다 조항 번호와 측정값을 붙였습니다. 숫자는 이 맥에서 직접 잰 값이고, 반올림하지 않았습니다.</p>
+
+    <div class="gauges mast-gauges" id="gauges">
+      <div class="gauge">
+        <b data-count="0.064" data-dec="3" data-prefix="+">+0.064</b>
+        <span><em>발화 정확도 최대 오차(초)</em><br>한도 +2초 · 음수 오차 0회</span>
+      </div>
+      <div class="gauge">
+        <b data-count="180" data-dec="0">180</b>
+        <span><em>코어 테스트 @Test</em><br>기록 시점 178개 통과</span>
+      </div>
+      <div class="gauge">
+        <b data-count="98.38" data-dec="2" data-suffix="%">98.38%</b>
+        <span><em>라인 커버리지</em><br>목표 90% · AlertEngine 99.21%</span>
+      </div>
+      <div class="gauge">
+        <b data-count="0" data-dec="0">0</b>
+        <span><em>네트워크 연결</em><br>lsof · nettop 모두 행 0개</span>
+      </div>
+    </div>
+
+    <div class="mast-cta">
+      <button type="button" class="btn btn-primary" disabled aria-describedby="ctaNote"><span class="dot"></span>0.3.0 · 공개 준비 중</button>
+      <a class="btn" href="#f2">F2 판정기로 건너뛰기 <span class="arr">↓</span></a>
+    </div>
+    <p class="mast-note" id="ctaNote">저장소와 dmg 는 아직 공개 전입니다. 공개되면 이 자리에 내려받기가 생깁니다. 그때까지 아래 사양을 대신 읽어 주세요.</p>
+  </div>
+</header>
+
+<!-- ══════════════════════════ §0 왜 ══════════════════════════ -->
+<section class="sec" id="why" aria-labelledby="whyH">
+  <div class="col">
+    <header class="sech">
+      <span class="eyebrow">§0 · 전제</span>
+      <h2 id="whyH">왜 배너가 아니라 화면 전체인가</h2>
+    </header>
+    <div class="ln">
+      <p>macOS 알림 센터의 배너는 놓치라고 만들어진 것처럼 생겼습니다. 화면 구석에 잠깐 떴다 사라지고, Slack 알림·메일 알림과 같은 자리에 같은 모양으로 나옵니다. 무언가에 집중해 있으면 안 보이고, 봤어도 5초 뒤엔 사라져 있습니다.</p>
+      <p>언틸리티는 반대로 갑니다. 회의 시작 전에 화면 전체를 덮고, 닫기 전에는 사라지지 않습니다. 소리는 발화 시 1회 재생합니다 — 화면을 안 보고 있을 때를 위한 나머지 절반입니다. 반복하지는 않습니다.</p>
+      <aside class="note">오른쪽은 스크린샷이 아니라 앱의 화면 배치를 그대로 옮긴 <b>DOM</b> 입니다. 컬럼 폭 46%, 제목 44pt, 제목 앞 5pt 앰버 막대 — 치수는 <b>AlertContentView</b> 의 값입니다. 뒤에서 도는 배경도 앱과 같은 규칙으로 그려집니다.</aside>
+    </div>
+  </div>
+
+  <div class="mid versus">
+    <div class="vs-left">
+      <div class="bannerbox">
+        <div class="bannerghost">5초 뒤 — 없음</div>
+        <div class="banner" aria-hidden="true">
+          <div class="ic"></div>
+          <div class="tx"><b>캘린더</b><span>회의가 곧 시작됩니다</span></div>
+          <div class="tm">지금</div>
+        </div>
+      </div>
+      <p class="figcap"><b>그림 1</b> — 배너. 5초 뒤 실제로 사라집니다.</p>
+      <p class="figcap dim" style="margin-top:6px">macOS 알림 배너의 크기·모양을 재현한 것입니다.</p>
+    </div>
+    <div class="vs-right">
+      <div class="stage" id="vsStage" role="img" aria-label="언틸리티 알림 화면 재현 — 화면 전체를 덮은 엠버 테마 알림. 5분 전 알림, 회의 제목, 시각 범위, 참가·닫기 버튼, esc 키 안내가 있습니다.">
+        <canvas class="bg" id="vsCanvas" aria-hidden="true"></canvas>
+        <div class="vs-closed">
+          <p>닫았습니다. 배너와 달리, 닫기 전에는 사라지지 않았습니다.</p>
+          <button type="button" class="tbtn" id="vsReopen">다시 띄우기</button>
+        </div>
+      </div>
+      <p class="figcap"><b>그림 2</b> — 언틸리티. <button type="button" class="tbtn" id="vsEsc" style="padding:2px 8px">esc</button> 를 누르기 전까지 그대로입니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ F2 판정기 ══════════════════════════ -->
+<section class="sec" id="f2" aria-labelledby="f2H">
+  <div class="col">
+    <header class="sech">
+      <span class="eyebrow">F2 · 제외 조건표</span>
+      <h2 id="f2H">무엇을 안 띄울지가 이 앱의 절반입니다</h2>
+    </header>
+    <p>표는 제외 조건만 나열합니다. 위에서부터 평가하고, 하나라도 걸리면 제외합니다. 끝까지 안 걸리면 포함입니다. 그리고 코드의 조건 순서가 이 표의 행 순서와 일치해야 합니다 — 이건 권고가 아니라 규칙입니다.</p>
+    <p>왼쪽 이벤트를 바꿔 보세요. 표를 위에서부터 훑어 내려가다 첫 번째로 걸리는 행에서 멈춥니다.</p>
+  </div>
+
+  <div class="wide adj">
+    <!-- 입력 -->
+    <div class="panel adj-a">
+      <div class="ph">입력 — 이벤트 하나<span class="push" style="margin-left:auto"></span></div>
+      <div class="pb">
+        <div class="ctl">
+          <div class="ctl-h">제목 (가명 고정)</div>
+          <div class="mono" style="font-size:var(--t-small);line-height:var(--lh-mono)">[A팀] 주간 리뷰</div>
+        </div>
+        <div class="ctl">
+          <div class="ctl-h">프리셋</div>
+          <div class="presets" role="group" aria-label="프리셋">
+            <button type="button" class="tbtn" data-preset="normal">평범한 회의</button>
+            <button type="button" class="tbtn" data-preset="conf">컨퍼런스 월~수</button>
+            <button type="button" class="tbtn" data-preset="declined">거절한 회의</button>
+            <button type="button" class="tbtn" data-preset="ended">이미 끝난 회의</button>
+          </div>
+        </div>
+        <div class="ctl">
+          <div class="ctl-h">이벤트</div>
+          <button type="button" class="sw" role="switch" aria-checked="false" data-flag="canceled">
+            <span class="lab">취소됨<code>status == .canceled</code></span><span class="tr"></span>
+          </button>
+          <button type="button" class="sw" role="switch" aria-checked="false" data-flag="allDay">
+            <span class="lab">종일 일정<code>isAllDay</code></span><span class="tr"></span>
+          </button>
+          <button type="button" class="sw" role="switch" aria-checked="false" data-flag="calendarOff">
+            <span class="lab">꺼진 캘린더에 있음<code>calendarId ∈ disabledCalendarIds</code></span><span class="tr"></span>
+          </button>
+        </div>
+        <div class="ctl">
+          <div class="ctl-h">내 응답</div>
+          <div class="seg" role="radiogroup" aria-label="내 응답">
+            <button type="button" role="radio" aria-checked="true"  data-resp="accepted">수락</button>
+            <button type="button" role="radio" aria-checked="false" data-resp="tentative">미정</button>
+            <button type="button" role="radio" aria-checked="false" data-resp="declined">거절</button>
+          </div>
+        </div>
+        <div class="ctl">
+          <div class="ctl-h">정책</div>
+          <button type="button" class="sw" role="switch" aria-checked="false" data-policy="skipTentative">
+            <span class="lab">미정 응답도 제외<code>skipTentative</code></span><span class="tr"></span>
+          </button>
+        </div>
+        <div class="ctl">
+          <div class="ctl-h">시각</div>
+          <div class="sld">
+            <div class="row"><label for="sStart">지금부터 시작까지</label><output id="oStart">1분 뒤</output></div>
+            <input type="range" id="sStart" min="-20" max="180" step="1" value="1">
+          </div>
+          <div class="sld">
+            <div class="row"><label for="sDur">회의 길이</label><output id="oDur">30분</output></div>
+            <input type="range" id="sDur" min="0" max="21" step="1" value="4">
+          </div>
+        </div>
+        <div class="ctl">
+          <div class="ctl-h">상호작용 상태 (F3)</div>
+          <div class="mono dim" id="stateLine" style="font-size:11.5px;line-height:1.8">dismissed ∅ · joined ∅</div>
+          <button type="button" class="tbtn" id="resetState" style="margin-top:10px">상태 초기화</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 표 -->
+    <div class="adj-b">
+      <table class="rules" id="f2Table">
+        <caption>F2 — 제외 조건표. 위에서부터 평가하고, 걸리는 첫 조건에서 멈춥니다.</caption>
+        <tbody></tbody>
+      </table>
+      <div class="verdict" id="verdict" role="status" aria-live="polite"><span class="badge">대기</span><span class="vtext">입력을 바꾸면 판정합니다.</span></div>
+
+      <div class="panel f3panel">
+        <div class="ph">F3 — 발화 조건 6가지 (F2 를 통과해야 평가합니다)</div>
+        <div style="padding:0 12px">
+          <table class="rules" id="f3Table"><tbody></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- 코드 / 로그 -->
+    <div class="adj-c">
+      <div class="panel">
+        <div class="ph">EventFilter.swift<span class="rng">34 – 52</span></div>
+        <div class="codewrap" id="paneCode" aria-label="EventFilter.swift 34행부터 52행"></div>
+      </div>
+      <div class="panel">
+        <div class="ph">untillity.log<span class="rng">판정 결과</span></div>
+        <div class="logwrap" id="paneLog" role="log" aria-live="polite" aria-label="판정 로그"></div>
+      </div>
+      <p class="pin">이 판정기는 <code>EventFilter.swift</code> 의 <code>exclusion(for:policy:now:)</code> 를 그대로 옮긴 것입니다 — 조건 순서까지 같고, 위에 그 코드가 있습니다. 로그는 앱의 출력 형식을 따른 재현입니다.</p>
+
+      <div class="minislot" id="miniSlot" aria-live="polite">
+        <div class="stage" id="miniStage" role="img" aria-label="판정을 통과하면 이 자리에 알림 화면 미니어처가 뜹니다.">
+          <canvas class="bg" id="miniCanvas" aria-hidden="true"></canvas>
+          <div class="flash" aria-hidden="true"></div>
+        </div>
+        <p class="figcap" id="miniCap" hidden><b>그림 2b</b> — 발화. <span class="nb">esc 키캡</span>을 누르면 닫히고, 그 상태가 다음 판정에 남습니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="col" style="margin-top:var(--sp-8)">
+    <div class="ln">
+      <h3>7번이 있는 이유</h3>
+      <p class="muted" style="margin-top:var(--sp-3)">「컨퍼런스 월요일 09:00 – 수요일 18:00」 같은 일정은 종일 일정이 아닙니다. 진행 중 발화 규칙(F3) 때문에, 이 한 줄이 없으면 앱을 켤 때마다·절전에서 깰 때마다 화면이 덮입니다.</p>
+      <aside class="note">기본 <b>longEventThreshold</b> 는 4시간입니다. 위 슬라이더를 4시간 이상으로 올리면 7번에서 멈추는 것을 볼 수 있습니다.</aside>
+    </div>
+    <div class="ln" style="margin-top:var(--sp-6)">
+      <h3>여기에 「닫기」와 「다시 알림」이 없는 이유</h3>
+      <p class="muted" style="margin-top:var(--sp-3)">그건 이벤트의 속성이 아니라 상호작용 상태입니다. 이 함수는 <code>(events, policy, now)</code> 만 받는 순수 함수로 남습니다. 그래서 이 페이지에서 그대로 다시 돌릴 수 있습니다 — 재현 가능성 자체가 주장의 증명입니다.</p>
+    </div>
+    <div class="ln" style="margin-top:var(--sp-6)">
+      <h3><span class="clause">F2.9</span> — 통과한 뒤에 한 번 더 거릅니다</h3>
+      <p class="muted" style="margin-top:var(--sp-3)"><code>(eventIdentifier, startsAt)</code> 은 유일하지 않습니다. 실캘린더 273건 중 <strong>64쌍</strong>이 충돌했습니다 — 같은 회의가 두 캘린더에 있었습니다. 합치지 않으면 같은 회의가 알림에 두 줄로 뜹니다.</p>
+      <aside class="note">참석자가 있는 이벤트 <b>222</b>건 중 <b>53</b>건은 내 주소가 참석자 목록에 있는데도 <b>isCurrentUser == false</b> 였습니다. 그래서 4·5번의 <b>myResponse</b> 는 3단계 폴백으로 유도합니다.</aside>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ F3 ══════════════════════════ -->
+<section class="sec" id="f3" aria-labelledby="f3H">
+  <div class="col">
+    <header class="sech">
+      <span class="eyebrow">F3 · 발화</span>
+      <h2 id="f3H">발화는 시각 비교가 아니라 상태로 판정합니다</h2>
+    </header>
+    <div class="ln">
+      <p>「과거 발화 시각을 버린다」는 규칙은 없습니다. 조건 1은 <code>fireTime &lt;= now</code> 이고, 늦은 발화는 조건 2가 막습니다 — 시작 후 10분(기본값)이 지나면 안 띄웁니다.</p>
+      <p>이 정의 하나가 세 가지를 한꺼번에 해결합니다. 타이머가 <code>T+ε</code> 에 깨어나도 발화하고, 앱을 늦게 켜서 이미 발화 시각이 지난 회의도 발화하고, 절전에서 깨어나도 발화합니다. 절전 복귀가 별도 로직이 아니라 이 규칙의 특수 사례가 됩니다.</p>
+      <aside class="note">알림의 단위는 「회의」가 아니라 <b>회의 × 시점</b> 입니다. 5분 전 알림을 닫아도 3분 전·1분 전은 따로 옵니다. 참가를 누르면 그 회의의 남은 알림이 전부 취소됩니다.</aside>
+    </div>
+
+    <table class="rules" style="margin-top:var(--sp-6)">
+      <caption>F3 — 발화 조건. 여섯 개가 전부 참이어야 띄웁니다.</caption>
+      <tbody>
+        <tr><td><div class="cell"><span class="no">1</span><span class="cond"><span class="cx">fireTime &lt;= now</span><span class="ko">발화 시각이 됐다</span></span><span class="mark"></span></div></td></tr>
+        <tr><td><div class="cell"><span class="no">2</span><span class="cond"><span class="cx">now &lt;= startsAt + graceAfterStart</span><span class="ko">너무 늦지 않았다 (기본 10분)</span></span><span class="mark"></span></div></td></tr>
+        <tr><td><div class="cell"><span class="no">3</span><span class="cond"><span class="cx">alertKey ∉ state.presented</span><span class="ko">아직 안 띄웠다</span></span><span class="mark"></span></div></td></tr>
+        <tr><td><div class="cell"><span class="no">4</span><span class="cond"><span class="cx">alertKey ∉ state.dismissed</span><span class="ko">사용자가 닫지 않았다</span></span><span class="mark"></span></div></td></tr>
+        <tr><td><div class="cell"><span class="no">5</span><span class="cond"><span class="cx">eventKey ∉ state.joined</span><span class="ko">사용자가 참가하지 않았다</span></span><span class="mark"></span></div></td></tr>
+        <tr><td><div class="cell"><span class="no">6</span><span class="cond"><span class="cx">snoozedUntil[alertKey] 없음 또는 &lt;= now</span><span class="ko">스누즈 중이 아니다</span></span><span class="mark"></span></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mid twocol">
+    <div>
+      <h3>타이머를 다시 계산하는 사건</h3>
+      <p class="dim" style="font-size:var(--t-small);line-height:1.7;margin-top:var(--sp-3)">타이머는 하나만 둡니다. 발화할 때마다 절대 시각 기준으로 다시 계산해 재무장합니다.</p>
+      <ul class="invalid" style="margin-top:var(--sp-4)">
+        <li data-n="01"><b>절전 복귀</b>자는 동안 지난 발화 시각은 조건 2가 판단한다</li>
+        <li data-n="02"><b>시계 변경</b>절대 시각이 바뀌면 남은 시간 전부 무효</li>
+        <li data-n="03"><b>타임존 변경</b>비행기에서 내리면 회의 시각이 달라진다</li>
+        <li data-n="04"><b>캘린더 변경</b>「무언가 바뀌었다」일 뿐이라 이것만 믿지 않는다</li>
+        <li data-n="05"><b>설정 변경</b>미리 알림 시점·제외 조건이 바뀌면 후보가 바뀐다</li>
+        <li data-n="06"><b>15분 주기 재조회</b>26시간 창을 다시 여는 것은 앱의 책임이다</li>
+      </ul>
+      <p class="muted" style="font-size:var(--t-small);line-height:1.75;margin-top:var(--sp-5)">이 한 줄이 없으면, 이틀 켜 둔 맥에서 26시간 경계 너머에 있던 회의가 창 안으로 들어와도 아무도 다시 조회하지 않습니다.</p>
+    </div>
+    <div>
+      <div class="console" id="logStream">
+        <div class="ch"><span>untillity.log</span><span class="sep">·</span><span>형식 예시 — 회의 제목은 전부 가명입니다</span></div>
+        <div class="cb" id="logStreamBody"></div>
+      </div>
+      <p class="figcap"><b>그림 6</b> — 무엇을 언제 왜 띄웠는지, 그리고 왜 안 띄웠는지가 전부 남습니다.</p>
+    </div>
+  </div>
+
+  <div class="mid chart" id="accChart">
+    <h3>정확도 — 한도와의 거리</h3>
+    <p class="muted" style="font-size:var(--t-small);line-height:1.75;margin-top:var(--sp-3);max-width:62ch">무인 4시간 동안 17회 측정했고, 최대 오차는 <strong>+0.064초</strong> 였습니다. 한도는 +2초이고 음수 오차는 0회입니다. 측정은 유휴 1시간 뒤의 발화로 했습니다 — 개발 중 바로 찍은 값은 App Nap 의 영향을 반영하지 못합니다.</p>
+    <svg viewBox="0 0 640 220" role="img" aria-label="발화 오차 도식. 세로축은 0초부터 2.2초까지이고, SPEC 한도인 플러스 2초 선이 위쪽에 점선으로 그어져 있습니다. 17회 측정값은 전부 0초에서 플러스 0.064초 사이의 얇은 띠 안에 있어, 한도선에서 멀리 떨어진 바닥에 붙어 있습니다.">
+      <line class="ax" x1="56" y1="16" x2="56" y2="186"></line>
+      <line class="ax" x1="56" y1="186" x2="624" y2="186"></line>
+      <line class="tickline" x1="56" y1="108.8" x2="624" y2="108.8"></line>
+      <text x="48" y="190" text-anchor="end">0초</text>
+      <text x="48" y="112.5" text-anchor="end">+1.0</text>
+      <text x="48" y="35" text-anchor="end" class="failc">+2.0</text>
+      <line class="lim" id="limLine" x1="56" y1="31.5" x2="624" y2="31.5"></line>
+      <text x="624" y="24" text-anchor="end" class="failc">SPEC 한도 +2초 — 한 번도 닿지 않았습니다</text>
+      <rect class="band" id="accBand" x="56" y="181" width="568" height="5" rx="2"></rect>
+      <g id="accTicks"></g>
+      <line class="tickline" x1="300" y1="183.5" x2="300" y2="150"></line>
+      <text x="306" y="146" class="strong">+0.064초 — 17회 중 최대</text>
+      <text x="306" y="162">전부 이 띠 안에 있었습니다. 음수 오차 0회.</text>
+      <text x="56" y="206">03:04</text>
+      <text x="340" y="206" text-anchor="middle">무인 4시간 · 17회 · 유휴 1시간 뒤 발화</text>
+      <text x="624" y="206" text-anchor="end">07:23</text>
+    </svg>
+    <p class="figcap"><b>그림 7</b> — 도식입니다. 개별 측정값의 분포가 아니라 한도와의 거리를 그렸습니다.</p>
+  </div>
+
+  <div class="col" style="margin-top:var(--sp-7)">
+    <div class="record">
+      <span class="rl">판정 기록</span>
+      맥이 자는 것을 막지는 않습니다. <code>beginActivity</code> 의 <code>.userInitiated</code> 는 <code>.idleSystemSleepDisabled</code> 를 포함합니다. 지금은 <code>.userInitiatedAllowingIdleSystemSleep</code> 을 씁니다. <code>pmset -g assertions | grep -i untillity</code> 가 비어 있는 것이 정상입니다.
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ F4 ══════════════════════════ -->
+<section class="sec" id="f4" aria-labelledby="f4H">
+  <div class="col">
+    <header class="sech">
+      <span class="eyebrow">F4 / §12 G5 · 창</span>
+      <h2 id="f4H">덮되, 빼앗지 않습니다</h2>
+    </header>
+    <div class="ln">
+      <p>알림 창은 비활성화 패널입니다. <code>NSPanel(.nonactivatingPanel)</code> 에 <code>canBecomeKey</code> 와 <code>canBecomeMain</code> 을 열어 둡니다. 이 오버라이드가 없으면 무테 창은 절대 key 가 되지 못합니다. <code>hidesOnDeactivate</code> 도 꺼야 합니다 — <code>NSPanel</code> 의 기본값이 <code>true</code> 입니다.</p>
+      <aside class="note">창 레벨은 <b>.screenSaver</b>(1000) 로 충분했습니다. <b>CGShieldingWindowLevel()</b>(2147483628)은 2단계 폴백으로만 남겨 뒀습니다.</aside>
+    </div>
+
+    <table class="meas reveal" id="measTable">
+      <caption>실측 — 알림 창이 뜬 직후</caption>
+      <tbody>
+        <tr class="reveal"><th scope="row">frontmost (다른 앱)</th><td class="v" data-v="그대로">·</td><td class="why">전면을 빼앗지 않았다</td></tr>
+        <tr class="reveal"><th scope="row">window.isKeyWindow</th><td class="v hot" data-v="true">·</td><td class="why">그런데 키 입력은 받는다</td></tr>
+        <tr class="reveal"><th scope="row">AXIsProcessTrusted()</th><td class="v" data-v="false">·</td><td class="why">손쉬운 사용 권한 없이 달성했다</td></tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top:var(--sp-6)">발화하면 연결된 모든 디스플레이 각각에 전체 화면 창이 뜹니다. 다른 앱이 네이티브 전체 화면이어도 그 위에 뜨고, 모든 Space 에 걸쳐 뜨며 Space 를 옮겨도 따라옵니다.</p>
+    <p>전역 키 모니터와 <code>CGEventTap</code> 은 쓰지 않습니다. 접근성 권한을 요구하고, 이벤트를 소비할 수 없어 <code>Esc</code> 가 전면 앱에도 전달됩니다.</p>
+    <p><strong>탈출구는 항상 있습니다.</strong> 어떤 상태에서도 <code>Esc</code> 한 번이면 사라집니다. 타협 대상이 아닙니다.</p>
+  </div>
+
+  <div class="wide shots">
+    <div class="shot">
+      <div class="shot-img">
+        <img src="../assets/alert-ember.jpg"
+             srcset="../assets/alert-ember@sm.jpg 1100w, ../assets/alert-ember.jpg 2000w"
+             sizes="(max-width:900px) 100vw, 900px"
+             width="2000" height="1296" loading="lazy" decoding="async"
+             alt="언틸리티 알림 화면, 엠버 테마. 어두운 자줏빛 배경 아래에서 앰버 광채가 올라오고, 화면 가운데 컬럼에 회의 제목과 시각, 참가·닫기 버튼이 놓여 있습니다.">
+      </div>
+      <div class="shot-txt">
+        <h3>그림 3 — 엠버</h3>
+        <p>같은 시각에 시작하는 회의가 여러 건이면 한 화면에 합칩니다. 화면이 세 번 연속 덮이지 않습니다.</p>
+        <p class="figcap">1352×878 화면의 실캡처 · 화면 전체를 덮은 상태</p>
+      </div>
+    </div>
+    <div class="shot flip">
+      <div class="shot-img">
+        <img src="../assets/alert-astra.jpg"
+             srcset="../assets/alert-astra@sm.jpg 1100w, ../assets/alert-astra.jpg 2000w"
+             sizes="(max-width:900px) 100vw, 900px"
+             width="2000" height="1296" loading="lazy" decoding="async"
+             alt="언틸리티 알림 화면, 아스트라 테마. 거의 검은 하늘에 빽빽한 별밭과 청록으로 빛나는 공동, 금빛 먼지 벽이 있고 그 위에 회의 정보가 놓여 있습니다.">
+      </div>
+      <div class="shot-txt">
+        <h3>그림 4 — 아스트라</h3>
+        <p>남은 시간에 따라 광원의 색온도가 바뀝니다. 청록 → 금 → 주홍. 색을 거의 안 쓰는 화면이라, 긴박함은 오직 이 색으로만 말합니다.</p>
+        <p class="figcap">1352×878 화면의 실캡처</p>
+      </div>
+    </div>
+    <div class="shot full">
+      <div class="shot-img">
+        <video id="standbyVid" muted loop playsinline preload="none"
+               poster="../assets/standby-fable-poster.jpg" width="1280" height="830"
+               aria-label="대기 화면, 페이블 테마. 저녁 하늘에 구름이 흐르고 새 무리가 지나갑니다. 가운데에 큰 시계와 다음 회의가 있습니다.">
+          <source src="../assets/standby-fable.webm" type="video/webm">
+          <source src="../assets/standby-fable.mp4" type="video/mp4">
+        </video>
+      </div>
+      <p class="figcap"><b>그림 5</b> — 대기 화면, 페이블. <span class="nb">⌃⌥⌘U</span>. 알림이 없을 때도 같은 배경에 큰 시계와 다음 회의. 잠금이 아닙니다 — 아무나 <span class="nb">Esc</span> 로 닫을 수 있고, 진짜 잠금은 macOS 의 <span class="nb">⌃⌘Q</span> 입니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════ 배경 ══════════════════════════ -->
+<section class="sec" id="backdrop" aria-labelledby="bdH">
+  <div class="col">
+    <header class="sech">
+      <span class="eyebrow ko">배경 · 두 층</span>
+      <h2 id="bdH">구운 그림과, 살아 있는 층</h2>
+    </header>
+    <div class="ln">
+      <p>구워 둔 그림(<code>AlertBackdrop</code>, 매 프레임 CPU 0) 위에 매 프레임 시뮬레이션되는 살아 있는 층(<code>SpriteKit</code> + <code>LivingSim</code>)이 얹힙니다. 둘은 <code>AlertBackdrop.parallax(_:)</code> 로 같은 카메라를 봅니다. 따로 움직이면 한 공간이라는 느낌이 즉시 깨집니다 — 배경과 먼지가 한 공간에 있어 보이는 유일한 이유가 이겁니다.</p>
+      <p>오른쪽 사각형 안에서 포인터를 움직여 보세요. 앱과 같은 규칙으로 움직입니다. 속도로 미는 바람, 거리로 도는 소용돌이, 스친 자리에 남는 물듦. 소용돌이는 속도가 아니라 거리로 계산합니다 — 밀어내기만 하면 마우스를 멈추는 순간 화면이 죽습니다.</p>
+      <aside class="note">앱은 SpriteKit 에 먼지 <b>320~900</b>개, 이 페이지는 브라우저 사정에 맞춰 줄였습니다. 같은 수를 자랑하려는 게 아니라 <b>같은 규칙</b>으로 움직인다는 말입니다. 실물은 위의 그림 3·4 입니다.</aside>
+    </div>
+  </div>
+
+  <div class="wide bdgrid">
+    <div>
+      <div class="ctl-h" style="margin-bottom:10px">레이어 스택 — <span id="stackTheme">엠버</span></div>
+      <ul class="stack" id="stackList"></ul>
+      <p class="figcap" style="margin-top:14px">오른쪽에 포인터를 올리면 반응하는 층이 켜집니다.</p>
+    </div>
+    <div class="livewrap">
+      <div class="livecanvas" id="liveBox">
+        <canvas id="liveCanvas"></canvas>
+        <div class="livetag" id="liveTag">엠버 · 여유</div>
+        <div class="livehud" id="liveHud"></div>
+      </div>
+      <div class="bdctl">
+        <span class="lbl">테마</span>
+        <button type="button" class="tbtn on" data-bd-theme="ember">엠버</button>
+        <button type="button" class="tbtn" data-bd-theme="astra">아스트라</button>
+        <button type="button" class="tbtn" data-bd-theme="fable">페이블</button>
+        <span class="lbl" style="margin-left:10px">남은 시간</span>
+        <button type="button" class="tbtn on" data-bd-tone="ahead">여유</button>
+        <button type="button" class="tbtn" data-bd-tone="imminent">1분 이내</button>
+        <button type="button" class="tbtn" data-bd-tone="started">시작됨</button>
+      </div>
+      <p class="figcap" id="liveCap">색이 곧 정보입니다. 남은 시간에 따라 광원의 색온도가 바뀝니다.</p>
+    </div>
+  </div>
+
+  <div class="wide perf">
+    <div><b>469 · 169 · 136</b><span>오프스크린 렌더 노드<br>아스트라 · 엠버 · 페이블</span></div>
+    <div><b>0.35초</b><span>성운 굽기 (Release)<br>백그라운드라 메인 스레드 0ms</span></div>
+    <div><b>0</b><span>셰이더 컴파일 오류<br>아스트라 별 16,000개</span></div>
+  </div>
+
+  <div class="col" style="margin-top:var(--sp-7)">
+    <div class="record">
+      <span class="rl">판정 기록</span>
+      글자 뒤 scrim 이 청록을 잿빛으로 눌러 대비가 1.4:1 이 되자, 광원과 공동을 글자 컬럼 바깥(0.74)으로 옮겼습니다. 밝은 구조물은 글자 뒤에 두지 않습니다.
+    </div>
+    <div class="record">
+      <span class="rl">판정 기록</span>
+      구름 명암 대비가 세면 구름이 아니라 바위 절벽으로 읽힙니다. 계수를 절반으로 낮췄습니다. 그리고 시간대를 섞지 않습니다 — 검은 실루엣과 라벤더 하늘은 저녁이라, 해는 수평선 아래에 두고 원반 없이 광채만 남겼습니다.
+    </div>
+    <p class="muted" style="margin-top:var(--sp-5)">하루에 몇 번씩 보는 화면이라 여기까지 적어 뒀습니다.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════ F12 ══════════════════════════ -->
+<section class="sec" id="f12" aria-labelledby="f12H">
+  <div class="col">
+    <header class="sech">
+      <span class="eyebrow">F12 · 네트워크</span>
+      <h2 id="f12H">네트워크를 아예 쓰지 않습니다</h2>
+    </header>
+    <p>캘린더를 읽기만 하고 아무 데도 보내지 않습니다. 분석도, 크래시 리포팅도, 업데이트 체크도 없습니다.</p>
+    <p>선언이 아니라 측정입니다. 앱을 띄워 둔 채로 두 명령을 돌리면 확인됩니다.</p>
+
+    <div class="term" id="term">
+      <div class="th">
+        <span>zsh</span><span class="sep">·</span><span>실측 2026-09-06 02:47</span>
+        <span class="push"></span>
+        <button type="button" class="tbtn copybtn" id="copyCmd">
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1.5"/><path d="M10.5 3.5v-1a1 1 0 0 0-1-1h-7a1 1 0 0 0-1 1v7a1 1 0 0 0 1 1h1"/></svg>
+          <span id="copyLabel">복사</span>
+        </button>
+      </div>
+      <div class="tb" id="termBody"></div>
+    </div>
+
+    <div class="mini2">
+      <div><b>0.0%</b><span>같은 시점 CPU</span></div>
+      <div><b>46.8MB</b><span>같은 시점 메모리</span></div>
+    </div>
+
+    <div class="record">
+      <span class="rl">§12 G4 — 샌드박스</span>
+      샌드박스는 껐습니다. 끄면 엔타이틀먼트는 아무 제약도 하지 않습니다. 그래서 F12 는 코드 규율과 <code>lsof</code>·<code>nettop</code> 실측으로만 담보한다고 사양에 적어 뒀습니다 — 「엔타이틀먼트로 막아 뒀으니 괜찮다」를 믿지 않기 위해서입니다.
+    </div>
+
+    <p class="muted">켜지 않은 다른 이유도 있습니다. 샌드박스를 켜면 로그가 컨테이너 안으로 숨어 사용자가 못 찾습니다. 로그는 사용자 홈 안에 있어야 합니다.</p>
+    <div class="pathline">~/Library/Logs/Untillity/untillity.log</div>
+
+    <p style="margin-top:var(--sp-6)">권한은 캘린더 전체 접근 하나입니다. 읽기 전용으로 쓰고, 일정을 만들거나 고치거나 지우지 않습니다. 손쉬운 사용 권한과 화면 기록 권한은 요구하지 않습니다.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════ 테스트 ══════════════════════════ -->
+<section class="sec" id="tests" aria-labelledby="tH">
+  <div class="col">
+    <header class="sech">
+      <span class="eyebrow ko">테스트 · 커버리지</span>
+      <h2 id="tH">중요한 건 총량이 아니라 어디가 덮였느냐입니다</h2>
+    </header>
+    <div class="ln">
+      <p>목표는 90% 였습니다. 라인 98.38%, 리전 96.17%, 함수 98.59% 입니다.</p>
+      <p>진짜 결함은 순수 함수가 아니라 오케스트레이터에서 납니다 — 타이머 재무장, 무효화 순서, 큐, 절전 복귀 재계산. <code>AlertEngine</code> 의 라인 커버리지가 <strong>99.21%</strong> 인 이유입니다. 오케스트레이터가 커버리지 밖에 있지 않다는 뜻입니다.</p>
+      <aside class="note">아래는 파일별 <b>@Test</b> 개수입니다. 앰버로 칠한 셋이 오케스트레이터·조건표·스케줄입니다.</aside>
+    </div>
+
+    <div class="gauges" style="margin-top:var(--sp-6)">
+      <div class="gauge"><b class="num">180</b><span><em>코어 테스트 @Test</em><br>기록 시점 178개 통과</span></div>
+      <div class="gauge"><b class="num">98.38%</b><span><em>UntillityCore 라인 커버리지</em><br>리전 96.17% · 함수 98.59%</span></div>
+      <div class="gauge" style="grid-column:span 2"><b class="num">99.21%</b><span><em>AlertEngine 라인 커버리지</em><br>오케스트레이터가 커버리지 밖에 있지 않다</span></div>
+    </div>
+  </div>
+
+  <div class="mid">
+    <div class="bars" id="testBars"></div>
+    <div class="twocol" style="margin-top:var(--sp-7)">
+      <div class="record" style="margin:0">
+        <span class="rl">검증 규칙 · F2</span>
+        8행 각각에 대응하는 테스트와, 「전부 통과해서 포함되는」 테스트를 둡니다. 최소 9개입니다.
+      </div>
+      <div class="record" style="margin:0">
+        <span class="rl">검증 규칙 · F3</span>
+        「타이머가 fireTime + 2초에 깨어나도 발화한다」를 반드시 테스트합니다. 이걸 빠뜨리면 앱이 아무 알림도 안 띄우는 채로 모든 테스트가 통과합니다.
+      </div>
+    </div>
+    <div class="quad">
+      <div><b>1,815</b><span>도메인 코어 (줄)</span></div>
+      <div><b>2,460</b><span>코어 테스트 (줄)</span></div>
+      <div><b>4,433</b><span>사양과 진행 기록 (줄)</span></div>
+      <div><b>31</b><span>커밋</span></div>
+    </div>
+  </div>
+
+  <div class="col" style="margin-top:var(--sp-6)">
+    <p class="muted">코어는 <code>AppKit</code> 도 <code>EventKit</code> 도 import 하지 않고, 현재 시각을 직접 읽지 않습니다. 시간은 주입된 <code>Clock</code> 에서 나옵니다. 그래서 위 테스트들이 가짜 시계로 전부 결정론적입니다.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════ 기록 ══════════════════════════ -->
+<section class="sec" id="journal" aria-labelledby="jH">
+  <div class="col">
+    <header class="sech">
+      <span class="eyebrow ko">기록 · 결함과 미해결</span>
+      <h2 id="jH">고친 것과, 아직 못 고친 것</h2>
+    </header>
+    <p>9월 5일에 시작해 9월 17일까지 31개의 커밋이 있습니다. 사양과 진행 기록이 4,433줄, 도메인 코어가 1,815줄입니다. <strong>이 저장소는 코드보다 판단의 기록이 많습니다.</strong></p>
+
+    <div class="tl" id="timeline">
+      <div class="axis-fill" id="axisFill"></div>
+      <p class="stamp">2026-09-05 · 첫 커밋</p>
+
+      <article class="jcard">
+        <div class="jhead"><span class="jbadge">결함</span><span class="jsrc">사용자 제보</span></div>
+        <h3>첫 설치자가 알림을 하나도 받지 못했습니다</h3>
+        <p>권한을 받기 전에 만든 <code>EKEventStore</code> 는 그 세션 내내 이벤트 캘린더가 0개입니다. 그런데 <code>authStatus</code> 는 전역 상태라 「권한 있음」으로 보이고, 15분 주기 재조회도 같은 store 를 읽어 자가 치유가 되지 않습니다. 허용을 받아낸 직후 <code>store.reset()</code> 하도록 고쳤고, 로그에 캘린더 개수를 남겨 「회의가 0건」과 「읽지 못한다」를 한 줄로 가릅니다.</p>
+        <div class="jfix">고침 — 0.2.7</div>
+      </article>
+
+      <article class="jcard">
+        <div class="jhead"><span class="jbadge">결함</span><span class="jsrc">실측</span></div>
+        <h3>맥이 유휴 절전에 들지 못했습니다</h3>
+        <p><code>beginActivity</code> 의 <code>.userInitiated</code> 가 <code>.idleSystemSleepDisabled</code> 를 포함합니다. 알림 정확도를 위해 App Nap 만 억제하려던 것이 절전까지 막고 있었습니다. <code>.userInitiatedAllowingIdleSystemSleep</code> 으로 바꿨습니다.</p>
+        <div class="jfix">고침 — Phase 6</div>
+      </article>
+
+      <article class="jcard">
+        <div class="jhead"><span class="jbadge">결함</span><span class="jsrc">사용자 스크린샷</span></div>
+        <h3>전체 화면 패널이 83×36 으로 줄었습니다</h3>
+        <p>내용 뷰에 가장자리로 고정된 제약이 하나라도 있으면 <code>NSWindow</code> 가 그 fitting size 로 창을 줄입니다. 로그도 발화도 소리도 전부 정상이라 로그로는 잡을 수 없었습니다. 지금은 창 프레임과 <code>isVisible</code> 을 상시 계측해 로그에 남깁니다.</p>
+        <div class="jfix">고침 — Phase 6</div>
+      </article>
+
+      <article class="jcard open">
+        <div class="jhead"><span class="jbadge">미해결</span><span class="jsrc">두 번 시도해 실패</span></div>
+        <h3>Finder 에 보이는 앱 파일 이름을 한글로 바꾸지 못했습니다</h3>
+        <p><code>LSHasLocalizedDisplayName</code> 과 <code>ko.lproj/InfoPlist.strings</code> 로 두 번 시도해 실패했습니다. 앱 내부 UI 와 설정 창 제목에는 반영됩니다.</p>
+        <div class="jfix">미해결</div>
+      </article>
+
+      <p class="stamp">2026-09-17 · 커밋 31개</p>
+    </div>
+
+    <p class="muted" style="margin-top:var(--sp-6)">무엇을 언제 왜 띄웠는지, 그리고 왜 안 띄웠는지는 전부 로그에 남습니다. 제외 사유는 <code>F2-7 장시간 일정</code> 처럼 조건 번호와 함께 적힙니다. 「왜 안 떴지」를 추측하지 않아도 됩니다.</p>
+  </div>
+</section>
+
+<!-- ══════════════════════════ 설치 ══════════════════════════ -->
+<section class="sec" id="get" aria-labelledby="gH">
+  <div class="col">
+    <header class="sech">
+      <span class="eyebrow ko">설치 · 5분, 한 번만</span>
+      <h2 id="gH">먼저 알아 둘 것이 있습니다</h2>
+    </header>
+
+    <div class="warn" id="warnBox">
+      <p>이 앱은 Apple 공증(notarization)을 받지 않았습니다. 개발자 프로그램(연 $99)에 가입하지 않고 만들었고, 아는 사람에게만 나눠주는 앱이라 가입하지 않았습니다. 그래서 처음 열 때 경고가 뜹니다.</p>
+      <p style="margin-bottom:0"><strong>조심할 것은 하나입니다.</strong> 경고 창의 파란 기본 버튼이 「휴지통으로 이동」입니다. 안내 없이 <code>Return</code> 을 누르면 앱이 삭제됩니다. 「그래도 열기」 뒤의 2차 확인 창에서도 맨 위가 「휴지통으로 이동」입니다.</p>
+    </div>
+
+    <p style="margin-top:var(--sp-6)">대신 서명은 확실히 합니다. 고정된 self-signed 인증서로 서명해서 designated requirement 가 재빌드 전후로 동일합니다 — 업데이트해도 캘린더 권한을 다시 주지 않아도 됩니다. ad-hoc 서명은 DR 이 <code>cdhash</code> 로 잡혀 빌드마다 바뀌고, TCC 가 다른 앱으로 보고 권한을 초기화합니다. 대조 실험으로 확인한 사실입니다.</p>
+
+    <div class="settings-fig">
+      <img src="../assets/settings.png" width="960" height="1024" loading="lazy" decoding="async"
+           alt="언틸리티 설정 창. 미리 알림 시점, 테마, 캘린더 목록, 로그인할 때 시작 항목이 보입니다.">
+      <p class="figcap"><b>그림 8</b> — 설정 창. 캘린더는 계정별로 묶이고, 끄고 싶은 것만 끕니다.</p>
+    </div>
+
+    <ol class="steps" id="steps">
+      <li><p>요구 사항을 확인합니다 — <em>macOS 15.2 이상</em>. 설치에 5분 걸리고, 한 번만 하면 됩니다.</p></li>
+      <li><p><code>Untillity-x.y.z.dmg</code> 를 받습니다.</p></li>
+      <li><p>dmg 를 열고 앱을 <em>응용 프로그램 폴더로 끌어다 놓습니다</em>. <em>dmg 안에서 바로 열지 마세요</em> — App Translocation 으로 임시 경로에 복사돼 실행되고, 로그인 자동 실행 등록이 엉뚱한 경로로 갑니다.</p></li>
+      <li><p>응용 프로그램 폴더에서 두 번 눌러 엽니다. 경고가 뜨면 <em>「완료」</em> 를 누릅니다. <em>「휴지통으로 이동」이 아닙니다</em> — 그건 파란 기본 버튼이라 안내 없이 <code>Return</code> 을 누르면 앱이 삭제됩니다.</p></li>
+      <li><p>시스템 설정 → 개인정보 보호 및 보안 → 맨 아래 「보안」에서 <em>「그래도 열기」</em>. 이 버튼은 앱을 연 뒤 약 1시간만 보입니다.</p></li>
+      <li><p>확인 창이 한 번 더 뜹니다. <em>여기서도 「휴지통으로 이동」이 맨 위</em> 이므로 가운데 「그래도 열기」를 누르고, Touch ID 또는 암호를 승인합니다.</p></li>
+      <li><p>Dock 에 아무것도 안 뜨는 것이 정상입니다 — 메뉴 막대 전용 앱입니다. 화면 오른쪽 위에서 종 아이콘을 확인하세요.</p></li>
+      <li><p>캘린더 접근을 물으면 <em>「전체 접근 허용」</em>. 읽기만 하고 어디에도 보내지 않습니다.</p></li>
+      <li><p>설정 창에서 「로그인할 때 언틸리티 시작」을 켜두면 끝입니다.</p></li>
+    </ol>
+
+    <div class="ctablock">
+      <div class="row">
+        <button type="button" class="btn btn-primary" disabled aria-describedby="ctaNote2"><span class="dot"></span>0.3.0 · 공개 준비 중</button>
+        <span class="mono dim" style="font-size:var(--t-micro);line-height:var(--lh-mono)">macOS 15.2+ · Apple Silicon / Intel</span>
+      </div>
+      <p class="st" id="ctaNote2">저장소가 아직 비공개라 dmg 링크를 걸지 않았습니다. 가짜 링크를 두는 것보다 없는 게 낫습니다 — 공개되면 이 자리에 내려받기와 설치 안내(INSTALL.md)가 함께 생깁니다.</p>
+    </div>
+
+    <div class="faq">
+      <h3 style="margin-bottom:var(--sp-4)">자주 묻는 것</h3>
+
+      <details>
+        <summary>왜 설치할 때 경고가 뜨나요? 위험한 앱인가요?</summary>
+        <div class="ans">Apple 공증을 받지 않아서입니다. 개발자 프로그램(연 $99)에 가입하지 않고 만들었기 때문이고, 아는 사람에게만 나눠주는 앱이라 가입하지 않았습니다. 대신 서명은 확실히 합니다 — 고정된 self-signed 인증서로 서명해서, 업데이트해도 캘린더 권한을 다시 주지 않아도 됩니다. 조심할 것은 하나입니다: 경고 창의 기본 버튼이 「휴지통으로 이동」이라, 안내 없이 <code>Return</code> 을 누르면 앱이 삭제됩니다. 한 번만 통과하면 이후 업데이트에서는 다시 묻지 않습니다.</div>
+      </details>
+
+      <details>
+        <summary>제 캘린더 내용이 어디로 가나요?</summary>
+        <div class="ans">아무 데도 가지 않습니다. 이 앱은 네트워크를 아예 쓰지 않습니다 — 분석도, 크래시 리포팅도, 업데이트 체크도 없습니다. 선언이 아니라 측정으로 담보합니다: 앱을 띄워 두고 <code>lsof -i -p &lt;pid&gt;</code> 와 <code>nettop -p &lt;pid&gt;</code> 를 돌려 연결이 0인 것을 직접 확인할 수 있습니다(개발 중 실측에서도 두 명령 모두 행 0개였습니다). 로그는 <code>~/Library/Logs/Untillity/untillity.log</code>, 사용자 홈 안에만 남습니다.</div>
+      </details>
+
+      <details>
+        <summary>어떤 캘린더를 지원하나요? 구글 로그인이 필요한가요?</summary>
+        <div class="ans">앱이 직접 구글이나 마이크로소프트에 로그인하지 않습니다. macOS 캘린더에 연결된 계정을 읽습니다. 그래서 시스템 설정 → 일반 → 인터넷 계정에서 계정을 한 번 연결해 두면 구글이든 Exchange든 iCloud든 CalDAV든 전부 같은 경로로 읽힙니다. 캘린더는 계정별로 묶여 보이고, 보기 싫은 것만 끄면 됩니다 — 저장하는 것은 켠 것이 아니라 <strong>끈 것</strong>입니다. 회사가 새 캘린더를 붙였을 때 기본이 「꺼짐」이 되어 회의를 조용히 놓치는 일이 없도록.</div>
+      </details>
+
+      <details>
+        <summary>알림이 하나도 안 떠요.</summary>
+        <div class="ans">먼저 로그를 보세요 — 메뉴 막대 → <code>[디버그] 로그 폴더 열기</code>. <code>[권한] 읽기 가능 → 이벤트 캘린더 N개</code> 줄의 N이 0이면 캘린더를 못 읽고 있는 것이고, 회의가 있는데 안 떴다면 <code>[판정]</code> 줄에 제외 사유가 조건 번호와 함께 적혀 있습니다(예: <code>F2-7 장시간 일정</code>). 참고로 0.2.7 이전 버전에는 첫 설치 직후 그 세션에서 캘린더가 비어 보이는 결함이 있었고, 지금은 권한을 받은 즉시 캘린더를 다시 읽도록 고쳐져 있습니다.</div>
+      </details>
+
+      <details>
+        <summary>알림 때문에 맥이 계속 깨어 있지는 않나요? 배터리는요?</summary>
+        <div class="ans">맥이 자는 것을 막지 않습니다. 알림 시각을 정확히 맞추려고 App Nap 만 억제하고 유휴 절전은 건드리지 않습니다 — 실제로 절전을 막는 옵션을 썼던 적이 있어 바로잡았습니다. 확인 방법은 <code>pmset -g assertions | grep -i untillity</code> 이고, 아무것도 안 나오는 것이 정상입니다. 평소 CPU 는 거의 0이고 메모리는 47MB 안팎입니다(같은 시점 실측 46.8MB).</div>
+      </details>
+
+      <details>
+        <summary>지우려면 어떻게 하나요?</summary>
+        <div class="ans">설정에서 「로그인할 때 언틸리티 시작」을 끄고, 응용 프로그램 폴더의 <code>Untillity.app</code> 을 휴지통으로 옮기면 됩니다. 캘린더 권한까지 지우려면 <code>tccutil reset Calendar com.bonjugi.untillity</code> (sudo 필요 없습니다), 로그는 <code>~/Library/Logs/Untillity/</code> 를 지우면 됩니다. 앱이 남긴 것은 그 둘과 설정값뿐입니다.</div>
+      </details>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<footer class="foot">
+  <div class="col">
+    <div class="fr">
+      <img src="../assets/icon.png" width="256" height="256" alt="언틸리티 앱 아이콘" loading="lazy" decoding="async">
+      <div class="ft">
+        <b>언틸리티 (Untillity)</b> — macOS 메뉴 막대 앱. 요구 사항 macOS 15.2 이상.<br>
+        서명 self-signed <b>"Untillity Local Signing"</b> · 인증서 유효기간 3650일(2036년 만료) · Apple 공증 없음.<br>
+        이 페이지의 수치는 전부 <b>2026-09-17 기준 실측값</b>이고, 반올림하지 않았습니다. 측정 환경이 바뀌면 값도 바뀝니다.<br>
+        화면에 나오는 회의 제목·캘린더 이름은 전부 가명입니다.
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script src="../assets/backdrop.js"></script>
+<script>
+/* ══════════════════════════════════════════════════════════════════
+   언틸리티 사양서 페이지 — 인라인 스크립트
+   0 util · 1 theme · 2 wall · 3 rail/topbar · 4 reveal
+   5 alert 미니어처 · 6 §0 · 7 F2 판정기 · 8 F3 · 9 배경 · 10 F12 · 11 설치
+   ══════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+
+  /* ───────── 0 util */
+  var $  = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var mqReduce = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: false };
+  var reduced = mqReduce.matches;
+  if (reduced) document.documentElement.classList.add('reduced');
+
+  function io(el, cb, opts) {
+    if (!window.IntersectionObserver) { cb(true); return null; }
+    var o = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { cb(e.isIntersecting, e); });
+    }, opts || { threshold: 0.2 });
+    o.observe(el);
+    return o;
+  }
+  function once(el, cb, opts) {
+    var o = io(el, function (vis) { if (vis && o) { o.disconnect(); o = null; cb(); } else if (vis && !window.IntersectionObserver) cb(); }, opts);
+    if (!o) cb();
+  }
+  var rafQ = [];
+  var rafOn = false;
+  function onScroll(fn) {
+    rafQ.push(fn);
+    if (!rafOn) {
+      rafOn = true;
+      var run = function () { rafQ.forEach(function (f) { f(); }); rafOn = true; ticking = false; };
+      var ticking = false;
+      window.addEventListener('scroll', function () {
+        if (ticking) return; ticking = true;
+        requestAnimationFrame(function () { rafQ.forEach(function (f) { f(); }); ticking = false; });
+      }, { passive: true });
+      window.addEventListener('resize', function () {
+        if (ticking) return; ticking = true;
+        requestAnimationFrame(function () { rafQ.forEach(function (f) { f(); }); ticking = false; });
+      }, { passive: true });
+    }
+    fn();
+  }
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+
+  /* ───────── 1 theme */
+  (function () {
+    var root = document.documentElement;
+    var stored = null;
+    try { stored = localStorage.getItem('un-spec-theme'); } catch (e) {}
+    if (stored === 'dark' || stored === 'light') root.setAttribute('data-theme', stored);
+    function label() {
+      var dark = root.getAttribute('data-theme') === 'dark';
+      $$('[data-theme-toggle]').forEach(function (b) {
+        b.textContent = dark ? '밝게' : '어둡게';
+        b.setAttribute('aria-label', dark ? '밝은 종이로 보기' : '어두운 종이로 보기');
+      });
+    }
+    $$('[data-theme-toggle]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var dark = root.getAttribute('data-theme') === 'dark';
+        root.setAttribute('data-theme', dark ? 'light' : 'dark');
+        try { localStorage.setItem('un-spec-theme', dark ? 'light' : 'dark'); } catch (e) {}
+        label();
+      });
+    });
+    label();
+  })();
+
+  /* ───────── 2 조항 번호 벽 */
+  (function () {
+    var wall = $('#wall');
+    if (!wall) return;
+    var ids = ['F1.4','F1.6','F1.7','F1.10','F2.9','F3.2','F3.5','F3.6','F4.1','F4.2','F4.3','F4.9','F4.10',
+               'F9.3','F11.1','F11.2','F12.1','F12.3','F13.1','F13.2','F14.1','F14.5','F14.6','F14.8',
+               'F14.9.5','F14.9.12','F14.9.14','F14.9.15','§6','§8','§12 G3','§12 G4','§12 G5'];
+    var out = [];
+    for (var i = 0; i < 260; i++) out.push(ids[(i * 7 + (i % 5)) % ids.length]);
+    var block = out.join('   ');
+    wall.textContent = block + '   ' + block;
+  })();
+
+  /* ───────── 3 rail / topbar / progress */
+  (function () {
+    var bar = $('#progressBar'), top = $('#topbar'), tbSec = $('#tbSection');
+    var links = $$('#rail a');
+    var secs = links.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); }).filter(Boolean);
+    onScroll(function () {
+      var y = window.scrollY || window.pageYOffset;
+      var h = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      if (bar) bar.style.transform = 'scaleX(' + clamp(y / h, 0, 1).toFixed(4) + ')';
+      if (top) top.classList.toggle('on', y > 12);
+    });
+    if (!window.IntersectionObserver || !secs.length) return;
+    var vis = {};
+    var ob = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { vis[e.target.id] = e.isIntersecting; });
+      var cur = null;
+      for (var i = 0; i < secs.length; i++) if (vis[secs[i].id]) { cur = secs[i].id; break; }
+      links.forEach(function (a) {
+        var on = a.getAttribute('href') === '#' + cur;
+        a.setAttribute('aria-current', on ? 'true' : 'false');
+        if (on && tbSec) tbSec.textContent = a.textContent;
+      });
+    }, { rootMargin: '-45% 0px -50% 0px', threshold: 0 });
+    secs.forEach(function (s) { ob.observe(s); });
+  })();
+
+  /* ───────── 4 reveal: 계기판 카운트업
+     HTML 의 초기 텍스트가 이미 최종값이다. 스크립트가 죽어도 올바른 숫자가 남는다.
+     관찰이 안 걸리는 자리(iframe · 화면보다 큰 뷰포트)에서도 1.5초 폴백으로 반드시 채운다. */
+  (function () {
+    var g = $('#gauges');
+    if (!g) return;
+    var els = $$('b[data-count]', g);
+    if (!els.length) return;
+    var started = false;
+    function run() {
+      if (started) return;
+      started = true;
+      els.forEach(function (el) {
+        var target = parseFloat(el.getAttribute('data-count'));
+        var dec = parseInt(el.getAttribute('data-dec'), 10) || 0;
+        var pre = el.getAttribute('data-prefix') || '';
+        var suf = el.getAttribute('data-suffix') || '';
+        var write = function (v) { el.textContent = pre + v.toFixed(dec) + suf; };
+        write(target);                       // 먼저 최종값을 박고
+        if (reduced || target === 0 || !isFinite(target)) return;
+        var t0 = performance.now(), dur = 600;
+        (function step(t) {                  // 그다음 0 에서 세어 올린다 (같은 프레임 안이라 깜빡임 없음)
+          var p = clamp((t - t0) / dur, 0, 1);
+          write(target * (1 - Math.pow(1 - p, 3)));
+          if (p < 1) requestAnimationFrame(step);
+        })(t0);
+      });
+    }
+    if (reduced) { run(); return; }          // 움직임 줄이기: 처음부터 최종값
+    once(g, run, { threshold: 0.4 });
+    setTimeout(run, 1500);                   // 폴백 — 관찰이 1.5초 안에 안 오면 그냥 시작
+  })();
+
+  /* ───────── 5 알림 미니어처 */
+  function snoozeHtml(list) {
+    return list.map(function (s, i) {
+      return '<span class="sn' + (i ? '' : ' first') + '"><span class="t">' + esc(s.t) +
+        (i ? '' : '<i>S</i>') + '</span><span class="s">' + esc(s.s) + '</span></span>';
+    }).join('');
+  }
+  function alertMarkup(o) {
+    return '' +
+      '<div class="scrim"></div>' +
+      '<div class="clock" data-clock>' + esc(o.clock) + '</div>' +
+      '<div class="column">' +
+        '<div class="a-head" data-head>' + esc(o.head) + '</div>' +
+        '<div class="a-block">' +
+          '<div class="a-titlerow"><i class="a-bar"></i><div class="a-title">' + esc(o.title) + '</div></div>' +
+          '<div class="a-range" data-range>' + esc(o.range) + '</div>' +
+          '<div class="a-count" data-count>' + esc(o.count) + '</div>' +
+          '<div class="a-chips"><span class="chip">' + esc(o.cal) + '</span><span class="chip svc">' + esc(o.svc) + '</span></div>' +
+        '</div>' +
+        '<div class="a-actions">' +
+          '<span class="pill primary">참가</span>' +
+          '<span class="pill outline">닫기</span>' +
+          '<div class="a-snoozelabel">다시 알림</div>' +
+          '<div class="a-snooze" data-snooze>' + snoozeHtml(o.snooze) + '</div>' +
+        '</div>' +
+        '<div class="a-hints">' +
+          '<span class="hint"><span class="kc">return</span><span>참가</span></span>' +
+          '<span class="hint"><span class="kc">esc</span><span>닫기</span></span>' +
+        '</div>' +
+      '</div>';
+  }
+  var THEME_FONT = {
+    ember: '"SF Pro Rounded", ui-rounded, -apple-system, system-ui, sans-serif',
+    astra: '-apple-system, "SF Pro Text", system-ui, sans-serif',
+    fable: '"New York", "AppleMyungjo", ui-serif, Georgia, serif'
+  };
+  function paintScr(scr, theme, tone) {
+    if (!window.UNBackdrop) return;
+    var tk = UNBackdrop.tokens(theme, tone);
+    scr.style.setProperty('--accent', tk['--accent']);
+    scr.style.setProperty('--sink', tk['--ink']);
+    scr.style.setProperty('--on-accent', tk['--on-accent']);
+    scr.style.setProperty('--sfont', THEME_FONT[theme] || 'inherit');
+  }
+  var stages = [];
+  function fitStage(st) {
+    var dw = parseFloat(getComputedStyle(st).getPropertyValue('--dw')) || 1920;
+    var w = st.clientWidth;
+    if (!w) return;
+    st.style.setProperty('--k', (w / dw).toFixed(5));
+  }
+  function registerStage(st) {
+    stages.push(st);
+    fitStage(st);
+    if (window.ResizeObserver) new ResizeObserver(function () { fitStage(st); }).observe(st);
+  }
+  window.addEventListener('resize', function () { stages.forEach(fitStage); }, { passive: true });
+
+  function fmtClock(sec) {
+    sec = ((sec % 86400) + 86400) % 86400;
+    return pad(Math.floor(sec / 3600)) + ':' + pad(Math.floor(sec / 60) % 60) + ':' + pad(sec % 60);
+  }
+  function fmtKo(sec) {
+    sec = ((sec % 86400) + 86400) % 86400;
+    var h = Math.floor(sec / 3600), m = Math.floor(sec / 60) % 60;
+    var ap = h < 12 ? '오전' : '오후';
+    var hh = h % 12; if (hh === 0) hh = 12;
+    return ap + ' ' + hh + ':' + pad(m);
+  }
+  function fmtKoShort(sec) {
+    sec = ((sec % 86400) + 86400) % 86400;
+    var h = Math.floor(sec / 3600) % 12; if (h === 0) h = 12;
+    return h + ':' + pad(Math.floor(sec / 60) % 60);
+  }
+
+  /* ───────── 6 §0 대조 무대 */
+  (function () {
+    var st = $('#vsStage'), cv = $('#vsCanvas');
+    if (!st || !cv) return;
+    var start = 9 * 3600 + 30 * 60;
+    var scr = document.createElement('div');
+    scr.className = 'scr';
+    scr.innerHTML = alertMarkup({
+      clock: '09:25:01', head: '5분 전 알림', title: '[A팀] 주간 리뷰',
+      range: fmtKo(start) + ' – ' + fmtKoShort(start + 1800), count: '4분 59초 뒤 시작',
+      cal: '업무', svc: 'Meet',
+      snooze: [{ t: '1분', s: fmtKoShort(start - 4 * 60) }, { t: '3분', s: fmtKoShort(start - 2 * 60) },
+               { t: '5분', s: fmtKoShort(start) }, { t: '시작할 때', s: fmtKoShort(start) }]
+    });
+    st.insertBefore(scr, st.querySelector('.vs-closed'));
+    paintScr(scr, 'ember', 'ahead');
+    registerStage(st);
+
+    var bd = null;
+    if (window.UNBackdrop) {
+      bd = UNBackdrop.createBackdrop(cv, { theme: 'ember', tone: 'ahead', scrim: false, quality: 0.65, interactive: true, pointerTarget: st, seed: 20260918 });
+    }
+
+    var t = 1, live = false, timer = 0;
+    var clockEl = scr.querySelector('[data-clock]'), cntEl = scr.querySelector('[data-count]');
+    function tick() {
+      t += 1; if (t > 60) t = 1;
+      var now = start - 300 + t;
+      clockEl.textContent = fmtClock(now);
+      var rest = start - now;
+      cntEl.textContent = Math.floor(rest / 60) + '분 ' + (rest % 60) + '초 뒤 시작';
+    }
+    function play() { if (timer || reduced) return; timer = setInterval(tick, 1000); }
+    function stop() { if (timer) { clearInterval(timer); timer = 0; } }
+    function maybe() { if (live && !document.hidden && !st.classList.contains('closed')) play(); else stop(); }
+    io(st, function (v) { live = v; maybe(); }, { threshold: 0.15 });
+    document.addEventListener('visibilitychange', maybe);
+
+    var escBtn = $('#vsEsc'), reopen = $('#vsReopen');
+    if (escBtn) escBtn.addEventListener('click', function () {
+      st.classList.add('closed'); stop(); if (bd) bd.stop();
+      if (reopen) reopen.focus();
+    });
+    if (reopen) reopen.addEventListener('click', function () {
+      st.classList.remove('closed'); if (bd) bd.start(); if (live) play();
+      if (escBtn) escBtn.focus();
+    });
+  })();
+
+  /* ───────── 7 F2 판정기 */
+  (function () {
+    var tbody2 = $('#f2Table tbody'), tbody3 = $('#f3Table tbody');
+    if (!tbody2 || !tbody3) return;
+
+    var NOW = 9 * 3600 + 29 * 60;
+    var DUR = [5, 10, 15, 20, 30, 45, 60, 90, 120, 150, 180, 210, 240, 300, 360, 480, 600, 720, 960, 1200, 1440, 3240];
+    var S = {
+      canceled: false, allDay: false, calendarOff: false, response: 'accepted',
+      startsInMin: 1, durIdx: 4, dismissed: false, joined: false,
+      policy: { skipCanceled: true, skipAllDay: true, skipDeclined: true, skipTentative: false,
+                longThresholdMin: 240, minDurationMin: 0, graceAfterStartMin: 10, leadMin: 1 }
+    };
+    function dur() { return DUR[S.durIdx]; }
+
+    var F2 = [
+      { code: 'skipCanceled && status == .canceled',            ko: '취소된 일정',      label: '취소된 일정',    line: 36, hit: function () { return S.policy.skipCanceled && S.canceled; } },
+      { code: 'calendarId ∈ policy.disabledCalendarIds',        ko: '꺼진 캘린더',      label: '꺼진 캘린더',    line: 38, hit: function () { return S.calendarOff; } },
+      { code: 'skipAllDay && isAllDay',                          ko: '종일 일정',        label: '종일 일정',      line: 40, hit: function () { return S.policy.skipAllDay && S.allDay; } },
+      { code: 'skipDeclined && myResponse == .declined',         ko: '내가 거절함',      label: '내가 거절함',    line: 42, hit: function () { return S.policy.skipDeclined && S.response === 'declined'; } },
+      { code: 'skipTentative && myResponse == .tentative',       ko: '미정 응답',        label: '미정 응답',      line: 44, hit: function () { return S.policy.skipTentative && S.response === 'tentative'; } },
+      { code: 'endsAt <= now',                                   ko: '이미 끝남',        label: '이미 끝남',      line: 46, hit: function () { return S.startsInMin + dur() <= 0; } },
+      { code: 'endsAt − startsAt >= longEventThreshold',         ko: '장시간 일정 (기본 4시간)', label: '장시간 일정', line: 48, hit: function () { return dur() >= S.policy.longThresholdMin; } },
+      { code: 'endsAt − startsAt < minimumDuration',             ko: '최소 길이 미만 (기본 0분)', label: '최소 길이 미만', line: 50, hit: function () { return dur() < S.policy.minDurationMin; } }
+    ];
+    var F3 = [
+      { code: 'fireTime <= now',                        ko: '발화 시각이 됐다',        label: '아직 발화 시각 전', ok: function () { return S.startsInMin <= S.policy.leadMin; } },
+      { code: 'now <= startsAt + graceAfterStart',      ko: '너무 늦지 않았다',        label: '늦은 알림',         ok: function () { return S.startsInMin >= -S.policy.graceAfterStartMin; } },
+      { code: 'alertKey ∉ state.presented',             ko: '아직 안 띄웠다',          label: '이미 띄움',         ok: function () { return true; } },
+      { code: 'alertKey ∉ state.dismissed',             ko: '사용자가 닫지 않았다',    label: '사용자가 닫음',     ok: function () { return !S.dismissed; } },
+      { code: 'eventKey ∉ state.joined',                ko: '참가를 누르지 않았다',    label: '사용자가 참가함',   ok: function () { return !S.joined; } },
+      { code: 'snoozedUntil[alertKey] 없음 또는 <= now', ko: '스누즈 중이 아니다',      label: '스누즈 중',         ok: function () { return true; } }
+    ];
+
+    function rowHtml(i, r, mono) {
+      return '<tr data-i="' + i + '"><td><div class="cell"><span class="no">' + (i + 1) + '</span>' +
+        '<span class="cond"><span class="cx">' + esc(r.code) + '</span><span class="ko">' + esc(r.ko) + '</span></span>' +
+        '<span class="mark"></span></div></td></tr>';
+    }
+    tbody2.innerHTML = F2.map(function (r, i) { return rowHtml(i, r); }).join('');
+    tbody3.innerHTML = F3.map(function (r, i) { return rowHtml(i, r); }).join('');
+    var rows2 = $$('tr', tbody2), rows3 = $$('tr', tbody3);
+
+    /* ── 코드 패널 */
+    var SRC = [
+      [33, '/// 한 이벤트에 대한 제외 판정. 걸리는 첫 조건을 돌려준다. nil 이면 포함이다.'],
+      [34, 'public static func exclusion(for e: MeetingEvent, policy: AlertPolicy, now: Date) -> Exclusion? {'],
+      [35, '    // 1'],
+      [36, '    if policy.skipCanceled, e.status == .canceled { return .canceled }'],
+      [37, '    // 2'],
+      [38, '    if policy.disabledCalendarIds.contains(e.calendarId) { return .disabledCalendar }'],
+      [39, '    // 3'],
+      [40, '    if policy.skipAllDay, e.isAllDay { return .allDay }'],
+      [41, '    // 4'],
+      [42, '    if policy.skipDeclined, e.myResponse == .declined { return .declined }'],
+      [43, '    // 5'],
+      [44, '    if policy.skipTentative, e.myResponse == .tentative { return .tentative }'],
+      [45, '    // 6'],
+      [46, '    if e.endsAt <= now { return .alreadyEnded }'],
+      [47, '    // 7'],
+      [48, '    if e.duration >= policy.longEventThreshold.timeInterval { return .tooLong }'],
+      [49, '    // 8'],
+      [50, '    if e.duration < policy.minimumDuration.timeInterval { return .tooShort }'],
+      [51, '    return nil'],
+      [52, '}']
+    ];
+    function hl(s) {
+      var e = esc(s);
+      if (/\/\//.test(e)) return '<i class="c-cm">' + e + '</i>';
+      e = e.replace(/\b(public|static|func|if|return|for)\b/g, '<i class="c-kw">$1</i>');
+      e = e.replace(/\b(MeetingEvent|AlertPolicy|Date|Exclusion)\b/g, '<i class="c-ty">$1</i>');
+      e = e.replace(/(\s)(\.[A-Za-z][A-Za-z0-9]*)/g, '$1<i class="c-en">$2</i>');
+      return e;
+    }
+    var paneCode = $('#paneCode');
+    paneCode.innerHTML = SRC.map(function (l) {
+      return '<div class="cl" data-line="' + l[0] + '"><span class="lnum">' + l[0] + '</span><pre>' + hl(l[1]) + '</pre></div>';
+    }).join('');
+    var codeLines = $$('.cl', paneCode);
+    function codeMark(line, cls) {
+      codeLines.forEach(function (el) {
+        var on = parseInt(el.getAttribute('data-line'), 10) === line;
+        el.classList.toggle('on', on && cls === 'on');
+        el.classList.toggle('hit', on && cls === 'hit');
+      });
+      if (!line) return;
+      var el = codeLines.filter(function (x) { return parseInt(x.getAttribute('data-line'), 10) === line; })[0];
+      if (!el) return;
+      var r = el.getBoundingClientRect(), rw = paneCode.getBoundingClientRect();
+      paneCode.scrollTop += (r.top - rw.top) - (paneCode.clientHeight / 2 - r.height / 2);
+    }
+    function codeClear() { codeLines.forEach(function (el) { el.classList.remove('on', 'hit'); }); }
+
+    /* ── 로그 */
+    var paneLog = $('#paneLog');
+    var persist = [];
+    function renderLog(run, typingIdx, typingLen) {
+      var html = '';
+      persist.forEach(function (l) { html += '<div class="' + l.c + '">' + esc(l.t) + '</div>'; });
+      run.forEach(function (l, i) {
+        if (typingIdx != null && i > typingIdx) return;
+        var txt = (typingIdx != null && i === typingIdx) ? l.t.slice(0, typingLen) : l.t;
+        html += '<div class="' + l.c + '">' + esc(txt) +
+          ((typingIdx != null && i === typingIdx) ? '<span class="caret"></span>' : '') + '</div>';
+      });
+      paneLog.innerHTML = html;
+      paneLog.scrollTop = paneLog.scrollHeight;
+    }
+
+    /* ── 미니어처 */
+    var miniStage = $('#miniStage'), miniSlot = $('#miniSlot'), miniCap = $('#miniCap');
+    var miniScr = document.createElement('div');
+    miniScr.className = 'scr';
+    miniStage.insertBefore(miniScr, miniStage.querySelector('.flash'));
+    registerStage(miniStage);
+    var miniBd = window.UNBackdrop
+      ? UNBackdrop.createBackdrop($('#miniCanvas'), { theme: 'ember', tone: 'ahead', scrim: false, quality: 0.5, interactive: false, seed: 4071 })
+      : null;
+    miniCap.innerHTML = '<b>그림 2b</b> — 발화. 아래 두 키는 실제 알림 화면의 키와 같은 일을 합니다. ' +
+      '<button type="button" class="tbtn" id="miniEsc" style="padding:2px 8px">esc — 닫기</button> ' +
+      '<button type="button" class="tbtn" id="miniJoin" style="padding:2px 8px">return — 참가</button>';
+
+    function tone() { return S.startsInMin <= 0 ? 'started' : S.startsInMin <= 1 ? 'imminent' : 'ahead'; }
+    function fillMini() {
+      var start = NOW + S.startsInMin * 60;
+      var rest = start - NOW;
+      var cnt = rest >= 0
+        ? Math.floor(rest / 60) + '분 ' + (rest % 60) + '초 뒤 시작'
+        : Math.floor(-rest / 60) + '분 전에 시작했습니다';
+      miniScr.innerHTML = alertMarkup({
+        clock: fmtClock(NOW), head: S.policy.leadMin + '분 전 알림', title: '[A팀] 주간 리뷰',
+        range: fmtKo(start) + ' – ' + fmtKoShort(start + dur() * 60), count: cnt,
+        cal: '업무', svc: 'Meet',
+        snooze: [{ t: '시작할 때', s: fmtKoShort(start) }]
+      });
+      paintScr(miniScr, 'ember', tone());
+      if (miniBd) miniBd.setTone(tone());
+    }
+
+    /* ── 시퀀스 */
+    var token = 0;
+    function cancelSeq() { token++; }
+    function runSteps(steps, done) {
+      var my = token;
+      if (reduced) { steps.forEach(function (s) { s.do(); }); if (done) done(); return; }
+      var t0 = performance.now(), i = 0;
+      (function tick(t) {
+        if (my !== token) return;
+        var el = t - t0;
+        while (i < steps.length && steps[i].at <= el) { steps[i].do(); i++; }
+        if (i < steps.length) requestAnimationFrame(tick); else if (done) done();
+      })(t0);
+    }
+    function typeLog(run, done) {
+      var my = token;
+      if (reduced) { renderLog(run); if (done) done(); return; }
+      var i = 0, n = 0, last = performance.now();
+      renderLog(run, 0, 0);
+      (function tick(t) {
+        if (my !== token) return;
+        if (t - last >= 22) {
+          last = t; n++;
+          if (n > run[i].t.length) { i++; n = 0; }
+          if (i >= run.length) { renderLog(run); if (done) done(); return; }
+          renderLog(run, i, n);
+        }
+        requestAnimationFrame(tick);
+      })(last);
+    }
+
+    function clearRows() {
+      rows2.concat(rows3).forEach(function (r) { r.className = ''; });
+      codeClear();
+      miniSlot.classList.remove('up');
+      miniCap.hidden = true;
+    }
+    var verdict = $('#verdict');
+    function setVerdict(kind, badge, text) {
+      verdict.className = 'verdict' + (kind ? ' ' + kind : '');
+      verdict.innerHTML = '<span class="badge">' + esc(badge) + '</span><span class="vtext">' + text + '</span>';
+    }
+
+    function evaluate() {
+      for (var i = 0; i < F2.length; i++) if (F2[i].hit()) return { f2: i };
+      for (var j = 0; j < F3.length; j++) if (!F3[j].ok()) return { f2: -1, f3: j };
+      return { f2: -1, f3: -1 };
+    }
+
+    function run() {
+      cancelSeq();
+      clearRows();
+      fillMini();
+      var res = evaluate();
+      var steps = [], t = 0, i;
+
+      for (i = 0; i < F2.length; i++) {
+        (function (idx) {
+          steps.push({ at: t, do: function () { rows2[idx].className = 'scan'; codeMark(F2[idx].line, 'on'); } });
+        })(i);
+        t += 55;
+        if (res.f2 === i) {
+          (function (idx) {
+            steps.push({ at: t, do: function () {
+              rows2[idx].className = 'hit';
+              rows2[idx].querySelector('.mark').textContent = '제외 — F2-' + (idx + 1);
+              codeMark(F2[idx].line, 'hit');
+              for (var k = idx + 1; k < rows2.length; k++) rows2[k].className = 'dead';
+              rows3.forEach(function (r) { r.className = 'dead'; });
+              setVerdict('fail', '제외', '<span class="mono">F2-' + (idx + 1) + '</span> ' + esc(F2[idx].label) + ' — 여기서 멈춥니다. 아래 조건은 평가하지 않습니다.');
+            } });
+          })(i);
+          break;
+        }
+        (function (idx) {
+          steps.push({ at: t, do: function () {
+            rows2[idx].className = 'ok';
+            rows2[idx].querySelector('.mark').textContent = '통과';
+          } });
+        })(i);
+      }
+
+      if (res.f2 >= 0) {
+        runSteps(steps, function () {
+          typeLog([
+            { t: '[판정] 주기: 발화 없음 (이벤트 1건)', c: 'lg-t' },
+            { t: '  · [A팀] 주간 리뷰: F2-' + (res.f2 + 1) + ' ' + F2[res.f2].label, c: 'lg-f' }
+          ]);
+        });
+        return;
+      }
+
+      t += 90;
+      for (i = 0; i < F3.length; i++) {
+        (function (idx) { steps.push({ at: t, do: function () { rows3[idx].className = 'scan'; } }); })(i);
+        t += 40;
+        if (res.f3 === i) {
+          (function (idx) {
+            steps.push({ at: t, do: function () {
+              rows3[idx].className = 'hit';
+              rows3[idx].querySelector('.mark').textContent = '멈춤 — F3-' + (idx + 1);
+              for (var k = idx + 1; k < rows3.length; k++) rows3[k].className = 'dead';
+              setVerdict('fail', '발화 없음', 'F2 는 전부 통과했습니다. <span class="mono">F3-' + (idx + 1) + '</span> ' + esc(F3[idx].label) + ' — 상호작용 상태에 걸렸습니다.');
+            } });
+          })(i);
+          break;
+        }
+        (function (idx) {
+          steps.push({ at: t, do: function () { rows3[idx].className = 'ok'; rows3[idx].querySelector('.mark').textContent = '참'; } });
+        })(i);
+      }
+
+      if (res.f3 >= 0) {
+        runSteps(steps, function () {
+          typeLog([
+            { t: '[판정] 주기: 발화 없음 (이벤트 1건)', c: 'lg-t' },
+            { t: '  · [A팀] 주간 리뷰: F3-' + (res.f3 + 1) + ' ' + F3[res.f3].label, c: 'lg-f' }
+          ]);
+        });
+        return;
+      }
+
+      var start = NOW + S.startsInMin * 60;
+      var fire = start - S.policy.leadMin * 60;
+      steps.push({ at: t + 60, do: function () {
+        setVerdict('pass', '발화', '여덟 행을 전부 통과했고 F3 여섯 조건도 참입니다 — 띄웁니다.');
+        miniSlot.classList.add('up');
+        miniCap.hidden = false;
+      } });
+      runSteps(steps, function () {
+        typeLog([
+          { t: '[예정] 1건', c: 'lg-p' },
+          { t: '  → ' + fmtClock(fire) + ' | ' + (S.policy.leadMin * 60) + 's | ' + fmtClock(start) + ' | ev-7c1a | [A팀] 주간 리뷰', c: '' },
+          { t: '[발화] 타이머: 1건 leadTime=' + S.policy.leadMin + '분', c: 'lg-p' }
+        ]);
+      });
+    }
+
+    /* ── 컨트롤 */
+    var oStart = $('#oStart'), oDur = $('#oDur'), sStart = $('#sStart'), sDur = $('#sDur'), stateLine = $('#stateLine');
+    function fmtDur(m) {
+      if (m < 60) return m + '분';
+      var h = Math.floor(m / 60), mm = m % 60;
+      return h + '시간' + (mm ? ' ' + mm + '분' : '');
+    }
+    function syncUI() {
+      $$('[data-flag]').forEach(function (b) { b.setAttribute('aria-checked', S[b.getAttribute('data-flag')] ? 'true' : 'false'); });
+      $$('[data-policy]').forEach(function (b) { b.setAttribute('aria-checked', S.policy[b.getAttribute('data-policy')] ? 'true' : 'false'); });
+      $$('[data-resp]').forEach(function (b) { b.setAttribute('aria-checked', S.response === b.getAttribute('data-resp') ? 'true' : 'false'); });
+      sStart.value = S.startsInMin; sDur.value = S.durIdx;
+      oStart.textContent = S.startsInMin > 0 ? S.startsInMin + '분 뒤' : S.startsInMin === 0 ? '지금' : (-S.startsInMin) + '분 전에 시작';
+      oDur.textContent = fmtDur(dur());
+      stateLine.textContent = 'dismissed ' + (S.dismissed ? '{ev-7c1a, 1분}' : '∅') + ' · joined ' + (S.joined ? '{ev-7c1a}' : '∅');
+    }
+    $$('[data-flag]').forEach(function (b) {
+      b.addEventListener('click', function () { var k = b.getAttribute('data-flag'); S[k] = !S[k]; syncUI(); run(); });
+    });
+    $$('[data-policy]').forEach(function (b) {
+      b.addEventListener('click', function () { var k = b.getAttribute('data-policy'); S.policy[k] = !S.policy[k]; syncUI(); run(); });
+    });
+    $$('[data-resp]').forEach(function (b) {
+      b.addEventListener('click', function () { S.response = b.getAttribute('data-resp'); syncUI(); run(); });
+    });
+    sStart.addEventListener('input', function () { S.startsInMin = parseInt(sStart.value, 10); syncUI(); run(); });
+    sDur.addEventListener('input', function () { S.durIdx = parseInt(sDur.value, 10); syncUI(); run(); });
+
+    var PRESETS = {
+      normal:   { canceled: false, allDay: false, calendarOff: false, response: 'accepted', startsInMin: 1, durIdx: 4 },
+      conf:     { canceled: false, allDay: false, calendarOff: false, response: 'accepted', startsInMin: 1, durIdx: 21 },
+      declined: { canceled: false, allDay: false, calendarOff: false, response: 'declined', startsInMin: 1, durIdx: 4 },
+      ended:    { canceled: false, allDay: false, calendarOff: false, response: 'accepted', startsInMin: -40, durIdx: 4 }
+    };
+    $$('[data-preset]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var p = PRESETS[b.getAttribute('data-preset')];
+        Object.keys(p).forEach(function (k) { S[k] = p[k]; });
+        $$('[data-preset]').forEach(function (x) { x.classList.toggle('on', x === b); });
+        syncUI(); run();
+      });
+    });
+
+    function act(kind) {
+      if (kind === 'esc') { S.dismissed = true; persist.push({ t: '[행동] 닫기 — (ev-7c1a, ' + S.policy.leadMin + '분)', c: 'lg-a' }); }
+      else { S.joined = true; persist.push({ t: '[행동] 참가 — ev-7c1a, 남은 알림 취소', c: 'lg-a' }); }
+      if (persist.length > 4) persist.shift();
+      syncUI(); run();
+    }
+    var mEsc = $('#miniEsc'), mJoin = $('#miniJoin');
+    if (mEsc) mEsc.addEventListener('click', function () { act('esc'); });
+    if (mJoin) mJoin.addEventListener('click', function () { act('join'); });
+    $('#resetState').addEventListener('click', function () {
+      S.dismissed = false; S.joined = false; persist = []; syncUI(); run();
+    });
+
+    syncUI();
+    fillMini();
+    setVerdict('', '대기', '왼쪽 입력을 바꾸거나 프리셋을 눌러 보세요.');
+    once($('#f2'), function () {
+      var b = $$('[data-preset]')[0];
+      if (b) b.classList.add('on');
+      run();
+    }, { threshold: 0.12 });
+  })();
+})();
+</script>
+<script>
+(function () {
+  'use strict';
+  var $  = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var reduced = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)').matches : false;
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+  function io(el, cb, opts) {
+    if (!window.IntersectionObserver) { cb(true); return null; }
+    var o = new IntersectionObserver(function (es) { es.forEach(function (e) { cb(e.isIntersecting, e); }); }, opts || { threshold: 0.2 });
+    o.observe(el); return o;
+  }
+  function once(el, cb, opts) {
+    if (!window.IntersectionObserver) { cb(); return; }
+    var o = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { o.disconnect(); cb(); } });
+    }, opts || { threshold: 0.2 });
+    o.observe(el);
+  }
+
+  /* ───────── 8 F3 로그 스트림 */
+  (function () {
+    var box = $('#logStreamBody');
+    if (!box) return;
+    var LINES = [
+      ['03:04:07', '[권한] 읽기 가능 → 이벤트 캘린더 7개'],
+      ['03:04:07', '[판정] 주기: 발화 없음 (이벤트 41건)'],
+      ['',         '  · 컨퍼런스 (가명): F2-7 장시간 일정'],
+      ['',         '  · 팀 오프사이트 (가명): F2-3 종일 일정'],
+      ['03:19:07', '[판정] 주기: 발화 없음 (이벤트 41건)'],
+      ['04:58:00', '[예정] 1건'],
+      ['',         '  → 04:59:00 | 60s | 05:00:00 | ev-7c1a | [A팀] 데일리'],
+      ['04:59:00', '[발화] 타이머: 1건 leadTime=1분'],
+      ['04:59:00', '[정확도] +0.064초 (한도 +2초)'],
+      ['04:59:38', '[행동] 닫기 — (ev-7c1a, 1분)'],
+      ['05:14:00', '[판정] 주기: 발화 없음 (이벤트 41건)'],
+      ['07:23:00', '[정확도] 4시간 17회 · 최대 +0.064초 · 음수 0회']
+    ];
+    box.innerHTML = LINES.map(function (l) {
+      var cls = '';
+      if (/\[정확도\]/.test(l[1])) cls = ' lg-a';
+      else if (/\[발화\]|\[예정\]/.test(l[1])) cls = ' lg-p';
+      else if (/F2-|F3-/.test(l[1])) cls = ' lg-f';
+      else if (/^\[/.test(l[1].trim())) cls = ' lg-t';
+      return '<div class="lgrow' + cls + '"><span class="ts">' + esc(l[0]) + '</span><span>' + esc(l[1]) + '</span></div>';
+    }).join('');
+    var rows = $$('.lgrow', box);
+    if (reduced) { rows.forEach(function (r) { r.classList.add('in'); }); return; }
+    var timers = [], playing = false;
+    function stop() { timers.forEach(clearTimeout); timers = []; playing = false; }
+    function play() {
+      if (playing) return;
+      playing = true;
+      rows.forEach(function (r) { r.classList.remove('in'); });
+      rows.forEach(function (r, i) { timers.push(setTimeout(function () { r.classList.add('in'); }, 120 + i * 260)); });
+      timers.push(setTimeout(function () { playing = false; play(); }, 120 + rows.length * 260 + 3000));
+    }
+    var inView = false;
+    function maybe() { if (inView && !document.hidden) play(); else stop(); }
+    io(box, function (v) { inView = v; maybe(); }, { threshold: 0.35 });
+    document.addEventListener('visibilitychange', maybe);
+  })();
+
+  /* ───────── 정확도 도식 */
+  (function () {
+    var wrap = $('#accChart'), g = $('#accTicks');
+    if (!wrap || !g) return;
+    var s = '';
+    for (var i = 0; i < 17; i++) {
+      var x = 56 + (568 / 16) * i;
+      s += '<line class="mtick" x1="' + x.toFixed(1) + '" y1="186" x2="' + x.toFixed(1) + '" y2="179.5"></line>';
+    }
+    g.innerHTML = s;
+    once(wrap, function () { wrap.classList.add('in'); }, { threshold: 0.25 });
+  })();
+
+  /* ───────── 9 F4 — 실측 표 · 영상 */
+  (function () {
+    var rows = $$('#measTable tr.reveal');
+    rows.forEach(function (r, i) {
+      var v = r.querySelector('.v');
+      once(r, function () {
+        setTimeout(function () {
+          v.textContent = v.getAttribute('data-v');
+          v.classList.add('set');
+          r.classList.add('in');
+        }, reduced ? 0 : i * 400);
+      }, { threshold: 0.6 });
+    });
+
+    var vid = $('#standbyVid');
+    if (!vid) return;
+    if (reduced) { vid.setAttribute('controls', ''); return; }
+    io(vid, function (v) {
+      if (v) { if (vid.preload === 'none') vid.preload = 'auto'; var p = vid.play(); if (p && p.catch) p.catch(function () { vid.setAttribute('controls', ''); }); }
+      else { vid.pause(); }
+    }, { threshold: 0.25 });
+  })();
+
+  /* ───────── 10 배경 — 살아 있는 층 */
+  (function () {
+    var box = $('#liveBox'), cv = $('#liveCanvas'), hud = $('#liveHud'), tag = $('#liveTag'),
+        list = $('#stackList'), stackTheme = $('#stackTheme'), cap = $('#liveCap');
+    if (!box || !cv || !window.UNBackdrop) return;
+
+    var STACK = {
+      ember: [
+        ['[뒤] sky — 세로 그라디언트', '—'],
+        ['hearth — 아래에서 올라오는 화로 빛', '0.12'],
+        ['core — 흔들리는 불꽃 심', '0.15'],
+        ['hearth bloom ×3', '—'],
+        ['빛덩이 ×2 (radial)', '0.20'],
+        ['열기 광선 (rayField)', '0.30'],
+        ['열기 아지랑이 ×2', '0.45'],
+        ['불씨 ×3 — 먼/가까운/영웅', '0.70'],
+        ['불꽃 24개 (glowDot)', '—'],
+        ['[살아 있는 층] 먼지 320 + 별 14', '카메라'],
+        ['flash → scrim pocket → [글자]', '—']
+      ],
+      astra: [
+        ['[뒤] sky — 거의 검정', '—'],
+        ['먼 별밭 (starfield)', '0.22'],
+        ['먼 안개 (wisps)', '0.42'],
+        ['성운 (emissionNebula)', '0.62'],
+        ['십자 반짝임 26개', '0.62'],
+        ['공동의 광선 36줄', '0.62'],
+        ['공동의 광원 bloom ×3', '0.62'],
+        ['[살아 있는 층] 먼지 900 + 별 34', '카메라'],
+        ['flash → scrim pocket → [글자]', '—']
+      ],
+      fable: [
+        ['[뒤] sky — 라벤더 → 살구 3정지점', '—'],
+        ['해 bloom ×3 — 수평선 아래', '0.10'],
+        ['달 — 구름 뒤', '0.20'],
+        ['먼 구름 ×3', '0.28'],
+        ['박명광선 (rayField)', '0.30'],
+        ['중간 구름 ×3', '0.50'],
+        ['가까운 구름 ×2', '0.85'],
+        ['나뭇가지 ×2', '0.80 / 1.0'],
+        ['[살아 있는 층] 먼지 240 + 별 12 + 새', '카메라'],
+        ['flash → scrim pocket → [글자]', '—']
+      ]
+    };
+    var TONE_KO = { ahead: '여유', imminent: '1분 이내', started: '시작됨' };
+
+    var bd = UNBackdrop.createBackdrop(cv, {
+      theme: 'ember', tone: 'ahead', scrim: false, quality: 0.85,
+      interactive: true, pointerTarget: box, seed: 20260918
+    });
+
+    function paintStack(theme) {
+      var rows = STACK[theme] || STACK.ember;
+      list.innerHTML = rows.map(function (r) {
+        var live = /살아 있는 층/.test(r[0]);
+        var top = /글자/.test(r[0]);
+        return '<li class="' + (live ? 'live' : top ? 'top' : '') + '"><span>' + esc(r[0]) + '</span><span class="d">' + esc(r[1]) + '</span></li>';
+      }).join('');
+      stackTheme.textContent = UNBackdrop.THEMES[theme].name;
+    }
+    function paintHud(theme) {
+      var L = UNBackdrop.THEMES[theme].living;
+      hud.innerHTML = 'motes <b>' + L.motes + '</b> · parallax <b>' + L.parallax + '</b> · swirl <b>' + L.swirl + '</b> · gustReach <b>' + L.gust + '</b>';
+    }
+    function paintTag() {
+      tag.textContent = UNBackdrop.THEMES[bd.theme].name + ' · ' + TONE_KO[bd.tone];
+    }
+    paintStack('ember'); paintHud('ember'); paintTag();
+
+    $$('[data-bd-theme]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var t = b.getAttribute('data-bd-theme');
+        $$('[data-bd-theme]').forEach(function (x) { x.classList.toggle('on', x === b); });
+        bd.setTheme(t); paintStack(t); paintHud(t); paintTag();
+      });
+    });
+    $$('[data-bd-tone]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        $$('[data-bd-tone]').forEach(function (x) { x.classList.toggle('on', x === b); });
+        bd.setTone(b.getAttribute('data-bd-tone')); paintTag();
+      });
+    });
+
+    box.addEventListener('pointerenter', function () { list.classList.add('hot'); });
+    box.addEventListener('pointerleave', function () { list.classList.remove('hot'); });
+
+    if (reduced && cap) {
+      cap.textContent = '움직임을 줄이도록 설정돼 있어 정지 화면을 보여줍니다. 테마와 남은 시간은 그대로 바꿔 볼 수 있습니다.';
+    }
+  })();
+
+  /* ───────── 11 F12 터미널 */
+  (function () {
+    var term = $('#term'), body = $('#termBody');
+    if (!term || !body) return;
+    var CMD1 = '$ lsof -i -a -p $(pgrep -x Untillity)';
+    var CMD2 = '$ nettop -P -x -l 1 -p $(pgrep -x Untillity)';
+    var OUT = 'time,,bytes_in,bytes_out,';
+    var TAIL = '(헤더만 나옵니다. 행 0개)';
+
+    function render(a, b, showOut) {
+      var h = '<span class="pr">' + esc(a) + '</span>';
+      if (b !== null) h += '\n<span class="pr">' + esc(b) + '</span>';
+      if (showOut) h += '\n<span class="out">' + esc(OUT) + '</span>\n<span class="hi">' + esc(TAIL) + '</span>';
+      body.innerHTML = h;
+    }
+    function done() { render(CMD1, CMD2, true); }
+    if (reduced) { done(); }
+    else {
+      once(term, function () {
+        var i = 0, stage = 0, last = 0;
+        function frame(t) {
+          if (!last) last = t;
+          if (t - last >= 28) {
+            last = t; i++;
+            if (stage === 0) {
+              if (i > CMD1.length) { stage = 1; i = 0; }
+              else render(CMD1.slice(0, i), null, false);
+            } else {
+              if (i > CMD2.length) { done(); return; }
+              render(CMD1, CMD2.slice(0, i), false);
+            }
+          }
+          requestAnimationFrame(frame);
+        }
+        requestAnimationFrame(frame);
+      }, { threshold: 0.4 });
+    }
+
+    var btn = $('#copyCmd'), lab = $('#copyLabel');
+    btn.addEventListener('click', function () {
+      var text = CMD1.slice(2) + '\n' + CMD2.slice(2);
+      var ok = function () {
+        lab.textContent = '복사됨';
+        setTimeout(function () { lab.textContent = '복사'; }, 1200);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(ok, function () { fallback(text, ok); });
+      } else fallback(text, ok);
+    });
+    function fallback(text, ok) {
+      var ta = document.createElement('textarea');
+      ta.value = text; ta.setAttribute('readonly', '');
+      ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+      document.body.appendChild(ta); ta.select();
+      try { document.execCommand('copy'); ok(); } catch (e) { lab.textContent = '복사 실패'; }
+      document.body.removeChild(ta);
+    }
+  })();
+
+  /* ───────── 12 테스트 막대 */
+  (function () {
+    var wrap = $('#testBars');
+    if (!wrap) return;
+    var DATA = [
+      ['AlertEngineTests', 26, 'AlertEngine — 오케스트레이터'],
+      ['CalendarSourceTests', 19, 'F1 조회 · 계정 판정'],
+      ['AlertSchedulerTests', 18, 'F3 스케줄 · 타이머 재무장'],
+      ['EventFilterTests', 16, 'F2 제외 조건표 8행'],
+      ['SnoozeOptionsTests', 16, 'F3 스누즈 7종'],
+      ['ValueTypeTests', 15, '값 타입 · EventKey'],
+      ['MeetingLinkParserTests', 14, '§6 회의 링크 추출'],
+      ['AlertTextTests', 11, '알림 문구 조립'],
+      ['StandbyTests', 11, 'F14 대기 화면'],
+      ['Phase5bTests', 10, 'Phase 5b 회귀'],
+      ['Phase6EdgeCaseTests', 9, 'Phase 6 경계'],
+      ['AlertStateTests', 8, 'F3 상호작용 상태'],
+      ['AccessNoticeTests', 7, 'F1.10 권한 안내']
+    ];
+    var max = 26;
+    wrap.innerHTML = DATA.map(function (d, i) {
+      var key = i < 4 && d[0] !== 'EventFilterTests' ? false : false;
+      var isKey = (d[0] === 'AlertEngineTests' || d[0] === 'EventFilterTests' || d[0] === 'AlertSchedulerTests');
+      return '<div class="bar' + (isKey ? ' key' : '') + '" style="--dly:' + (i * 45) + 'ms">' +
+        '<span class="fn">' + esc(d[0]) + '</span>' +
+        '<span class="track"><i class="fill" style="--w:' + ((d[1] / max) * 100).toFixed(1) + '%"></i></span>' +
+        '<span class="cover">' + esc(d[2]) + '</span>' +
+        '<span class="ct">' + d[1] + '</span></div>';
+    }).join('');
+    once(wrap, function () { wrap.classList.add('in'); }, { threshold: 0.15 });
+  })();
+
+  /* ───────── 13 기록 타임라인 */
+  (function () {
+    var tl = $('#timeline'), fill = $('#axisFill');
+    if (!tl) return;
+    $$('.jcard', tl).forEach(function (c) { once(c, function () { c.classList.add('in'); }, { threshold: 0.2 }); });
+    if (!fill || reduced) { if (fill) fill.style.height = '100%'; return; }
+    var tick = false;
+    function upd() {
+      var r = tl.getBoundingClientRect();
+      var p = clamp((window.innerHeight * 0.65 - r.top) / Math.max(1, r.height), 0, 1);
+      fill.style.height = (p * 100).toFixed(2) + '%';
+    }
+    window.addEventListener('scroll', function () {
+      if (tick) return; tick = true;
+      requestAnimationFrame(function () { upd(); tick = false; });
+    }, { passive: true });
+    upd();
+  })();
+
+  /* ───────── 14 설치 — 경고 박스와 단계 */
+  (function () {
+    var warn = $('#warnBox');
+    if (warn) once(warn, function () { warn.classList.add('in'); }, { threshold: 0.4 });
+
+    var steps = $$('#steps li');
+    if (!steps.length) return;
+    var tick = false;
+    function upd() {
+      var line = window.innerHeight * 0.55, cur = -1;
+      steps.forEach(function (li, i) {
+        var r = li.getBoundingClientRect();
+        if (r.top <= line) cur = i;
+      });
+      steps.forEach(function (li, i) {
+        li.classList.toggle('lit', i === cur);
+        li.classList.toggle('done', i < cur);
+      });
+    }
+    window.addEventListener('scroll', function () {
+      if (tick) return; tick = true;
+      requestAnimationFrame(function () { upd(); tick = false; });
+    }, { passive: true });
+    upd();
+  })();
+})();
+</script>
+
+<!-- 시안 전환 띠 — 초안 비교용. 하나를 고르면 통째로 지운다. -->
+<style>
+#un-switch{position:fixed;right:14px;bottom:14px;z-index:2147483000;
+ display:flex;align-items:center;gap:2px;padding:5px;border-radius:999px;
+ background:rgba(14,14,16,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+ border:1px solid rgba(255,255,255,.16);box-shadow:0 10px 34px -14px rgba(0,0,0,.85);
+ font:500 12px/1 -apple-system,BlinkMacSystemFont,"Noto Sans KR",system-ui,sans-serif;
+ max-width:calc(100vw - 28px);overflow:hidden;
+ transition:opacity .3s cubic-bezier(.22,.61,.36,1)}
+#un-switch .un-list{display:flex;align-items:center;gap:2px;max-width:0;overflow:hidden;
+ opacity:0;transition:max-width .45s cubic-bezier(.22,.61,.36,1),opacity .3s}
+#un-switch:hover .un-list,#un-switch:focus-within .un-list{max-width:min(62vw,560px);opacity:1}
+#un-switch a{color:rgba(255,255,255,.74);text-decoration:none;padding:7px 11px;border-radius:999px;
+ white-space:nowrap;transition:background .22s,color .22s}
+#un-switch a:hover{color:#fff;background:rgba(255,255,255,.12)}
+#un-switch a[aria-current]{color:#0b0b0c;background:#f2f0ec}
+#un-switch .un-tag{color:rgba(255,255,255,.5);padding:7px 10px;white-space:nowrap;letter-spacing:.06em}
+@media print{#un-switch{display:none}}
+@media (prefers-reduced-motion:reduce){#un-switch .un-list{transition:none}}
+</style>
+<nav id="un-switch" aria-label="시안 전환" tabindex="0">
+  <span class="un-tag" aria-hidden="true">시안</span>
+  <span class="un-list"><a href="../">목록</a><a href="../theatre/">극장</a><a href="../specimen/">표본실</a><a href="../spec/" aria-current="page">사양서</a><a href="../zine/">석간</a><a href="../playable/">만져 보는 것</a></span>
+</nav>
+</body>
+</html>

@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>언틸리티 소개 페이지 — 시안 다섯</title>
+<meta name="description" content="macOS 앱 언틸리티의 공개 소개 페이지 시안 다섯 개. 같은 제품을 다섯 가지 방식으로 말한다.">
+<meta name="robots" content="noindex">
+<meta property="og:title" content="언틸리티 — 소개 페이지 시안 다섯">
+<meta property="og:description" content="같은 제품을 다섯 가지 방식으로 말한다. 고르는 것은 한 개.">
+<meta property="og:image" content="assets/og.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta property="og:type" content="website">
+<link rel="icon" href="assets/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme: dark;
+    --ink:#f3f1ee;
+    --dim:rgba(243,241,238,.62);
+    --faint:rgba(243,241,238,.34);
+    --line:rgba(243,241,238,.14);
+    --accent:#a8ebf7;
+    --bg:#08090a;
+    --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:"Noto Sans KR",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+    --ease:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:var(--sans); font-weight:300;
+    -webkit-font-smoothing:antialiased;
+    line-height:1.7; overflow-x:hidden;
+  }
+  a{color:inherit}
+
+  /* 머리 — 배경이 살아 있다. 이 페이지도 그 앱의 일부처럼 보여야 한다. */
+  .top{position:relative; min-height:62vh; display:flex; align-items:flex-end; overflow:hidden; padding:0 0 clamp(36px,6vw,80px)}
+  .top canvas{position:absolute; inset:0; width:100%; height:100%; display:block}
+  /* 캔버스가 뚝 끊기면 잘린 사진처럼 보인다. 아래로 녹여 본문 배경에 잇는다. */
+  .top::after{
+    content:""; position:absolute; left:0; right:0; bottom:0; height:38%;
+    background:linear-gradient(180deg,rgba(8,9,10,0) 0%,rgba(8,9,10,.55) 55%,var(--bg) 100%);
+    pointer-events:none; z-index:1;
+  }
+  .top .inner{position:relative; z-index:2; width:min(1180px,calc(100% - 48px)); margin:0 auto}
+  .eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--faint); margin:0 0 18px}
+  h1{
+    margin:0; font-weight:700; letter-spacing:-.035em;
+    font-size:clamp(34px,6.4vw,76px); line-height:1.08;
+    text-shadow:0 2px 40px rgba(0,0,0,.55);
+  }
+  h1 em{font-style:normal; color:var(--accent)}
+  .lede{margin:20px 0 0; max-width:46ch; color:var(--dim); font-size:clamp(15px,1.5vw,18px); text-shadow:0 1px 20px rgba(0,0,0,.5)}
+
+  /* 본문 */
+  .wrap{width:min(1180px,calc(100% - 48px)); margin:0 auto}
+  .note{
+    margin:clamp(40px,6vw,72px) auto 0; padding:18px 20px;
+    border:1px solid var(--line); border-radius:14px;
+    font-size:14px; color:var(--dim); background:rgba(255,255,255,.022);
+  }
+  .note b{color:var(--ink); font-weight:500}
+  .note ul{margin:10px 0 0; padding-left:18px}
+  .note li{margin:4px 0}
+
+  .grid{
+    display:grid; gap:18px; margin:clamp(28px,4vw,44px) 0 0;
+    grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));
+  }
+  .card{
+    position:relative; display:flex; flex-direction:column;
+    min-height:300px; border-radius:18px; overflow:hidden;
+    border:1px solid var(--line); text-decoration:none;
+    background:#0c0d0f;
+    transition:transform .5s var(--ease), border-color .5s var(--ease), box-shadow .5s var(--ease);
+  }
+  .card:hover,.card:focus-visible{
+    transform:translateY(-4px);
+    border-color:rgba(243,241,238,.34);
+    box-shadow:0 22px 60px -28px rgba(0,0,0,.95);
+  }
+  .card:focus-visible{outline:2px solid var(--accent); outline-offset:3px}
+  .card canvas{position:absolute; inset:0; width:100%; height:100%; display:block}
+  .card .veil{position:absolute; inset:0; background:linear-gradient(180deg,rgba(6,7,8,.16) 0%,rgba(6,7,8,.62) 54%,rgba(6,7,8,.93) 100%)}
+  .card .body{position:relative; z-index:2; margin-top:auto; padding:22px}
+  .no{font-family:var(--mono); font-size:11px; letter-spacing:.2em; color:var(--faint); display:block; margin-bottom:10px}
+  .card h2{margin:0; font-size:21px; font-weight:700; letter-spacing:-.02em; line-height:1.3}
+  .card p{margin:9px 0 0; font-size:13.5px; line-height:1.65; color:var(--dim)}
+  .go{display:inline-flex; align-items:center; gap:7px; margin-top:16px; font-size:13px; font-weight:500; color:var(--ink)}
+  .go svg{transition:transform .4s var(--ease)}
+  .card:hover .go svg{transform:translateX(4px)}
+
+  footer{margin:clamp(48px,7vw,96px) 0 clamp(40px,6vw,72px); padding-top:26px; border-top:1px solid var(--line); color:var(--faint); font-size:13px}
+  footer p{margin:0 0 6px}
+  code{font-family:var(--mono); font-size:.92em; color:var(--dim)}
+
+  @media (max-width:640px){
+    .top{min-height:56vh}
+    .card{min-height:250px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .card{transition:none}
+    .card:hover{transform:none}
+  }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <canvas id="sky" aria-hidden="true"></canvas>
+  <div class="inner">
+    <p class="eyebrow">Untillity · 소개 페이지 초안</p>
+    <h1>같은 제품을<br>다섯 가지로 <em>말해 봤습니다</em></h1>
+    <p class="lede">
+      macOS 앱 <b>언틸리티</b>의 공개 소개 페이지 시안입니다. 담은 사실은 모두 같고
+      — 말하는 방식만 다릅니다. 하나를 고르면 그것을 끝까지 다듬습니다.
+    </p>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <div class="note">
+    <b>읽기 전에</b>
+    <ul>
+      <li>다섯 페이지의 <b>스크린샷과 영상은 전부 실제 앱 화면</b>입니다. 회의 제목·캘린더 이름만 가짜입니다.</li>
+      <li>수치와 주장은 저장소의 <code>SPEC.md</code>·<code>PROGRESS.md</code> 실측 기록에서 가져왔습니다.</li>
+      <li><b>다운로드 버튼은 아직 살아 있지 않습니다.</b> 0.3.0 릴리스를 공개하면 그때 연결합니다.</li>
+      <li>배경은 이미지가 아니라 앱의 배경 코드를 옮긴 Canvas 입니다. <b>마우스를 움직여 보세요.</b></li>
+    </ul>
+  </div>
+
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    <p>언틸리티 · Untillity — <code>until</code> + <code>utility</code></p>
+    <p>회의를 놓치지 않게, 화면을 통째로 덮는 macOS 앱.</p>
+  </footer>
+</main>
+
+<script src="assets/backdrop.js"></script>
+<script>
+(function(){
+  var DRAFTS = [
+    { dir:'theatre',  theme:'ember',  name:'극장',
+      line:'스크롤이 곧 남은 시간이다. 5분 → 1분 → 0 → 시작됨. 화면이 실제로 그때의 색으로 변하고, 마지막엔 페이지가 알림이 된다.' },
+    { dir:'specimen', theme:'astra',  name:'표본실',
+      line:'앱을 도감의 판(plate)으로 전시한다. 미색 종이 위에서 화면만이 유일한 빛이고, 마우스를 올리면 열 겹이 분해되어 뒤로 물러난다.' },
+    { dir:'spec',     theme:'astra',  name:'사양서',
+      line:'랜딩 페이지인 척하지 않는다. 조판된 사양서다. 조항 번호, 실측 각주, 그리고 브라우저에서 직접 돌려 보는 F2 판정기.' },
+    { dir:'zine',     theme:'fable',  name:'석간',
+      line:'한 부의 발행물로 조판했다. 살구빛 지면, 명조 표제, 여백의 방주. 제품 페이지라기보다 한 편의 글처럼 읽힌다.' },
+    { dir:'playable', theme:'ember',  name:'만져 보는 것',
+      line:'페이지 자체가 데모다. 앱의 화면을 브라우저에 다시 지었다. 테마를 바꾸고, 회의를 넘기고, 끝내 이 페이지에 덮여 본다.' }
+  ];
+
+  var grid = document.getElementById('grid');
+  var frag = document.createDocumentFragment();
+
+  DRAFTS.forEach(function(d, i){
+    var a = document.createElement('a');
+    a.className = 'card';
+    a.href = d.dir + '/';
+    a.innerHTML =
+      '<canvas aria-hidden="true"></canvas>' +
+      '<div class="veil"></div>' +
+      '<div class="body">' +
+        '<span class="no">시안 ' + String(i+1).padStart(2,'0') + ' · ' + d.theme + '</span>' +
+        '<h2>' + d.name + '</h2>' +
+        '<p>' + d.line + '</p>' +
+        '<span class="go">열기' +
+          '<svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">' +
+          '<path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>' +
+        '</span>' +
+      '</div>';
+    frag.appendChild(a);
+  });
+  grid.appendChild(frag);
+
+  if (!window.UNBackdrop) return;
+
+  UNBackdrop.createBackdrop(document.getElementById('sky'), {
+    theme: 'astra', tone: 'ahead', scrim: false, pointerTarget: document.body, seed: 20260918
+  });
+
+  // 카드마다 작은 하늘. 작으니 먼지는 절반만.
+  var canvases = grid.querySelectorAll('.card canvas');
+  DRAFTS.forEach(function(d, i){
+    UNBackdrop.createBackdrop(canvases[i], {
+      theme: d.theme, tone: 'ahead', scrim: false, quality: 0.5, seed: 1000 + i * 77
+    });
+  });
+})();
+</script>
+</body>
+</html>

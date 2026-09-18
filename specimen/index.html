@@ -1,0 +1,2531 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex"><!-- 초안. 하나를 고르면 이 줄을 지운다 -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>언틸리티 — 표본실</title>
+<meta name="description" content="회의를 놓치지 않게 화면을 통째로 덮는 macOS 앱, 언틸리티. 알림 화면 한 장을 열한 겹으로 분해해 놓은 표본 도감.">
+<meta name="color-scheme" content="light">
+<meta property="og:type" content="website">
+<meta property="og:title" content="언틸리티 — 표본실">
+<meta property="og:description" content="한 장처럼 보이지만 열한 겹입니다. 판 사이의 간격은 앱이 실제로 쓰는 depth 값 그대로입니다.">
+<meta property="og:image" content="../assets/alert-ember.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/icon.png">
+<link rel="apple-touch-icon" href="../assets/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@300;400;500;600&family=Noto+Serif+KR:wght@200;300;600&display=swap">
+<style>
+/* ===================================================================
+   언틸리티 — 표본실 (판 시리즈)
+   지면은 종이다. 색과 어둠은 표본 안에만 있다.
+   =================================================================== */
+
+:root{
+  /* --- 지면 --- */
+  --paper:#F2EFE9;
+  --paper-sunk:#E9E5DC;
+  --card:#FBFAF7;
+  --ink:#17171A;
+  --ink-2:#4C4C52;
+  --ink-3:#8C897F;
+  --rule:#CFC9BC;
+  --hair:#E0DBD0;
+  --caution:#A33B16;
+  --vitrine:#0B0A0D;
+
+  /* --- 표본 안의 색 (앱 정본) --- */
+  --ember:#FFB829;
+  --astra:#57D1EB;
+  --fable:#573375;
+
+  /* --- 활자 --- */
+  --serif:"Noto Serif KR", ui-serif, Georgia, serif;
+  --sans:"IBM Plex Sans KR", system-ui, -apple-system, "Helvetica Neue", sans-serif;
+  --mono:"IBM Plex Mono", "IBM Plex Sans KR", ui-monospace, SFMono-Regular, monospace;
+
+  --t-display:clamp(38px, 7.2vw, 96px);
+  --t-h2:clamp(30px, 4.4vw, 56px);
+  --t-h3:clamp(24px, 2.9vw, 40px);
+  --t-h4:clamp(20px, 1.9vw, 28px);
+  --t-h5:clamp(18px, 1.5vw, 22px);
+  --t-body:clamp(16px, 1.15vw, 19px);
+  --t-body-s:clamp(15px, 1vw, 17px);
+  --t-15:15px;
+  --t-13:13px;
+  --t-12:12px;
+  --t-11:11px;
+  --t-10:10px;
+
+  /* --- 간격 --- */
+  --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px; --sp-5:24px;
+  --sp-6:32px; --sp-7:48px; --sp-8:64px; --sp-9:96px;
+  --sec:clamp(80px, 9.5vw, 136px);
+  --sec-wide:clamp(104px, 13vw, 176px);
+  --gut:clamp(16px, 4vw, 72px);
+  --measure:1400px;
+
+  /* --- 움직임 --- */
+  --ease:cubic-bezier(.16,.9,.3,1);
+  --ease-io:cubic-bezier(.62,.02,.34,1);
+  --ease-soft:cubic-bezier(.33,.72,.28,1);
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+
+html{
+  -webkit-text-size-adjust:100%;
+  overflow-x:clip;
+  scroll-behavior:smooth;
+}
+
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:var(--sans);
+  font-size:var(--t-body);
+  font-weight:400;
+  line-height:1.72;
+  word-break:keep-all;
+  overflow-wrap:anywhere;
+  overflow-x:clip;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+
+@media (prefers-reduced-motion: reduce){
+  html{ scroll-behavior:auto; }
+  *,*::before,*::after{ animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; }
+}
+
+img,video,canvas,svg{ display:block; max-width:100%; }
+a{ color:inherit; }
+button{ font:inherit; color:inherit; }
+
+:focus-visible{
+  outline:2px solid var(--ink);
+  outline-offset:3px;
+  border-radius:2px;
+}
+
+::selection{ background:rgba(163,59,22,.16); }
+
+.skip{
+  position:absolute; left:-9999px; top:0; z-index:99;
+  background:var(--ink); color:var(--paper); padding:10px 16px;
+  font-family:var(--mono); font-size:var(--t-12);
+}
+.skip:focus{ left:var(--sp-4); top:var(--sp-4); }
+
+/* --- 뼈대 ------------------------------------------------------- */
+
+.wrap{
+  width:100%;
+  max-width:var(--measure);
+  margin-inline:auto;
+  padding-inline:var(--gut);
+}
+.wrap--wide{ --measure:1480px; }
+
+.plate{
+  padding-block:var(--sec);
+  border-top:1px solid var(--rule);
+}
+.plate:first-of-type{ border-top:0; }
+
+.grid12{
+  display:grid;
+  grid-template-columns:repeat(12,minmax(0,1fr));
+  gap:clamp(24px,2.8vw,42px);
+}
+
+/* --- 활자 ------------------------------------------------------- */
+
+.eyebrow{
+  font-family:var(--mono);
+  font-size:var(--t-11);
+  font-weight:500;
+  letter-spacing:.16em;
+  line-height:1.5;
+  color:var(--ink-3);
+  text-transform:none;
+  margin:0 0 var(--sp-5);
+}
+.eyebrow b{ color:var(--ink-2); font-weight:500; }
+
+h1,h2,h3,h4{
+  font-family:var(--serif);
+  font-weight:300;
+  letter-spacing:normal;
+  text-wrap:balance;
+  margin:0;
+}
+h1{ font-size:var(--t-display); font-weight:200; line-height:1.28; }
+h2{ font-size:var(--t-h2); font-weight:200; line-height:1.32; }
+h3{ font-size:var(--t-h3); font-weight:300; line-height:1.38; }
+h4{ font-size:var(--t-h4); font-weight:300; line-height:1.45; }
+@media (max-width:760px){
+  h1{ font-weight:300; }
+  h2{ font-weight:300; }
+}
+
+.lede{ font-size:var(--t-body); color:var(--ink-2); max-width:52ch; margin:var(--sp-5) 0 0; font-weight:300; }
+.lede p{ margin:0 0 var(--sp-4); }
+.lede p:last-child{ margin-bottom:0; }
+.lede strong{ font-weight:500; color:var(--ink); }
+
+.note{
+  font-size:var(--t-13);
+  line-height:1.66;
+  color:var(--ink-3);
+  max-width:64ch;
+  font-weight:300;
+}
+.note code{ font-family:var(--mono); font-size:.94em; }
+
+.mono{ font-family:var(--mono); font-variant-numeric:tabular-nums; }
+.num{ font-variant-numeric:tabular-nums; }
+
+.kicker{
+  font-family:var(--serif);
+  font-size:var(--t-h3);
+  font-weight:200;
+  line-height:1.4;
+  text-wrap:balance;
+}
+
+/* --- 러닝헤드 --------------------------------------------------- */
+
+.runhead{
+  border-bottom:1px solid var(--rule);
+  padding-block:var(--sp-3);
+  display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4);
+  font-family:var(--mono);
+  font-size:var(--t-12);
+  letter-spacing:.16em;
+  color:var(--ink-3);
+  line-height:1;
+}
+.runhead__left{ display:flex; align-items:center; gap:var(--sp-3); }
+.runhead img{ width:20px; height:20px; border-radius:4px; }
+.runhead__right{ white-space:nowrap; }
+@media (max-width:640px){
+  .runhead{ font-size:var(--t-10); letter-spacing:.12em; }
+}
+
+/* --- 표본 액자 -------------------------------------------------- */
+
+.vitrine{
+  position:relative;
+  border:1px solid var(--rule);
+  background:var(--vitrine);
+  padding:8px;
+}
+.vitrine__inner{
+  position:relative;
+  overflow:hidden;
+  background:#000;
+}
+/* 네 모서리 등록 표시 — 액자 바깥 14px */
+.reg{ position:absolute; width:9px; height:9px; pointer-events:none; opacity:.9; }
+.reg::before,.reg::after{ content:''; position:absolute; background:var(--rule); }
+.reg::before{ left:0; top:4px; width:9px; height:1px; }
+.reg::after{ left:4px; top:0; width:1px; height:9px; }
+.reg--tl{ left:-15px; top:-15px; }
+.reg--tr{ right:-15px; top:-15px; }
+.reg--bl{ left:-15px; bottom:-15px; }
+.reg--br{ right:-15px; bottom:-15px; }
+
+.caption{
+  margin-top:var(--sp-3);
+  font-family:var(--mono);
+  font-size:var(--t-10);
+  letter-spacing:.04em;
+  color:var(--ink-3);
+  line-height:1.6;
+}
+
+/* 눈금 자 */
+.ruler{
+  margin-top:var(--sp-3);
+  display:grid; grid-template-columns:1fr auto 1fr; align-items:center; gap:var(--sp-3);
+  font-family:var(--mono); font-size:var(--t-10); letter-spacing:.08em; color:var(--ink-3);
+}
+.ruler::before,.ruler::after{
+  content:''; height:5px; border-top:1px solid var(--rule);
+  border-left:1px solid var(--rule); border-right:1px solid var(--rule);
+}
+
+/* --- 표본 무대 (판 스택) ---------------------------------------- */
+
+.stage{
+  position:relative;
+  perspective:1800px;
+  perspective-origin:50% 44%;
+}
+.deck{
+  position:relative;
+  width:100%;
+  aspect-ratio:1.6 / 1;
+  transform-style:preserve-3d;
+  transform:rotateX(calc(-16deg * var(--e,0))) rotateY(calc(26deg * var(--e,0))) rotateX(var(--px,0deg)) rotateY(var(--py,0deg));
+}
+.deck--flat{ transform:rotateX(var(--px,0deg)) rotateY(var(--py,0deg)); }
+
+.pl{
+  position:absolute; inset:0;
+  transform:translateZ(calc((var(--z) - 280 + var(--boost,0)) * var(--e,0) * 1px));
+  transition:opacity .34s var(--ease);
+  backface-visibility:hidden;
+}
+.pl canvas,.pl .fill{ position:absolute; inset:0; width:100%; height:100%; }
+.pl--add{ mix-blend-mode:screen; }
+
+/* 판 테두리 + 모서리 tick — e 에 비례해 나타난다 */
+.pl__edge{
+  position:absolute; inset:0; pointer-events:none;
+  opacity:var(--e,0);
+  box-shadow:0 0 0 1px rgba(23,23,26,.30), inset 0 0 0 1px rgba(255,255,255,.18);
+}
+.pl__edge::before,.pl__edge::after{
+  content:''; position:absolute; width:13px; height:13px;
+  filter:drop-shadow(0 0 1px rgba(242,239,233,.9));
+}
+.pl__edge::before{
+  left:-2px; top:-2px;
+  border-left:1px solid rgba(23,23,26,.85);
+  border-top:1px solid rgba(23,23,26,.85);
+}
+.pl__edge::after{
+  right:-2px; bottom:-2px;
+  border-right:1px solid rgba(23,23,26,.85);
+  border-bottom:1px solid rgba(23,23,26,.85);
+}
+.anchor{ position:absolute; right:0; top:0; width:0; height:0; }
+
+.deck[data-solo] .pl{ opacity:.28 !important; }
+.deck[data-solo] .pl.is-solo{ opacity:1 !important; --boost:46; }
+
+/* 개별 판의 그림 (엠버 · ahead — 비주얼 정본 webRecreationNotes) */
+.pl-sky{ background:linear-gradient(180deg,#17141C 0%,#291C21 100%); }
+.pl-hearth{
+  position:absolute; left:0; right:0; bottom:0; height:60%;
+  background:linear-gradient(0deg, rgba(140,51,61,.50) 0%, rgba(140,51,61,.145) 38%, rgba(140,51,61,0) 100%);
+}
+.pl-core{
+  position:absolute; left:0; right:0; bottom:0; height:20%;
+  background:linear-gradient(0deg, rgba(203,110,58,.40) 0%, rgba(203,110,58,.13) 30%, rgba(203,110,58,0) 100%);
+}
+.pl-bloom{
+  background:
+    radial-gradient(ellipse 14.3% 22.9% at 50% 108%, rgba(225,191,180,.347) 0%, rgba(225,191,180,.132) 32%, rgba(225,191,180,0) 100%),
+    radial-gradient(ellipse 30.3% 48.4% at 50% 108%, rgba(203,143,123,.248) 0%, rgba(203,143,123,.094) 32%, rgba(203,143,123,0) 100%),
+    radial-gradient(ellipse 55% 88% at 50% 108%, rgba(180,96,67,.173) 0%, rgba(180,96,67,.066) 32%, rgba(180,96,67,0) 100%);
+}
+.pl-orbs{
+  background:
+    radial-gradient(ellipse 60% 96% at 26% 66%, rgba(140,51,61,.55) 0%, rgba(140,51,61,.209) 42%, rgba(140,51,61,0) 100%),
+    radial-gradient(ellipse 52% 83% at 80% 30%, rgba(77,46,107,.5) 0%, rgba(77,46,107,.19) 42%, rgba(77,46,107,0) 100%);
+}
+.pl-pocket{
+  background:radial-gradient(ellipse 84% 96% at 50% 50%, rgba(9,8,11,.6) 0%, rgba(9,8,11,.432) 50%, rgba(9,8,11,0) 100%);
+}
+
+/* --- 표본 안의 글자 층 (알림 화면 재현) ------------------------- */
+
+.alert{
+  position:absolute; inset:0;
+  color:#fff;
+  font-family:-apple-system,"SF Pro Text",system-ui,var(--sans);
+  letter-spacing:normal;
+  line-height:1.2;
+  --u:.5;
+}
+.alert__col{
+  position:absolute; left:50%; top:50%; transform:translate(-50%,-50%);
+  width:46%;
+  display:flex; flex-direction:column; align-items:center; text-align:center;
+}
+.alert__hd{ font-size:calc(14px * var(--u)); font-weight:600; color:rgba(255,255,255,.65); }
+.alert__title{
+  margin-top:calc(34px * var(--u));
+  display:flex; align-items:center; gap:calc(12px * var(--u)); width:100%;
+  justify-content:center;
+}
+.alert__bar{
+  flex:none; width:calc(5px * var(--u)); height:calc(41px * var(--u));
+  border-radius:calc(2.5px * var(--u)); background:var(--ember);
+}
+.alert__name{
+  font-family:"SF Pro Rounded",ui-rounded,system-ui,var(--sans);
+  font-size:calc(44px * var(--u)); font-weight:700; text-align:left;
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.alert__range{
+  margin-top:calc(6px * var(--u));
+  font-family:"SF Pro Rounded",ui-rounded,system-ui,var(--sans);
+  font-size:calc(24px * var(--u)); font-weight:500; color:rgba(255,255,255,.9);
+}
+.alert__count{ margin-top:calc(6px * var(--u)); font-size:calc(15px * var(--u)); color:rgba(255,255,255,.62); }
+.alert__chips{ margin-top:calc(14px * var(--u)); display:flex; gap:calc(8px * var(--u)); }
+.alert__chip{
+  font-size:calc(13px * var(--u)); font-weight:500; color:rgba(255,255,255,.75);
+  padding:calc(5px * var(--u)) calc(11px * var(--u));
+  border-radius:calc(8px * var(--u));
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.13);
+  white-space:nowrap;
+}
+.alert__chip--svc{ color:var(--ember); border-color:rgba(255,255,255,.22); }
+.alert__btns{ margin-top:calc(44px * var(--u)); display:flex; flex-direction:column; gap:calc(10px * var(--u)); align-items:center; }
+.alert__btn{
+  min-width:calc(230px * var(--u)); height:calc(44px * var(--u));
+  border-radius:calc(11px * var(--u));
+  display:flex; align-items:center; justify-content:center;
+  font-family:"SF Pro Rounded",ui-rounded,system-ui,var(--sans);
+  font-size:calc(16px * var(--u)); font-weight:600;
+}
+.alert__btn--join{ background:var(--ember); color:#21140D; }
+.alert__btn--close{ background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.3); color:rgba(255,255,255,.95); }
+.alert__snoozeLabel{ margin-top:calc(26px * var(--u)); font-size:calc(13px * var(--u)); font-weight:600; color:rgba(255,255,255,.5); }
+.alert__snooze{ margin-top:calc(10px * var(--u)); display:flex; gap:calc(10px * var(--u)); }
+.alert__sn{
+  border-radius:calc(10px * var(--u));
+  padding:calc(7px * var(--u)) calc(15px * var(--u));
+  border:1px solid rgba(255,255,255,.14);
+  text-align:center; white-space:nowrap;
+}
+.alert__sn b{
+  display:block; font-family:"SF Pro Rounded",ui-rounded,system-ui,var(--sans);
+  font-size:calc(15px * var(--u)); font-weight:600; color:rgba(255,255,255,.92);
+}
+.alert__sn i{ display:block; font-style:normal; font-size:calc(12px * var(--u)); color:rgba(255,255,255,.55); margin-top:1px; }
+.alert__sn--first{ background:rgba(255,255,255,.13); border:1.5px solid rgba(255,184,41,.85); }
+.alert__sn--first b::after{ content:'  S'; font-size:calc(12px * var(--u)); font-weight:700; color:var(--ember); }
+.alert__hint{ margin-top:calc(34px * var(--u)); display:flex; gap:calc(12px * var(--u)); align-items:center; }
+.alert__pair{ display:flex; align-items:center; gap:calc(6px * var(--u)); }
+.alert__cap{
+  font-size:calc(11px * var(--u)); font-weight:600; color:rgba(255,255,255,.7);
+  padding:calc(3px * var(--u)) calc(7px * var(--u));
+  border-radius:calc(5px * var(--u));
+  background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.16);
+}
+.alert__pair span{ font-size:calc(12px * var(--u)); color:rgba(255,255,255,.45); }
+.alert__clock{
+  position:absolute; top:calc(20px * var(--u)); right:calc(26px * var(--u));
+  font-family:"SF Pro Rounded",ui-rounded,system-ui,var(--sans);
+  font-size:calc(14px * var(--u)); font-weight:500; color:rgba(255,255,255,.55);
+  font-variant-numeric:tabular-nums;
+}
+
+/* ===================================================================
+   판 00 — 표제지
+   =================================================================== */
+
+.front{ padding-block:clamp(40px,4.4vw,68px) clamp(64px,7vw,104px); }
+.front__grid{ align-items:start; row-gap:clamp(36px,4.6vw,72px); }
+.front__head{ grid-column:1 / -1; }
+.front__text{ grid-column:1 / span 4; }
+.front__stage{ grid-column:6 / span 7; }
+
+.front h1 span{ display:block; }
+.front__head .lede{ margin-top:var(--sp-5); max-width:58ch; }
+.front .lede{ margin-top:0; }
+
+/* 수집 카드 */
+.collect{
+  margin-top:0;
+  border-left:2px solid var(--ink);
+  padding-left:var(--sp-5);
+  display:grid; gap:var(--sp-3);
+}
+.collect__row{
+  display:grid; grid-template-columns:5.5em 1fr; gap:var(--sp-4);
+  font-family:var(--mono); font-size:var(--t-12); line-height:1.6;
+  font-variant-numeric:tabular-nums;
+}
+.collect__row dt{ color:var(--ink-3); letter-spacing:.08em; }
+.collect__row dd{ margin:0; color:var(--ink-2); }
+
+/* CTA */
+.cta{ margin-top:var(--sp-6); display:flex; align-items:center; gap:var(--sp-5); flex-wrap:wrap; }
+.btn{
+  appearance:none; border:1px solid var(--ink); background:var(--ink); color:var(--paper);
+  height:52px; padding-inline:26px; border-radius:0;
+  font-family:var(--mono); font-size:var(--t-13); font-weight:500; letter-spacing:.06em;
+  display:inline-flex; align-items:center; gap:10px; cursor:pointer;
+  transition:transform .4s var(--ease), background-color .4s var(--ease), color .4s var(--ease);
+}
+.btn:hover{ transform:translateY(-2px); }
+.btn[disabled],.btn[aria-disabled="true"]{
+  background:transparent; color:var(--ink-3); border-color:var(--rule);
+  cursor:not-allowed;
+}
+.btn[disabled]:hover{ transform:none; }
+.btn__dot{
+  width:7px; height:7px; border-radius:50%; background:var(--caution); flex:none;
+  animation:pulse 3.2s var(--ease-io) infinite;
+}
+@keyframes pulse{ 0%,100%{ opacity:.35 } 50%{ opacity:1 } }
+.link{
+  font-family:var(--mono); font-size:var(--t-13); letter-spacing:.04em; color:var(--ink-2);
+  text-decoration:none; border-bottom:1px solid var(--rule); padding-bottom:3px;
+  transition:border-color .35s var(--ease), color .35s var(--ease);
+}
+.link:hover{ color:var(--ink); border-color:var(--ink); }
+.cta-note{ margin-top:var(--sp-4); }
+
+/* 등장 */
+.rise{ opacity:0; transform:translateY(10px); }
+.rise.in{ opacity:1; transform:none; transition:opacity .9s var(--ease), transform .9s var(--ease); }
+.rise[data-d="1"].in{ transition-delay:.12s; }
+.rise[data-d="2"].in{ transition-delay:.24s; }
+.rise[data-d="3"].in{ transition-delay:.36s; }
+.front__stage{ opacity:0; transform:scale(1.012); }
+.front__stage.in{ opacity:1; transform:none; transition:opacity .9s var(--ease), transform .9s var(--ease); }
+@media (prefers-reduced-motion: reduce){
+  .rise,.front__stage{ opacity:1 !important; transform:none !important; }
+}
+
+/* 표제지의 첫 블록은 JS 를 기다리지 않는다.
+   .rise 의 등장은 스크립트가 .in 을 붙일 때 시작하는데, 그 스크립트는 문서 끝에서
+   굽기(bakeAll)를 마친 뒤에야 여기까지 온다 — 첫 화면이 몇 초 동안 빈 종이로 남았다.
+   그래서 라벨·표제·부제만 CSS 애니메이션으로 로드 즉시(늦어도 0.6s) 드러낸다.
+   아래 판들의 순차 등장은 그대로 스크립트가 맡는다. */
+.front__head .rise{ animation:front-rise .42s var(--ease) both; }
+.front__head .rise[data-d="1"]{ animation-delay:.06s; }
+.front__head .rise[data-d="2"]{ animation-delay:.12s; }
+.front__head .rise[data-d="3"]{ animation-delay:.18s; }
+@keyframes front-rise{ from{ opacity:0; transform:translateY(10px) } to{ opacity:1; transform:none } }
+
+/* ===================================================================
+   판 01 — 분해도
+   =================================================================== */
+
+.splithead{ display:grid; grid-template-columns:repeat(12,minmax(0,1fr)); gap:clamp(24px,2.8vw,42px); }
+.splithead > .eyebrow{ grid-column:1 / -1; }
+.splithead > h2{ grid-column:1 / span 6; }
+.splithead > .lede{ grid-column:8 / span 5; align-self:end; margin-top:0; padding-bottom:6px; }
+@media (max-width:980px){
+  .splithead > h2,.splithead > .lede{ grid-column:1 / -1; }
+  .splithead > .lede{ margin-top:var(--sp-5); }
+}
+.ex__body{
+  margin-top:clamp(48px,6vw,88px);
+  display:grid;
+  grid-template-columns:minmax(0,1fr) minmax(250px,.42fr);
+  gap:clamp(40px,5.2vw,88px);
+  align-items:center;
+  position:relative;
+}
+.ex__stageWrap{ position:relative; }
+.ex__stage{ padding:5% 7%; touch-action:pan-y; }
+
+/* z 축 라벨 */
+.zaxis{
+  position:absolute; left:-6px; top:8%; bottom:16%;
+  display:flex; align-items:center;
+  font-family:var(--mono); font-size:var(--t-10); letter-spacing:.14em; color:var(--ink-3);
+  writing-mode:vertical-rl; transform:rotate(180deg);
+  opacity:var(--e,0); transition:opacity .4s var(--ease);
+  pointer-events:none;
+}
+.zaxis::after{
+  content:''; position:absolute; left:50%; top:0; bottom:0; width:1px; background:var(--rule);
+  transform:translateX(-50%) translateX(14px);
+}
+
+#leaders{
+  position:absolute; inset:0; width:100%; height:100%;
+  pointer-events:none; overflow:visible;
+}
+#leaders polyline{ fill:none; stroke:var(--ink); stroke-width:1; }
+#leaders circle{ fill:var(--ink); }
+
+/* 판 목록 */
+.legend{ list-style:none; margin:0; padding:0; border-top:1px solid var(--rule); }
+.legend li{
+  border-bottom:1px solid var(--hair);
+  padding:10px 0 11px;
+  cursor:default;
+  transition:background-color .2s var(--ease), padding-left .3s var(--ease);
+}
+.legend li:hover,.legend li:focus-visible{ background:var(--paper-sunk); padding-left:8px; }
+.legend__top{
+  display:flex; align-items:baseline; gap:10px;
+  font-family:var(--mono); font-size:var(--t-12); font-variant-numeric:tabular-nums;
+}
+.legend__no{ color:var(--ink-3); }
+.legend__name{ font-family:var(--sans); font-size:var(--t-13); font-weight:500; color:var(--ink); }
+.legend__depth{ margin-left:auto; color:var(--ink-2); white-space:nowrap; }
+.legend__note{ font-size:var(--t-11); line-height:1.55; color:var(--ink-3); margin-top:3px; font-weight:300; }
+.legend__bar{
+  position:relative; height:1px; background:var(--hair); margin-top:7px;
+}
+.legend__bar i{
+  position:absolute; top:-2px; width:1px; height:5px; background:var(--ink-2); left:var(--p);
+}
+.ex__foot{ margin-top:clamp(40px,5vw,72px); max-width:74ch; }
+
+/* 모바일 대체 */
+.ex__mobile{ display:none; }
+.ex__mobile img{ width:100%; height:auto; border:1px solid var(--rule); }
+
+/* ===================================================================
+   판 02 — 대조 표본
+   =================================================================== */
+
+.scale{ overflow:hidden; --boxh:calc((100vw + 240px) * 0.5625); }
+.scale__stage{ position:relative; padding-block:clamp(40px,6vw,96px); }
+.scale__rect{
+  position:absolute; inset:0;
+  display:grid; place-items:center;
+  pointer-events:none;
+}
+.scale__box{
+  width:calc(100vw + 240px);
+  height:var(--boxh);
+  border:1px solid rgba(23,23,26,.22);
+  transform-origin:center;
+  position:relative;
+}
+.scale__rect.in .scale__box{ animation:spread 1.1s var(--ease) both; }
+@keyframes spread{ from{ transform:scaleX(.04) } to{ transform:scaleX(1) } }
+.scale__rectLabel{
+  position:absolute; left:0; top:calc(50% - var(--boxh) / 2 + 12px);
+  font-family:var(--mono); font-size:var(--t-10); letter-spacing:.1em; color:var(--ink-3);
+}
+.scale__inner{
+  position:relative; z-index:1;
+  display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+  align-items:center;
+  gap:clamp(24px,4vw,64px);
+  min-height:calc(var(--boxh) - 96px);
+}
+.scale__bannerCol{ display:flex; flex-direction:column; align-items:flex-start; gap:var(--sp-3); }
+.scale__textCol{ max-width:46ch; }
+.scale__textCol h2{ margin-bottom:var(--sp-5); }
+
+/* 실물 크기 배너 목업 */
+.banner{
+  position:relative;
+  width:344px; height:80px; max-width:100%;
+  border-radius:16px;
+  background:linear-gradient(180deg,#ECEAE6,#E2DFDA);
+  border:1px solid rgba(23,23,26,.1);
+  box-shadow:0 10px 26px rgba(23,23,26,.13);
+  display:flex; align-items:center; gap:12px; padding:0 16px;
+}
+.banner.loop{ animation:bannerLife 5.75s var(--ease) infinite; }
+@keyframes bannerLife{
+  0%,72%{ opacity:1; transform:translateY(0) }
+  78%{ opacity:0; transform:translateY(-8px) }
+  99%{ opacity:0; transform:translateY(-8px) }
+  100%{ opacity:1; transform:translateY(0) }
+}
+.banner__icon{ width:38px; height:38px; border-radius:9px; background:#C9C5BE; flex:none; }
+.banner__txt{ min-width:0; font-family:-apple-system,system-ui,var(--sans); line-height:1.3; }
+.banner__app{ font-size:11px; color:#6A6862; letter-spacing:.01em; }
+.banner__l1{ font-size:13px; font-weight:600; color:#1B1B1E; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.banner__l2{ font-size:12px; color:#4C4C52; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+.dimline{ position:relative; width:344px; max-width:100%; height:12px; }
+.dimline::before{ content:''; position:absolute; left:0; right:0; top:6px; height:1px; background:var(--rule); }
+.dimline::after{ content:''; position:absolute; left:0; top:2px; width:1px; height:9px; background:var(--rule); box-shadow:343px 0 0 var(--rule); }
+.dimline span{
+  position:absolute; left:50%; top:-2px; transform:translateX(-50%);
+  background:var(--paper); padding:0 6px;
+  font-family:var(--mono); font-size:9px; color:var(--ink-3); letter-spacing:.06em;
+}
+.banner__labels{ font-family:var(--mono); font-size:var(--t-10); color:var(--ink-3); letter-spacing:.04em; line-height:1.7; }
+.banner__labels .only-narrow{ display:none; }
+.scale__foot{ margin-top:clamp(28px,3.4vw,48px); }
+.scale__kick{ margin-top:var(--sp-5); }
+
+/* ===================================================================
+   판 03 — 표본 세 점
+   =================================================================== */
+
+.specimens{
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:clamp(24px,3vw,40px);
+  margin-top:clamp(48px,6vw,80px);
+}
+.card{ display:flex; flex-direction:column; }
+.card__no{
+  font-family:var(--mono); font-size:var(--t-10); letter-spacing:.16em; color:var(--ink-3);
+  margin-bottom:var(--sp-3);
+}
+.card__frame{
+  transition:transform .4s var(--ease), box-shadow .4s var(--ease);
+  position:relative;
+}
+.card:hover .card__frame,.card:focus-within .card__frame{
+  transform:translateY(-6px);
+  box-shadow:0 24px 60px rgba(23,23,26,.18);
+}
+.card__media{ position:relative; aspect-ratio:2000 / 1296; }
+.card__media img,.card__media video{
+  position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+}
+.card__media video{ opacity:0; transition:opacity .5s var(--ease); }
+.card__media video.on{ opacity:1; }
+
+/* 팔레트 띠 */
+.palette{
+  display:flex; height:6px; overflow:hidden;
+  transition:height .42s var(--ease);
+}
+.card:hover .palette,.card:focus-within .palette{ height:34px; }
+.palette span{
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--mono); font-size:9px; letter-spacing:.04em;
+  color:rgba(255,255,255,.82);
+  opacity:0; transition:opacity .28s var(--ease) .1s;
+  overflow:hidden; white-space:nowrap;
+}
+.card:hover .palette span,.card:focus-within .palette span{ opacity:1; }
+.palette span.on-light{ color:rgba(20,16,28,.72); }
+
+.card__name{ margin-top:var(--sp-4); display:flex; align-items:baseline; gap:10px; }
+.card__ko{ font-family:var(--serif); font-size:var(--t-h4); font-weight:300; }
+.card__la{ font-family:var(--mono); font-size:var(--t-12); letter-spacing:.16em; color:var(--ink-3); }
+.card__desc{ margin-top:var(--sp-2); font-size:var(--t-body-s); color:var(--ink-2); font-weight:300; line-height:1.66; }
+.card__specs{ margin-top:var(--sp-4); border-top:1px solid var(--rule); }
+.card__specs div{
+  border-bottom:1px solid var(--hair);
+  padding:7px 0;
+  font-family:var(--mono); font-size:var(--t-10); letter-spacing:.02em; color:var(--ink-3);
+  font-variant-numeric:tabular-nums;
+  opacity:0; transform:translateX(-10px);
+}
+.card.in .card__specs div{ opacity:1; transform:none; transition:opacity .5s var(--ease), transform .5s var(--ease); }
+.card.in .card__specs div:nth-child(2){ transition-delay:.04s; }
+.card.in .card__specs div:nth-child(3){ transition-delay:.08s; }
+.card__specs b{ color:var(--ink-2); font-weight:500; }
+
+/* 톤 띠 */
+.toneband{ margin-top:clamp(56px,7vw,96px); }
+.toneband__line{ max-width:62ch; }
+.toneband__bar{
+  position:relative; margin-top:var(--sp-5); height:40px; overflow:hidden;
+  background:linear-gradient(90deg,
+    #17141C 0%, #291C21 33.33%,
+    #1F1214 33.33%, #381A1A 66.66%,
+    #260F12 66.66%, #471717 100%);
+}
+.toneband__bar::after{
+  content:''; position:absolute; inset:0;
+  background:linear-gradient(105deg, transparent 38%, rgba(255,255,255,.16) 50%, transparent 62%);
+  transform:translateX(-120%);
+}
+.toneband__bar.in::after{ animation:sheen 1.4s var(--ease) .2s both; }
+@keyframes sheen{ to{ transform:translateX(120%) } }
+.toneband__labels{
+  display:grid; grid-template-columns:repeat(3,1fr);
+  font-family:var(--mono); font-size:var(--t-10); letter-spacing:.1em; color:var(--ink-3);
+  margin-top:var(--sp-2);
+}
+.toneband__labels span+span{ border-left:1px solid var(--rule); padding-left:10px; }
+.toneband__foot{ margin-top:var(--sp-5); }
+
+/* ===================================================================
+   판 04 — 검색표
+   =================================================================== */
+
+.key__text{ grid-column:1 / span 5; }
+.key__table{ grid-column:6 / span 7; }
+
+.keytable{ border-top:1px solid var(--rule); }
+.keyrow{
+  display:grid; grid-template-columns:28px minmax(0,1fr) minmax(0,auto);
+  align-items:center; gap:var(--sp-4);
+  min-height:64px; padding:10px 8px 10px 0;
+  border-bottom:1px solid var(--hair);
+  position:relative;
+  cursor:default;
+  transition:background-color .18s var(--ease);
+  opacity:0; transform:translateX(-6px);
+}
+.keytable.in .keyrow{ opacity:1; transform:none; transition:opacity .5s var(--ease), transform .5s var(--ease), background-color .18s var(--ease); }
+.keytable.in .keyrow:nth-child(1){ transition-delay:0s }
+.keytable.in .keyrow:nth-child(2){ transition-delay:.04s }
+.keytable.in .keyrow:nth-child(3){ transition-delay:.08s }
+.keytable.in .keyrow:nth-child(4){ transition-delay:.12s }
+.keytable.in .keyrow:nth-child(5){ transition-delay:.16s }
+.keytable.in .keyrow:nth-child(6){ transition-delay:.2s }
+.keytable.in .keyrow:nth-child(7){ transition-delay:.24s }
+.keytable.in .keyrow:nth-child(8){ transition-delay:.28s }
+.keyrow:hover,.keyrow.is-on{ background:var(--paper-sunk); }
+.keyrow__n{
+  font-family:var(--mono); font-size:var(--t-13); font-weight:400; color:var(--ink-3);
+  align-self:stretch; padding-top:2px; position:relative; text-align:center;
+  transition:color .18s var(--ease), font-weight .18s var(--ease);
+}
+.keyrow__n::after{
+  content:''; position:absolute; left:50%; top:24px; bottom:-12px; width:1px; background:var(--hair);
+}
+.keyrow:last-child .keyrow__n::after{ display:none; }
+.keyrow:hover .keyrow__n,.keyrow.is-on .keyrow__n{ color:var(--ink); font-weight:500; }
+.keyrow__ko{ font-size:var(--t-body-s); font-weight:400; }
+.keyrow__code{
+  font-family:var(--mono); font-size:var(--t-11); color:var(--ink-3);
+  opacity:.55; text-align:right; white-space:nowrap;
+  transition:opacity .18s var(--ease);
+}
+.keyrow:hover .keyrow__code,.keyrow.is-on .keyrow__code{ opacity:1; }
+
+.dedupe{
+  margin-top:var(--sp-6);
+  background:var(--paper-sunk);
+  border-left:3px solid var(--ink);
+  padding:var(--sp-5) var(--sp-5) var(--sp-5) var(--sp-5);
+}
+.dedupe h4{ font-family:var(--mono); font-size:var(--t-12); font-weight:500; letter-spacing:.08em; color:var(--ink-2); }
+.dedupe p{ margin:var(--sp-3) 0 0; font-size:var(--t-body-s); color:var(--ink-2); font-weight:300; }
+
+/* 판정 로그 블록 */
+.log{
+  margin-top:var(--sp-6);
+  background:var(--vitrine);
+  padding:var(--sp-5);
+  font-family:var(--mono); font-size:var(--t-13); line-height:1.9;
+  color:rgba(237,235,228,.82);
+  overflow-x:auto;
+}
+.log div{ white-space:nowrap; transition:opacity .16s var(--ease); }
+.log.fade div{ opacity:0; transition-duration:.12s; }
+.log .tag{ color:#8C897F; }
+.log .hit{ color:#E0713F; }
+.log .ok{ color:#9FC08A; }
+.log__cursor{
+  display:inline-block; width:2px; height:14px; margin-left:2px;
+  background:rgba(237,235,228,.7); vertical-align:-2px;
+  animation:blink 1.1s steps(1,end) infinite;
+}
+@keyframes blink{ 0%,49%{ opacity:1 } 50%,100%{ opacity:0 } }
+@media (prefers-reduced-motion: reduce){ .log__cursor{ animation:none } }
+
+/* ===================================================================
+   판 05 — 대기 화면
+   =================================================================== */
+
+.standby{ padding-block:var(--sec-wide); }
+.standby__head{ text-align:center; max-width:60ch; margin-inline:auto; }
+.standby__head .lede{ margin-inline:auto; }
+.keys{ display:inline-flex; gap:8px; align-items:center; vertical-align:middle; margin-right:10px; }
+.kc{
+  font-family:var(--mono); font-size:.42em; font-weight:500;
+  padding:3px 7px; border-radius:5px;
+  border:1px solid var(--rule); background:var(--card); color:var(--ink-2);
+  line-height:1.35;
+}
+.sb{ position:relative; margin-top:clamp(48px,6vw,88px); }
+.sb__media{ position:relative; aspect-ratio:2000 / 1296; }
+.sb__media img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.sb__media img.hint{ opacity:0; transition:opacity .2s var(--ease); }
+.sb__media img.hint.on{ opacity:1; }
+.sb__svg{ position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+.sb__svg line,.sb__svg polyline{
+  fill:none; stroke:rgba(255,255,255,.62); stroke-width:1;
+  vector-effect:non-scaling-stroke;
+  stroke-dasharray:1; stroke-dashoffset:1;
+}
+.sb.in .sb__svg line,.sb.in .sb__svg polyline{ animation:draw .5s var(--ease) both; }
+@keyframes draw{ to{ stroke-dashoffset:0 } }
+.sb__note{
+  position:absolute; transform:translate(-50%,-50%);
+  font-family:var(--mono); font-size:var(--t-11); letter-spacing:.02em;
+  color:rgba(255,255,255,.9);
+  text-shadow:0 1px 10px rgba(0,0,0,.8);
+  background:rgba(11,10,13,.5);
+  border:1px solid rgba(255,255,255,.16);
+  padding:5px 9px;
+  white-space:nowrap;
+  opacity:0;
+  transition:opacity .35s var(--ease), border-color .3s var(--ease);
+  cursor:default;
+}
+.sb.in .sb__note{ opacity:1; }
+.sb__note b{ color:var(--ember); font-weight:500; margin-right:6px; }
+.sb.dim .sb__note{ opacity:.3; }
+.sb.dim .sb__note:hover,.sb.dim .sb__note.on{ opacity:1; border-color:rgba(255,255,255,.5); }
+.sb__notes-m{ display:none; }
+.sb__dot{
+  position:absolute; width:5px; height:5px; border-radius:50%;
+  background:rgba(255,255,255,.9); transform:translate(-50%,-50%);
+  opacity:0; transition:opacity .35s var(--ease);
+}
+.sb.in .sb__dot{ opacity:1; }
+
+.details{
+  margin-top:clamp(48px,6vw,80px);
+  display:grid; grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:clamp(24px,3vw,44px);
+}
+.detail{ border-top:1px solid var(--rule); padding-top:var(--sp-4); }
+.detail h4{
+  font-family:var(--mono); font-size:var(--t-12); font-weight:500; letter-spacing:.1em;
+  color:var(--ink-2); margin-bottom:var(--sp-3);
+}
+.detail p{ margin:0; font-size:var(--t-body-s); color:var(--ink-2); font-weight:300; line-height:1.72; }
+.standby__foot{ margin-top:clamp(48px,6vw,80px); text-align:center; }
+
+/* ===================================================================
+   판 06 — 계측 기록
+   =================================================================== */
+
+.ledger{ margin-top:clamp(40px,5vw,72px); width:100%; border-collapse:collapse; }
+.ledger caption{ position:absolute; left:-9999px; }
+.ledger thead th{
+  font-family:var(--mono); font-size:var(--t-10); font-weight:500; letter-spacing:.14em;
+  color:var(--ink-3); text-align:left; padding:10px 16px 10px 0;
+  border-top:2px solid var(--ink); border-bottom:2px solid var(--ink);
+  white-space:nowrap;
+}
+.ledger tbody tr{ border-bottom:1px solid var(--hair); opacity:0; }
+.ledger.in tbody tr{ opacity:1; transition:opacity .5s var(--ease); }
+.ledger.in tbody tr:nth-child(1){ transition-delay:0s } .ledger.in tbody tr:nth-child(2){ transition-delay:.03s }
+.ledger.in tbody tr:nth-child(3){ transition-delay:.06s } .ledger.in tbody tr:nth-child(4){ transition-delay:.09s }
+.ledger.in tbody tr:nth-child(5){ transition-delay:.12s } .ledger.in tbody tr:nth-child(6){ transition-delay:.15s }
+.ledger.in tbody tr:nth-child(7){ transition-delay:.18s } .ledger.in tbody tr:nth-child(8){ transition-delay:.21s }
+.ledger.in tbody tr:nth-child(9){ transition-delay:.24s }
+.ledger td{ padding:16px 16px 16px 0; vertical-align:baseline; }
+.ledger .c-item{ font-size:var(--t-body-s); font-weight:500; width:22%; }
+.ledger .c-val{
+  font-family:var(--mono); font-size:clamp(17px,1.5vw,22px); font-weight:500;
+  font-variant-numeric:tabular-nums; color:var(--ink); white-space:nowrap; width:18%;
+}
+.ledger .c-cond{ font-size:var(--t-13); color:var(--ink-2); font-weight:300; width:26%; }
+.ledger .c-memo{ font-size:var(--t-13); color:var(--ink-3); font-weight:300; }
+
+.netblock{
+  margin-top:clamp(40px,5vw,64px);
+  background:var(--vitrine); padding:var(--sp-5);
+  font-family:var(--mono); font-size:var(--t-13); line-height:2;
+  color:rgba(237,235,228,.8); overflow-x:auto;
+}
+.netblock div{ white-space:nowrap; }
+.netblock .dim{ color:#6E6C66; }
+.ledger__kick{ margin-top:clamp(40px,5vw,64px); max-width:40ch; }
+.ledger__foot{ margin-top:var(--sp-5); }
+
+/* ===================================================================
+   판 07 — 관찰 기록
+   =================================================================== */
+
+.notes__grid{ align-items:start; }
+.notes__side{ grid-column:1 / span 4; position:sticky; top:clamp(32px,6vh,72px); }
+.notes__list{ grid-column:6 / span 7; }
+.counter{
+  margin-top:var(--sp-7);
+  font-family:var(--mono); font-size:var(--t-12); letter-spacing:.14em; color:var(--ink-3);
+  border-top:1px solid var(--rule); padding-top:var(--sp-3);
+  font-variant-numeric:tabular-nums;
+}
+.counter b{ color:var(--ink); font-weight:500; }
+
+.entry{
+  position:relative;
+  display:grid; grid-template-columns:120px minmax(0,1fr);
+  gap:var(--sp-5);
+  padding-bottom:clamp(44px,5vw,72px);
+  opacity:.4;
+}
+.entry.in{ opacity:1; transition:opacity .5s var(--ease); }
+.entry__meta{ position:relative; }
+.entry__date{
+  font-family:var(--mono); font-size:var(--t-11); letter-spacing:.06em; color:var(--ink-3);
+  font-variant-numeric:tabular-nums;
+}
+.entry__meta::after{
+  content:''; position:absolute; left:0; top:26px; bottom:-8px; width:1px; background:var(--hair);
+}
+.entry:last-child .entry__meta::after{ display:none; }
+.entry__body{ position:relative; padding-right:110px; }
+.entry__body h3{ font-size:var(--t-h5); font-weight:300; }
+.entry__body p{ margin:var(--sp-3) 0 0; font-size:var(--t-body-s); color:var(--ink-2); font-weight:300; line-height:1.76; max-width:56ch; }
+.tag{
+  position:absolute; right:0; top:2px;
+  font-family:var(--mono); font-size:var(--t-10); letter-spacing:.1em;
+  border:1px solid var(--rule); color:var(--ink-3);
+  padding:3px 9px; border-radius:999px; white-space:nowrap;
+}
+.tag--open{ border-color:var(--caution); color:var(--caution); }
+
+/* ===================================================================
+   판 08 — 취급 절차
+   =================================================================== */
+
+.steps{ grid-column:1 / span 7; }
+.handling__side{ grid-column:9 / span 4; position:sticky; top:clamp(32px,6vh,72px); }
+
+.stepList{ counter-reset:step; margin-top:clamp(40px,5vw,64px); }
+.step{
+  position:relative;
+  display:grid; grid-template-columns:52px minmax(0,1fr); gap:var(--sp-4);
+  padding-bottom:28px;
+}
+.step__n{
+  font-family:var(--mono); font-size:var(--t-12); color:var(--ink-3); padding-top:4px;
+  font-variant-numeric:tabular-nums;
+}
+.step__rail{
+  position:absolute; left:22px; top:26px; bottom:0; width:1px; background:var(--rule);
+}
+.step__rail i{
+  position:absolute; inset:0 auto 0 0; width:1px; height:var(--fill,0%); background:var(--ink);
+  transition:height .3s linear;
+}
+.step__body{ font-size:var(--t-body-s); color:var(--ink-2); font-weight:300; line-height:1.76; }
+.step__body b{ color:var(--ink); font-weight:500; }
+
+.danger{
+  position:relative;
+  margin:var(--sp-5) 0 var(--sp-6) -14px;
+  padding:var(--sp-5) 0 var(--sp-3) 14px;
+  background:rgba(163,59,22,.05);
+  border-left:3px solid transparent;
+}
+.danger::before{
+  content:''; position:absolute; left:0; top:0; width:3px; height:0; background:var(--caution);
+  transition:height .6s var(--ease);
+}
+.danger.in::before{ height:100%; }
+.danger__label{
+  font-family:var(--mono); font-size:var(--t-10); letter-spacing:.18em; color:var(--caution);
+  margin-bottom:var(--sp-4); padding-left:38px;
+}
+
+/* 경고 창 버튼 재현 */
+.dialog{
+  margin:var(--sp-4) 0 var(--sp-2);
+  background:var(--card); border:1px solid var(--rule);
+  padding:var(--sp-4);
+}
+.dialog__title{ font-family:var(--mono); font-size:var(--t-10); letter-spacing:.1em; color:var(--ink-3); margin-bottom:var(--sp-3); }
+.dialog__row{ display:flex; gap:10px; flex-wrap:wrap; }
+.dbtn{
+  position:relative; flex:1 1 0; min-width:96px;
+  border:1px solid var(--rule); border-radius:7px; background:#fff;
+  padding:9px 8px; text-align:center;
+  font-size:var(--t-13); color:var(--ink-2);
+  font-family:-apple-system,system-ui,var(--sans);
+}
+.dbtn--primary{ background:#2E6BE6; border-color:#2E6BE6; color:#fff; font-weight:500; }
+.dbtn__x{ position:absolute; inset:0; overflow:hidden; }
+.dbtn__x::before,.dbtn__x::after{
+  content:''; position:absolute; left:-10%; top:50%; width:120%; height:1px;
+  background:rgba(255,255,255,.95); transform-origin:center;
+  transform:scaleX(0) rotate(14deg);
+}
+.dbtn__x::after{ transform:scaleX(0) rotate(-14deg); }
+.danger.in .dbtn__x::before{ animation:strike .35s var(--ease) .2s both; }
+.danger.in .dbtn__x::after{ animation:strike2 .35s var(--ease) .55s both; }
+@keyframes strike{ to{ transform:scaleX(1) rotate(14deg) } }
+@keyframes strike2{ to{ transform:scaleX(1) rotate(-14deg) } }
+.dbtn__tag{
+  position:absolute; left:50%; top:-22px; transform:translateX(-50%);
+  font-family:var(--mono); font-size:var(--t-10); letter-spacing:.08em; white-space:nowrap;
+  color:var(--caution);
+}
+.dbtn__tag--ok{ color:var(--ink-2); }
+
+/* sticky 요약 카드 */
+.reqcard{
+  background:var(--card); border:1px solid var(--rule); padding:var(--sp-5);
+}
+.reqcard h4{ font-family:var(--mono); font-size:var(--t-11); letter-spacing:.14em; color:var(--ink-3); font-weight:500; }
+.reqcard dl{ margin:var(--sp-4) 0 0; display:grid; gap:10px; }
+.reqcard .r{
+  display:grid; grid-template-columns:6.2em 1fr; gap:10px;
+  font-family:var(--mono); font-size:var(--t-11); line-height:1.6; font-variant-numeric:tabular-nums;
+}
+.reqcard dt{ color:var(--ink-3); letter-spacing:.06em; }
+.reqcard dd{ margin:0; color:var(--ink-2); }
+.reqcard .btn{ width:100%; margin-top:var(--sp-5); justify-content:center; }
+.reqcard__thumb{
+  margin-top:var(--sp-5); border:1px solid var(--rule); background:var(--paper-sunk);
+}
+.reqcard__thumb img{ width:100%; height:auto; }
+.reqcard__remove{ margin-top:var(--sp-4); }
+
+/* 모바일 하단 바 */
+.mobilebar{
+  position:fixed; left:0; right:0; bottom:0; z-index:40;
+  height:64px; background:var(--paper); border-top:1px solid var(--rule);
+  display:none; align-items:center; justify-content:space-between; gap:12px;
+  padding-inline:16px;
+  transform:translateY(100%); transition:transform .4s var(--ease);
+  font-family:var(--mono); font-size:var(--t-11); color:var(--ink-3); letter-spacing:.06em;
+}
+.mobilebar.on{ transform:none; }
+
+/* 판권장 */
+.colophon{
+  border-top:1px solid var(--rule);
+  padding-block:clamp(48px,6vw,80px) clamp(64px,8vw,110px);
+}
+.colophon__rows{
+  display:grid; grid-template-columns:auto 1fr auto; gap:var(--sp-5);
+  font-family:var(--mono); font-size:var(--t-11); letter-spacing:.04em; color:var(--ink-3);
+  line-height:1.7;
+}
+.colophon__rows div:nth-child(2){ text-align:center; }
+.colophon__rows div:nth-child(3){ text-align:right; }
+.colophon__mark{ display:flex; align-items:center; gap:10px; }
+.colophon__mark img{ width:16px; height:16px; border-radius:3px; }
+.colophon__last{
+  margin-top:clamp(40px,5vw,72px); text-align:center;
+  opacity:0;
+}
+.colophon__last.in{ opacity:1; transition:opacity .9s var(--ease); }
+
+/* ===================================================================
+   반응형
+   =================================================================== */
+
+@media (max-width:1100px){
+  .front__head,.front__text,.front__stage{ grid-column:1 / -1; }
+  .front__grid{ display:flex; flex-direction:column; gap:clamp(32px,5vw,56px); }
+  .front__head{ order:0; }
+  .front__stage{ order:1; }
+  .front__text{ order:2; }
+  .key__text,.key__table{ grid-column:1 / -1; }
+  .notes__side,.notes__list{ grid-column:1 / -1; }
+  .notes__side{ position:static; }
+  .steps,.handling__side{ grid-column:1 / -1; }
+  .handling__side{ position:static; order:-1; margin-bottom:var(--sp-6); }
+}
+
+@media (max-width:980px){
+  .ex__body{ grid-template-columns:minmax(0,1fr); gap:var(--sp-7); }
+  .ex__stageWrap{ display:none; }
+  .ex__mobile{ display:block; }
+  #leaders{ display:none; }
+  .specimens{ grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .details{ grid-template-columns:1fr; }
+  .sb__note{ display:none; }
+  .sb__notes-m{ display:block; margin-top:var(--sp-5); }
+  .sb__svg{ display:none; }
+}
+
+@media (max-width:860px){
+  .scale__inner{ grid-template-columns:1fr; gap:var(--sp-6); min-height:calc(var(--boxh) - 40px); }
+  .ledger thead{ display:none; }
+  .ledger,.ledger tbody,.ledger tr,.ledger td{ display:block; width:auto; }
+  .ledger tbody tr{ padding:var(--sp-5) 0; border-bottom:1px solid var(--hair); }
+  .ledger td{ padding:0; }
+  .ledger .c-val{ font-size:26px; width:auto; margin-bottom:6px; }
+  .ledger .c-item{ width:auto; font-size:var(--t-body-s); margin-bottom:4px; }
+  .ledger .c-cond,.ledger .c-memo{ width:auto; }
+  .ledger .c-cond::before{ content:'조건 — '; color:var(--ink-3); }
+  .ledger .c-memo{ margin-top:4px; }
+  .entry{ grid-template-columns:1fr; gap:var(--sp-2); }
+  .entry__meta::after{ display:none; }
+  .entry__body{ padding-right:0; }
+  .tag{ position:static; display:inline-block; margin-bottom:var(--sp-3); }
+  .colophon__rows{ grid-template-columns:1fr; gap:var(--sp-3); }
+  .colophon__rows div:nth-child(2),.colophon__rows div:nth-child(3){ text-align:left; }
+}
+
+@media (max-width:700px){
+  .specimens{ grid-template-columns:1fr; }
+  .banner__labels .only-wide{ display:none; }
+  .banner__labels .only-narrow{ display:block; }
+  .banner{ width:100%; }
+  .dimline{ width:100%; }
+  .dimline::after{ box-shadow:none; right:0; }
+  .keyrow{ grid-template-columns:24px minmax(0,1fr); row-gap:4px; padding-block:14px; }
+  .keyrow__code{ grid-column:2; text-align:left; white-space:normal; }
+  .toneband__labels{ font-size:9px; }
+  .log,.netblock{ font-size:11px; padding:var(--sp-4); }
+  .mobilebar{ display:flex; }
+  .step{ grid-template-columns:34px minmax(0,1fr); gap:var(--sp-3); }
+  .step__rail{ left:14px; }
+  .danger__label{ padding-left:22px; }
+  .dialog__row{ flex-direction:column; }
+  .dbtn__tag{ top:50%; left:auto; right:10px; transform:translateY(-50%); }
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#plate-01">본문으로 건너뛰기</a>
+
+<header class="wrap">
+  <div class="runhead">
+    <span class="runhead__left"><img src="../assets/icon.png" alt="" width="20" height="20" decoding="async"> UNTILLITY · 표본실</span>
+    <span class="runhead__right">판 00 / 08</span>
+  </div>
+</header>
+
+<main>
+
+<!-- ======================= 판 00 — 표제지 ======================= -->
+<section class="plate front wrap" id="plate-00" aria-labelledby="t0">
+  <div class="grid12 front__grid">
+    <div class="front__head">
+      <p class="eyebrow rise">표본 001 · UNTILLITY 0.3.0 · macOS 15.2 이상</p>
+      <h1 id="t0"><span class="rise" data-d="1">회의를 놓치지 않게,</span><span class="rise" data-d="2">화면을 통째로 덮습니다</span></h1>
+      <div class="lede rise" data-d="3">
+        <p>다른 앱이 전체 화면이든, 다른 Space에 있든 그 위에 뜹니다. 닫기 전에는 안 사라집니다. 소리는 1회 — 화면을 안 보고 있을 때를 위한 나머지 절반입니다.</p>
+      </div>
+    </div>
+
+    <div class="front__text">
+      <dl class="collect rise" data-d="3">
+        <div class="collect__row"><dt>채집</dt><dd>2026-09 · macOS 15.2 이상</dd></div>
+        <div class="collect__row"><dt>크기</dt><dd>2.2 MB (Untillity-0.3.0.dmg)</dd></div>
+        <div class="collect__row"><dt>서명</dt><dd>self-signed · Untillity Local Signing · 2036-09-02 만료</dd></div>
+        <div class="collect__row"><dt>망</dt><dd>사용하지 않음 (lsof 0행 · nettop 0행)</dd></div>
+      </dl>
+
+      <div class="cta rise" data-d="3">
+        <button class="btn" type="button" disabled aria-describedby="ctaNote"><span class="btn__dot" aria-hidden="true"></span>0.3.0 · 공개 준비 중</button>
+        <a class="link" href="#plate-06">사양과 실측 기록 보기</a>
+      </div>
+      <p class="note cta-note" id="ctaNote">아직 배포 링크가 없습니다. Apple 공증을 받지 않은 앱이라 설치에 5분 걸리고, 한 번만 하면 됩니다. 경고 창의 기본 버튼이 「휴지통으로 이동」이라 <a class="link" href="#plate-08">취급 절차</a>를 보면서 하세요.</p>
+    </div>
+
+    <div class="front__stage">
+      <div class="vitrine">
+        <span class="reg reg--tl"></span><span class="reg reg--tr"></span><span class="reg reg--bl"></span><span class="reg reg--br"></span>
+        <div class="vitrine__inner">
+          <div class="stage">
+            <div class="deck" data-deck="hero" style="--e:0" role="img" aria-label="언틸리티 알림 화면 재현 — 엠버 테마, 여유(ahead) 톤. 화로 앞의 따뜻한 어둠 위에 「[A팀] 주간 리뷰」와 참가·닫기 버튼이 떠 있다.">
+
+              <div class="pl" data-i="0" style="--z:40"><div class="fill pl-sky"></div><i class="anchor"></i><div class="pl__edge"></div></div>
+              <div class="pl pl--add" data-i="1" style="--z:98"><div class="pl-hearth"></div><i class="anchor"></i><div class="pl__edge"></div></div>
+              <div class="pl pl--add" data-i="2" style="--z:112"><div class="pl-core"></div><i class="anchor"></i><div class="pl__edge"></div></div>
+              <div class="pl pl--add" data-i="3" style="--z:130"><div class="fill pl-bloom"></div><i class="anchor"></i><div class="pl__edge"></div></div>
+              <div class="pl pl--add" data-i="4" style="--z:136"><div class="fill pl-orbs"></div><i class="anchor"></i><div class="pl__edge"></div></div>
+              <div class="pl pl--add" data-i="5" style="--z:184;opacity:.52"><canvas data-art="rays" aria-hidden="true"></canvas><i class="anchor"></i><div class="pl__edge"></div></div>
+              <div class="pl pl--add" data-i="6" style="--z:256;opacity:.72"><canvas data-art="haze" aria-hidden="true"></canvas><i class="anchor"></i><div class="pl__edge"></div></div>
+              <div class="pl pl--add" data-i="7" style="--z:376"><canvas data-art="embers" aria-hidden="true"></canvas><i class="anchor"></i><div class="pl__edge"></div></div>
+              <div class="pl pl--add" data-i="8" style="--z:438"><canvas data-art="living" aria-hidden="true"></canvas><i class="anchor"></i><div class="pl__edge"></div></div>
+              <div class="pl" data-i="9" style="--z:456"><div class="fill pl-pocket"></div><i class="anchor"></i><div class="pl__edge"></div></div>
+
+              <div class="pl" data-i="10" style="--z:520">
+                <div class="alert" data-alert>
+                  <div class="alert__clock" data-clock>10:56:03</div>
+                  <div class="alert__col">
+                    <div class="alert__hd">1분 전 알림</div>
+                    <div class="alert__title"><i class="alert__bar"></i><div class="alert__name">[A팀] 주간 리뷰</div></div>
+                    <div class="alert__range" data-range>오전 10:00 – 10:30</div>
+                    <div class="alert__count" data-count>58초 뒤 시작</div>
+                    <div class="alert__chips">
+                      <span class="alert__chip">업무</span>
+                      <span class="alert__chip alert__chip--svc">Google Meet</span>
+                    </div>
+                    <div class="alert__btns">
+                      <div class="alert__btn alert__btn--join">참가</div>
+                      <div class="alert__btn alert__btn--close">닫기</div>
+                    </div>
+                    <div class="alert__snoozeLabel">다시 알림</div>
+                    <div class="alert__snooze">
+                      <span class="alert__sn alert__sn--first"><b>3분</b><i data-sn="3">오전 10:02</i></span>
+                      <span class="alert__sn"><b>10분</b><i data-sn="10">오전 10:09</i></span>
+                      <span class="alert__sn"><b>시작할 때</b><i data-sn="start">오전 10:00</i></span>
+                    </div>
+                    <div class="alert__hint">
+                      <span class="alert__pair"><span class="alert__cap">return</span><span>참가</span></span>
+                      <span class="alert__pair"><span class="alert__cap">esc</span><span>닫기</span></span>
+                    </div>
+                  </div>
+                </div>
+                <i class="anchor"></i><div class="pl__edge"></div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ruler"><span>1920 px</span></div>
+      <p class="caption">판 00 — 알림 화면 · 엠버 · ahead · 1920 × 1080 pt · 연결된 디스플레이마다 한 장</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 판 01 — 분해도 ======================= -->
+<section class="plate wrap" id="plate-01" aria-labelledby="t1">
+  <div class="ex__head splithead">
+    <p class="eyebrow">판 01 — 분해도 / <b>EXPLODED VIEW</b></p>
+    <h2 id="t1">한 장처럼 보이지만, 열한 겹입니다</h2>
+    <div class="lede">
+      <p>알림 화면은 하늘 위에 장면을 얹고, 그 위에 매 프레임 계산되는 먼지를 얹고, 마지막에 글자 뒤 주머니를 깔아 만듭니다. 표본에 마우스를 올리면 그 열한 겹이 뒤로 물러납니다.</p>
+      <p>판 사이의 간격은 보기 좋으라고 벌린 것이 아닙니다. 앱이 실제로 쓰는 <strong>depth 값 그대로</strong>입니다 — 0.12부터 1.00까지. 간격이 고르지 않은데, 그게 맞습니다.</p>
+    </div>
+  </div>
+
+  <div class="ex__body">
+    <div class="ex__stageWrap">
+      <div class="zaxis" aria-hidden="true">z ← depth 0.00 … 1.00</div>
+      <div class="stage ex__stage" data-stage></div>
+    </div>
+
+    <div class="ex__mobile">
+      <img src="../assets/alert-ember@sm.jpg" srcset="../assets/alert-ember@sm.jpg 1100w, ../assets/alert-ember.jpg 2000w"
+           sizes="100vw" alt="엠버 테마의 알림 화면 — 열한 겹이 합쳐진 완성 상태" width="2000" height="1296" loading="lazy" decoding="async">
+      <p class="caption">합쳐진 상태. 아래 목록의 depth 값이 이 한 장 안에서 층이 놓인 순서입니다.</p>
+    </div>
+
+    <div>
+      <ol class="legend" data-legend>
+        <li tabindex="0" data-i="0"><div class="legend__top"><span class="legend__no">판 00</span><span class="legend__name">하늘</span><span class="legend__depth">depth —</span></div><p class="legend__note">#17141C → #291C21 세로 선형</p><div class="legend__bar" aria-hidden="true"><i style="--p:0%"></i></div></li>
+        <li tabindex="0" data-i="1"><div class="legend__top"><span class="legend__no">판 01</span><span class="legend__name">화로</span><span class="legend__depth">0.12</span></div><p class="legend__note">화면 아래 60%. 빛이 아래에서 옵니다</p><div class="legend__bar" aria-hidden="true"><i style="--p:12%"></i></div></li>
+        <li tabindex="0" data-i="2"><div class="legend__top"><span class="legend__no">판 02</span><span class="legend__name">화로 심</span><span class="legend__depth">0.15</span></div><p class="legend__note">불꽃색으로 0.55 민 #CB6E3A. 3.4초마다 흔들립니다</p><div class="legend__bar" aria-hidden="true"><i style="--p:15%"></i></div></li>
+        <li tabindex="0" data-i="3"><div class="legend__top"><span class="legend__no">판 03</span><span class="legend__name">광채 3겹</span><span class="legend__depth">depth —</span></div><p class="legend__note">반경 ×{1.0, 0.55, 0.26}. 반경 하나로는 눈부심이 안 됩니다</p><div class="legend__bar" aria-hidden="true"><i style="--p:19%"></i></div></li>
+        <li tabindex="0" data-i="4"><div class="legend__top"><span class="legend__no">판 04</span><span class="legend__name">빛덩이 2개</span><span class="legend__depth">0.20</span></div><p class="legend__note">37.3초에 한 번 떠다닙니다</p><div class="legend__bar" aria-hidden="true"><i style="--p:20%"></i></div></li>
+        <li tabindex="0" data-i="5"><div class="legend__top"><span class="legend__no">판 05</span><span class="legend__name">열기 광선</span><span class="legend__depth">0.30</span></div><p class="legend__note">±0.025 rad 를 19초에</p><div class="legend__bar" aria-hidden="true"><i style="--p:30%"></i></div></li>
+        <li tabindex="0" data-i="6"><div class="legend__top"><span class="legend__no">판 06</span><span class="legend__name">열기 아지랑이</span><span class="legend__depth">0.45</span></div><p class="legend__note">1.6화면 높이를 92초에 오릅니다</p><div class="legend__bar" aria-hidden="true"><i style="--p:45%"></i></div></li>
+        <li tabindex="0" data-i="7"><div class="legend__top"><span class="legend__no">판 07</span><span class="legend__name">불씨 3겹</span><span class="legend__depth">0.70</span></div><p class="legend__note">88초 / 50초 / 34초. 먼 것부터 느립니다</p><div class="legend__bar" aria-hidden="true"><i style="--p:70%"></i></div></li>
+        <li tabindex="0" data-i="8"><div class="legend__top"><span class="legend__no">판 08</span><span class="legend__name">살아 있는 층</span><span class="legend__depth">가변</span></div><p class="legend__note">먼지 320 · 별 14. 이 판만 매 프레임 다시 계산됩니다</p><div class="legend__bar" aria-hidden="true"><i style="--p:83%"></i></div></li>
+        <li tabindex="0" data-i="9"><div class="legend__top"><span class="legend__no">판 09</span><span class="legend__name">주머니</span><span class="legend__depth">depth —</span></div><p class="legend__note">#09080B α0.60. 글자 뒤에만 깔립니다</p><div class="legend__bar" aria-hidden="true"><i style="--p:87%"></i></div></li>
+        <li tabindex="0" data-i="10"><div class="legend__top"><span class="legend__no">판 10</span><span class="legend__name">글자</span><span class="legend__depth">1.00</span></div><p class="legend__note">이 판만 급합니다</p><div class="legend__bar" aria-hidden="true"><i style="--p:100%"></i></div></li>
+      </ol>
+    </div>
+
+    <svg id="leaders" aria-hidden="true"></svg>
+  </div>
+
+  <p class="note ex__foot">각주 — 포인터를 따라 기우는 것도 흉내가 아닙니다. 앱은 구운 배경과 살아 있는 층을 같은 카메라로 보고, 층마다 <code>camera × (0.15 + 0.85 × depth)</code> 만큼 밉니다. 두 층을 따로 움직이면 즉시 깨집니다. 이 페이지는 같은 식을 씁니다.</p>
+</section>
+
+<!-- ======================= 판 02 — 대조 표본 ======================= -->
+<section class="plate scale" id="plate-02" aria-labelledby="t2">
+  <div class="wrap">
+    <p class="eyebrow">판 02 — 대조 표본 / <b>실물 크기</b></p>
+    <div class="scale__stage">
+      <div class="scale__rect" data-spread aria-hidden="true">
+        <div class="scale__box"></div>
+        <span class="scale__rectLabel">1920 × 1080 pt</span>
+      </div>
+      <div class="scale__inner">
+        <div class="scale__bannerCol">
+          <div class="banner" data-banner>
+            <div class="banner__icon" aria-hidden="true"></div>
+            <div class="banner__txt">
+              <div class="banner__app">캘린더 · 지금</div>
+              <div class="banner__l1">[A팀] 주간 리뷰</div>
+              <div class="banner__l2">오전 10:00 – 10:30</div>
+            </div>
+          </div>
+          <div class="dimline" aria-hidden="true"><span>344 pt</span></div>
+          <p class="banner__labels">
+            <span class="only-wide">macOS 알림 배너 — 약 344 × 80 pt · 5초 뒤 사라짐</span>
+            <span class="only-narrow">macOS 알림 배너 — 실물 크기 아님 (화면이 배너보다 좁습니다) · 5초 뒤 사라짐</span><br>
+            언틸리티 — 1920 × 1080 pt · 닫기 전에는 안 사라짐<br>
+            <span style="opacity:.7">재현 — 실제 스크린샷이 아닙니다</span>
+          </p>
+        </div>
+        <div class="scale__textCol">
+          <h2 id="t2">배너는 놓치라고 만들어진 것처럼 생겼습니다</h2>
+          <div class="lede">
+            <p>화면 구석에 잠깐 떴다 사라지고, Slack 알림·메일 알림과 같은 자리에 같은 모양으로 나옵니다. 무언가에 집중해 있으면 안 보이고, 봤어도 5초 뒤엔 사라져 있습니다.</p>
+          </div>
+          <p class="kicker scale__kick">언틸리티는 반대로 갑니다.</p>
+        </div>
+      </div>
+    </div>
+    <p class="note scale__foot">배너 크기는 macOS 기본값 기준의 근사치입니다. 두 사각형의 비율은 실제 비율이고, 큰 쪽은 이 페이지 밖으로 나갑니다. 실제로는 연결된 디스플레이마다 한 장씩 뜹니다.</p>
+  </div>
+</section>
+
+<!-- ======================= 판 03 — 표본 세 점 ======================= -->
+<section class="plate wrap" id="plate-03" aria-labelledby="t3">
+  <div class="splithead">
+  <p class="eyebrow">판 03 — 표본 세 점</p>
+  <h2 id="t3">하루에 몇 번씩 보는 화면이니까요</h2>
+  <div class="lede">
+    <p>배경은 두 층입니다. 구워 둔 그림 위에 매 프레임 시뮬레이션되는 살아 있는 층이 얹히고, 둘은 같은 카메라를 봅니다. 마우스를 움직이면 층이 시차로 갈라지고, 먼지가 바람에 밀려났다 되돌아옵니다.</p>
+  </div>
+  </div>
+
+  <div class="specimens">
+    <article class="card" data-card data-theme="ember">
+      <p class="card__no">001-A</p>
+      <div class="card__frame">
+        <div class="vitrine">
+          <span class="reg reg--tl"></span><span class="reg reg--tr"></span><span class="reg reg--bl"></span><span class="reg reg--br"></span>
+          <div class="vitrine__inner card__media">
+            <img src="../assets/alert-ember@sm.jpg" srcset="../assets/alert-ember@sm.jpg 1100w, ../assets/alert-ember.jpg 2000w"
+                 sizes="(max-width:700px) 92vw, (max-width:980px) 46vw, 30vw"
+                 alt="엠버 테마의 알림 화면 — 자줏빛 어둠 아래에서 올라오는 앰버 광채와 떠오르는 불씨"
+                 width="2000" height="1296" loading="lazy" decoding="async">
+            <video data-vid muted loop playsinline preload="none" poster="../assets/alert-ember-poster.jpg" aria-hidden="true" tabindex="-1">
+              <source src="../assets/alert-ember.webm" type="video/webm">
+              <source src="../assets/alert-ember.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="palette" aria-hidden="true">
+            <span style="background:#17141C;flex:34">#17141C</span>
+            <span style="background:#8C333D;flex:30">#8C333D</span>
+            <span style="background:#4D2E6B;flex:22">#4D2E6B</span>
+            <span class="on-light" style="background:#FFB829;flex:14">#FFB829</span>
+          </div>
+        </div>
+      </div>
+      <div class="card__name"><h3 class="card__ko">엠버</h3><span class="card__la">EMBER</span></div>
+      <p class="card__desc">화로 앞. 열기 아지랑이가 세로 결로 피어오르고 그 사이로 불씨가 떠올라 위쪽에서 식어 사라집니다.</p>
+      <div class="card__specs">
+        <div>먼지 <b>320</b> · 별 <b>14</b></div>
+        <div>오프스크린 렌더 노드 <b>169</b></div>
+        <div>서체 <b>SF Pro Rounded</b></div>
+      </div>
+    </article>
+
+    <article class="card" data-card data-theme="astra">
+      <p class="card__no">001-B</p>
+      <div class="card__frame">
+        <div class="vitrine">
+          <span class="reg reg--tl"></span><span class="reg reg--tr"></span><span class="reg reg--bl"></span><span class="reg reg--br"></span>
+          <div class="vitrine__inner card__media">
+            <img src="../assets/alert-astra@sm.jpg" srcset="../assets/alert-astra@sm.jpg 1100w, ../assets/alert-astra.jpg 2000w"
+                 sizes="(max-width:700px) 92vw, (max-width:980px) 46vw, 30vw"
+                 alt="아스트라 테마의 알림 화면 — 거의 검정인 하늘의 청록 공동과 금빛 먼지 벽, 빽빽한 별밭"
+                 width="2000" height="1296" loading="lazy" decoding="async">
+            <video data-vid muted loop playsinline preload="none" poster="../assets/alert-astra-poster.jpg" aria-hidden="true" tabindex="-1">
+              <source src="../assets/alert-astra.webm" type="video/webm">
+              <source src="../assets/alert-astra.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="palette" aria-hidden="true">
+            <span style="background:#070706;flex:34">#070706</span>
+            <span class="on-light" style="background:#57D1EB;flex:30">#57D1EB</span>
+            <span class="on-light" style="background:#DBA85C;flex:22">#DBA85C</span>
+            <span class="on-light" style="background:#A8EBF7;flex:14">#A8EBF7</span>
+          </div>
+        </div>
+      </div>
+      <div class="card__name"><h3 class="card__ko">아스트라</h3><span class="card__la">ASTRA</span></div>
+      <p class="card__desc">발광 성운. 청록 공동과 그것을 감싸는 금빛 먼지 벽. 팔레트에서 보라를 전부 뺐습니다.</p>
+      <div class="card__specs">
+        <div>별 <b>16,000</b></div>
+        <div>오프스크린 렌더 노드 <b>469</b></div>
+        <div>굽기 Release <b>0.35초</b> · 메인 스레드 <b>0ms</b></div>
+      </div>
+    </article>
+
+    <article class="card" data-card data-theme="fable">
+      <p class="card__no">001-C</p>
+      <div class="card__frame">
+        <div class="vitrine">
+          <span class="reg reg--tl"></span><span class="reg reg--tr"></span><span class="reg reg--bl"></span><span class="reg reg--br"></span>
+          <div class="vitrine__inner card__media">
+            <img src="../assets/alert-fable@sm.jpg" srcset="../assets/alert-fable@sm.jpg 1100w, ../assets/alert-fable.jpg 2000w"
+                 sizes="(max-width:700px) 92vw, (max-width:980px) 46vw, 30vw"
+                 alt="페이블 테마의 알림 화면 — 라벤더에서 살구로 내려가는 저녁 하늘과 밑면이 노을에 물든 구름"
+                 width="2000" height="1296" loading="lazy" decoding="async">
+            <video data-vid muted loop playsinline preload="none" poster="../assets/alert-fable-poster.jpg" aria-hidden="true" tabindex="-1">
+              <source src="../assets/alert-fable.webm" type="video/webm">
+              <source src="../assets/alert-fable.mp4" type="video/mp4">
+            </video>
+          </div>
+          <div class="palette" aria-hidden="true">
+            <span style="background:#4D52A8;flex:34">#4D52A8</span>
+            <span class="on-light" style="background:#FFC78F;flex:30">#FFC78F</span>
+            <span class="on-light" style="background:#FF8C9E;flex:22">#FF8C9E</span>
+            <span class="on-light" style="background:#FFF7E6;flex:14">#FFF7E6</span>
+          </div>
+        </div>
+      </div>
+      <div class="card__name"><h3 class="card__ko">페이블</h3><span class="card__la">FABLE</span></div>
+      <p class="card__desc">저녁 하늘. 해는 수평선 아래라 원반 없이 광채만, 구름은 밑면이 노을에 물듭니다. 가끔 새 무리가 글자 위를 지나갑니다.</p>
+      <div class="card__specs">
+        <div>구름 <b>8</b> · 새 무리 최대 <b>2</b></div>
+        <div>오프스크린 렌더 노드 <b>136</b></div>
+        <div>서체 <b>New York</b> + AppleMyungjo</div>
+      </div>
+    </article>
+  </div>
+
+  <div class="toneband">
+    <p class="kicker toneband__line">남은 시간에 따라 광원의 색이 바뀝니다 — 여유, 임박, 이미 시작됨. 색이 곧 정보입니다.</p>
+    <div class="toneband__bar" data-tone aria-hidden="true"></div>
+    <div class="toneband__labels"><span>여유</span><span>1분 이내</span><span>이미 시작됨</span></div>
+    <p class="note toneband__foot">전환은 0.7초, 레이어 구조는 그대로 두고 그라디언트 색만 갈아입습니다.</p>
+    <p class="note" style="margin-top:12px">각주 — 구름 명암 대비를 세게 뒀더니 구름이 아니라 바위 절벽으로 읽혔습니다. 절반으로 낮췄습니다. 흰 글자가 청록 위에 오면 대비가 1.4:1 이라, 아스트라의 공동은 글자 컬럼 바깥 오른쪽으로 옮겼습니다.</p>
+  </div>
+</section>
+
+<!-- ======================= 판 04 — 검색표 ======================= -->
+<section class="plate wrap" id="plate-04" aria-labelledby="t4">
+  <div class="grid12">
+    <div class="key__text">
+      <p class="eyebrow">판 04 — 검색표 / <b>제외 조건</b></p>
+      <h2 id="t4">무엇을 안 띄울지가 이 앱의 절반입니다</h2>
+      <div class="lede">
+        <p>취소된 일정, 종일 일정, 내가 거절한 일정, 4시간 넘는 장시간 일정, 이미 끝난 일정은 기본값으로 안 띄웁니다. “컨퍼런스 월~수” 같은 일정이 앱을 켤 때마다 화면을 덮으면 안 되니까요.</p>
+        <p>판정은 <strong>(이벤트, 설정, 지금)</strong> 만 받는 순수 함수 하나가 합니다. 위에서부터 평가하고 하나라도 걸리면 제외합니다. 끝까지 안 걸리면 포함입니다.</p>
+        <p>그리고 이 표의 행 순서와 코드의 조건 순서가 일치해야 한다고 사양에 적어 뒀습니다. 표가 먼저고 코드가 나중입니다.</p>
+      </div>
+
+      <div class="log" data-log>
+        <div class="log__l1"><span class="tag">[예정]</span> 09:55:00 [A팀] 주간 리뷰 — 5분 전</div>
+        <div class="log__l2"><span class="tag">[판정]</span> <span class="hit">제외 F2-7 장시간 일정</span> — 컨퍼런스 월~수 (26시간 12분)</div>
+        <div class="log__l3"><span class="tag">[발화]</span> <span class="ok">09:55:00.064</span> 창 2개 · 소리 1회<span class="log__cursor" aria-hidden="true"></span></div>
+      </div>
+    </div>
+
+    <div class="key__table">
+      <div class="keytable" data-keytable>
+        <div class="keyrow" data-row="1" tabindex="0"><span class="keyrow__n">1</span><span class="keyrow__ko">취소된 일정</span><span class="keyrow__code">skipCanceled &amp;&amp; status == .canceled</span></div>
+        <div class="keyrow" data-row="2" tabindex="0"><span class="keyrow__n">2</span><span class="keyrow__ko">내가 끈 캘린더의 일정</span><span class="keyrow__code">calendarId ∈ disabledCalendarIds</span></div>
+        <div class="keyrow" data-row="3" tabindex="0"><span class="keyrow__n">3</span><span class="keyrow__ko">종일 일정</span><span class="keyrow__code">skipAllDay &amp;&amp; isAllDay</span></div>
+        <div class="keyrow" data-row="4" tabindex="0"><span class="keyrow__n">4</span><span class="keyrow__ko">내가 거절한 일정</span><span class="keyrow__code">skipDeclined &amp;&amp; myResponse == .declined</span></div>
+        <div class="keyrow" data-row="5" tabindex="0"><span class="keyrow__n">5</span><span class="keyrow__ko">미정으로 답한 일정</span><span class="keyrow__code">skipTentative &amp;&amp; myResponse == .tentative</span></div>
+        <div class="keyrow" data-row="6" tabindex="0"><span class="keyrow__n">6</span><span class="keyrow__ko">이미 끝난 일정</span><span class="keyrow__code">endsAt &lt;= now</span></div>
+        <div class="keyrow" data-row="7" tabindex="0"><span class="keyrow__n">7</span><span class="keyrow__ko">4시간 넘는 장시간 일정</span><span class="keyrow__code">endsAt − startsAt &gt;= longEventThreshold</span></div>
+        <div class="keyrow" data-row="8" tabindex="0"><span class="keyrow__n">8</span><span class="keyrow__ko">너무 짧은 일정</span><span class="keyrow__code">endsAt − startsAt &lt; minimumDuration</span></div>
+      </div>
+
+      <div class="dedupe">
+        <h4>통과한 뒤 — 중복 제거 (F2.9)</h4>
+        <p>같은 회의가 두 캘린더에 있으면 EventKit 은 별개의 이벤트로 돌려줍니다. 실측에서 273건 중 64쌍이 충돌했습니다. 합치지 않으면 같은 회의가 한 화면에 두 줄로 뜹니다.</p>
+      </div>
+
+      <p class="note" style="margin-top:32px">각주 — 끈 캘린더만 저장합니다. 허용 집합으로 저장하면 회사가 새 캘린더를 붙였을 때 기본이 “꺼짐”이 되어 회의를 조용히 놓칩니다. 저장 방향이 뒤집히면 그게 결함입니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 판 05 — 대기 화면 ======================= -->
+<section class="plate standby wrap wrap--wide" id="plate-05" aria-labelledby="t5">
+  <div class="standby__head">
+    <p class="eyebrow">판 05 — 표본 둘째</p>
+    <h2 id="t5"><span class="keys" aria-hidden="true"><span class="kc">⌃</span><span class="kc">⌥</span><span class="kc">⌘</span><span class="kc">U</span></span>알림이 없을 때도</h2>
+    <div class="lede">
+      <p>자리를 비울 때 화면을 덮고, 돌아왔을 때 다음 회의가 바로 보입니다. 위아래 방향키나 스크롤로 뒤의 회의를 넘겨 보고, 화면 오른쪽의 점이 지금 몇 번째 칸인지 말합니다. 떠 있는 동안 단축키를 다시 누르면 테마가 바뀌고 그대로 저장됩니다 — 테마는 여기서 고르면 됩니다.</p>
+      <p>이 화면은 정보 화면이 아니라 <strong>보는 화면</strong>이라, 조작을 말하는 것들은 평소에 숨어 있다가 마우스를 움직이면 떠오릅니다.</p>
+    </div>
+  </div>
+
+  <div class="sb" data-sb>
+    <div class="vitrine">
+      <span class="reg reg--tl"></span><span class="reg reg--tr"></span><span class="reg reg--bl"></span><span class="reg reg--br"></span>
+      <div class="vitrine__inner sb__media">
+        <img src="../assets/standby-fable@sm.jpg" srcset="../assets/standby-fable@sm.jpg 1100w, ../assets/standby-fable.jpg 2000w"
+             sizes="(max-width:980px) 92vw, 1240px"
+             alt="페이블 테마의 대기 화면 — 저녁 하늘 위에 큰 시계 14:27, 날짜, 다음 회의와 참가 버튼"
+             width="2000" height="1296" loading="lazy" decoding="async">
+        <img class="hint" data-hint src="../assets/standby-fable-hint@sm.jpg" srcset="../assets/standby-fable-hint@sm.jpg 1100w, ../assets/standby-fable-hint.jpg 2000w"
+             sizes="(max-width:980px) 92vw, 1240px"
+             alt="같은 화면에서 마우스를 움직였을 때 — 아래쪽에 ↑↓ 넘기기 · return 참가 · esc 닫기 힌트 줄이 떠오른 상태"
+             width="2000" height="1296" loading="lazy" decoding="async">
+
+        <svg class="sb__svg" viewBox="0 0 1000 1000" preserveAspectRatio="none" aria-hidden="true">
+          <polyline points="235,200 350,200 420,283" pathLength="1" style="animation-delay:.1s"></polyline>
+          <polyline points="765,440 650,440 596,492" pathLength="1" style="animation-delay:.28s"></polyline>
+          <polyline points="235,820 360,820 452,742" pathLength="1" style="animation-delay:.46s"></polyline>
+          <polyline points="755,872 662,872 600,918" pathLength="1" style="animation-delay:.64s"></polyline>
+        </svg>
+
+        <span class="sb__dot" style="left:42%;top:28.3%"></span>
+        <span class="sb__dot" style="left:59.6%;top:49.2%"></span>
+        <span class="sb__dot" style="left:45.2%;top:74.2%"></span>
+        <span class="sb__dot" style="left:60%;top:91.8%"></span>
+
+        <p class="sb__note" data-note="1" style="left:15%;top:20%"><b>①</b>시계 118pt · light — 가장 큰 것</p>
+        <p class="sb__note" data-note="2" style="left:84%;top:44%"><b>②</b>회의 자리 216pt 고정 · 위 맞춤</p>
+        <p class="sb__note" data-note="3" data-reveal style="left:15%;top:82%"><b>③</b>힌트 줄 — 평소엔 없습니다. 올려 보세요</p>
+        <p class="sb__note" data-note="4" style="left:82%;top:87%"><b>④</b>다음 회의 — ↑ ↓ 또는 스크롤</p>
+      </div>
+    </div>
+    <p class="caption">판 05 — 대기 화면 · 페이블 · 전체 화면 캡처. ③ 은 실제로 힌트 줄이 떠 있는 두 번째 캡처로 갈아 끼웁니다.</p>
+
+    <ol class="sb__notes-m note" style="padding-left:1.2em">
+      <li>시계는 118pt · light. 이 화면에서 가장 큰 것입니다</li>
+      <li>회의 자리는 216pt 고정에 위 맞춤 — 칸마다 제목 높이가 달라도 시계가 흔들리지 않습니다</li>
+      <li>힌트 줄은 평소에는 없습니다. 마우스를 움직이면 0.2초에 걸쳐 떠오릅니다</li>
+      <li>아래쪽은 다음 회의 — ↑ ↓ 또는 스크롤로 넘깁니다</li>
+    </ol>
+  </div>
+
+  <div class="details">
+    <div class="detail">
+      <h4>전환</h4>
+      <p>나가는 층 0.12초, 들어오는 층 0.26초. 같은 길이로 두면 겹치는 구간이 길어 글자가 두 겹으로 읽힙니다. 스프링은 stiffness 400 · damping 25 — 더 세게 밀어 봤다가 되돌렸습니다. 느낌은 세게 만들수록 좋아지지 않습니다.</p>
+    </div>
+    <div class="detail">
+      <h4>숨기기</h4>
+      <p>뜨고 사라지는 데 0.2초, 신호가 끊기면 2.5초 뒤 사라집니다. 힌트 줄은 마우스가 움직일 때, 자리 표시 점은 칸을 넘길 때 — 신호가 다릅니다.</p>
+    </div>
+    <div class="detail">
+      <h4>점이 셋인 이유</h4>
+      <p>상한이 없으면 20건에 297pt, 40건에 442pt 로 의도한 띠를 넘고 셀 수도 없어집니다.</p>
+    </div>
+  </div>
+
+  <p class="kicker standby__foot">잠금은 아닙니다. 아무나 esc 로 닫을 수 있습니다 — 진짜 잠금은 macOS 의 ⌃⌘Q 입니다.</p>
+</section>
+
+<!-- ======================= 판 06 — 계측 기록 ======================= -->
+<section class="plate wrap" id="plate-06" aria-labelledby="t6">
+  <div class="splithead">
+    <p class="eyebrow">판 06 — 계측 기록</p>
+    <h2 id="t6">반올림하지 않은 숫자만 적습니다</h2>
+    <div class="lede"><p>아래는 전부 실제로 잰 값입니다. 측정 조건과 함께 저장소의 PROGRESS.md 에 남아 있습니다.</p></div>
+  </div>
+
+  <table class="ledger" data-ledger>
+    <caption>언틸리티 0.3.0 계측 기록 — 항목, 측정값, 조건, 비고</caption>
+    <thead>
+      <tr><th scope="col">항목</th><th scope="col">측정값</th><th scope="col">조건</th><th scope="col">비고</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="c-item">발화 정확도</td>
+        <td class="c-val"><span data-num data-to="0.064" data-dec="3" data-pre="+" data-suf="초">+0.064초</span></td>
+        <td class="c-cond">무인 4시간 · 17회 측정</td>
+        <td class="c-memo">한도 +2초. 음수 오차 0회</td>
+      </tr>
+      <tr>
+        <td class="c-item">코어 테스트</td>
+        <td class="c-val"><span data-num data-to="180" data-dec="0" data-suf="개">180개</span></td>
+        <td class="c-cond">UntillityCore <code>@Test</code></td>
+        <td class="c-memo">라인 커버리지 98.38%</td>
+      </tr>
+      <tr>
+        <td class="c-item">오케스트레이터</td>
+        <td class="c-val"><span data-num data-to="99.21" data-dec="2" data-suf="%">99.21%</span></td>
+        <td class="c-cond">AlertEngine 라인 커버리지</td>
+        <td class="c-memo">진짜 결함은 순수 함수가 아니라 여기서 납니다</td>
+      </tr>
+      <tr>
+        <td class="c-item">참석자 판정</td>
+        <td class="c-val"><span data-num data-to="53" data-dec="0" data-suf="건">53건</span></td>
+        <td class="c-cond">참석자 있는 이벤트 222건 중</td>
+        <td class="c-memo">내 주소가 목록에 있는데도 <code>isCurrentUser == false</code></td>
+      </tr>
+      <tr>
+        <td class="c-item">중복</td>
+        <td class="c-val"><span data-num data-to="64" data-dec="0" data-suf="쌍">64쌍</span></td>
+        <td class="c-cond">이벤트 273건 중</td>
+        <td class="c-memo">같은 회의가 두 캘린더에</td>
+      </tr>
+      <tr>
+        <td class="c-item">계정 판정</td>
+        <td class="c-val">39 / 44</td>
+        <td class="c-cond"><code>store.sources</code> 중</td>
+        <td class="c-memo">이벤트 캘린더 0개인 회의실 리소스. 걸러야 계정 3개</td>
+      </tr>
+      <tr>
+        <td class="c-item">캘린더 변경 감지</td>
+        <td class="c-val"><span data-num data-to="28" data-dec="0" data-suf="초">28초</span></td>
+        <td class="c-cond">외부에서 만든 6건</td>
+        <td class="c-memo">변경 알림만 믿지 않고 15분마다 다시 엽니다</td>
+      </tr>
+      <tr>
+        <td class="c-item">실사용 로그 대조</td>
+        <td class="c-val">0 · 0 · 0</td>
+        <td class="c-cond">1일차 누락 · 오탐 · 중복</td>
+        <td class="c-memo">절전 복귀 4회 포함</td>
+      </tr>
+      <tr>
+        <td class="c-item">배경 굽기</td>
+        <td class="c-val"><span data-num data-to="0.35" data-dec="2" data-suf="초">0.35초</span></td>
+        <td class="c-cond">아스트라 성운 · Release</td>
+        <td class="c-memo">백그라운드라 메인 스레드 0ms</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="netblock">
+    <div>$ lsof -i -a -p 41287</div>
+    <div>$ nettop -P -x -l 1 -p 41287</div>
+    <div class="dim">(헤더만. 행 0개)</div>
+    <div>CPU 0.0%&nbsp;&nbsp;·&nbsp;&nbsp;메모리 46.8MB<span class="log__cursor" aria-hidden="true"></span></div>
+  </div>
+  <p class="note" style="margin-top:12px">pid 는 예시 숫자입니다. 두 명령의 결과(행 0개)와 CPU·메모리는 실측값입니다.</p>
+
+  <p class="kicker ledger__kick">캘린더를 읽기만 하고, 아무 데도 보내지 않습니다.</p>
+  <p class="note ledger__foot">분석도, 크래시 리포팅도, 업데이트 체크도 없습니다. 선언이 아니라 측정입니다 — 같은 명령을 직접 돌려 확인할 수 있습니다.</p>
+  <p class="note" style="margin-top:16px">각주 — 샌드박스를 껐기 때문에 엔타이틀먼트는 아무것도 막지 않습니다. 그래서 네트워크 미사용은 코드 규율과 위 두 명령의 실측으로만 담보한다고 사양에 적어 뒀습니다. “엔타이틀먼트로 막아 뒀으니 괜찮다”를 믿지 않으려고요.</p>
+</section>
+
+<!-- ======================= 판 07 — 관찰 기록 ======================= -->
+<section class="plate wrap" id="plate-07" aria-labelledby="t7">
+  <div class="grid12 notes__grid">
+    <div class="notes__side">
+      <p class="eyebrow">판 07 — 관찰 기록</p>
+      <h2 id="t7">아직 못 고친 것을 먼저 적습니다</h2>
+      <div class="lede"><p>자랑할 것보다 이쪽이 판단에 더 필요합니다. 옆의 라벨은 그 사실이 어디에 기록돼 있는지입니다.</p></div>
+      <p class="counter" data-counter>현재 <b>1</b> / 5</p>
+    </div>
+
+    <div class="notes__list" data-entries>
+      <article class="entry">
+        <div class="entry__meta"><span class="entry__date">docs/signing.md</span></div>
+        <div class="entry__body">
+          <span class="tag">의도된 선택</span>
+          <h3>Apple 공증을 받지 않았습니다</h3>
+          <p>개발자 프로그램(연 $99)에 가입하지 않고 만들었고, 아는 사람에게만 나눠주는 앱이라 가입하지 않았습니다. 대신 서명은 확실히 합니다 — 고정된 self-signed 인증서라 업데이트해도 캘린더 권한을 다시 주지 않아도 됩니다. ad-hoc 서명이었다면 재빌드마다 권한이 초기화됩니다. 그건 실측으로 확인했습니다.</p>
+        </div>
+      </article>
+      <article class="entry">
+        <div class="entry__meta"><span class="entry__date">Phase 7 · 실측</span></div>
+        <div class="entry__body">
+          <span class="tag tag--open">미해결</span>
+          <h3>경고 창의 기본 버튼이 「휴지통으로 이동」입니다</h3>
+          <p>안내 없이 return 을 누르면 앱이 삭제됩니다. 「그래도 열기」 뒤에 뜨는 2차 확인 창에서도 맨 위가 「휴지통으로 이동」입니다. 이건 저희가 고칠 수 있는 것이 아니라서, 설치 안내에 순서를 그림으로 적어 뒀습니다.</p>
+        </div>
+      </article>
+      <article class="entry">
+        <div class="entry__meta"><span class="entry__date">Phase 7 · 2회 실패</span></div>
+        <div class="entry__body">
+          <span class="tag tag--open">미해결</span>
+          <h3>Finder 에서 앱 이름이 한글로 보이지 않습니다</h3>
+          <p>LSHasLocalizedDisplayName 과 ko.lproj/InfoPlist.strings 로 두 번 시도해 두 번 실패했습니다. 앱 내부 UI 와 설정 창 제목에는 반영됩니다. 파일명만 그대로입니다.</p>
+        </div>
+      </article>
+      <article class="entry">
+        <div class="entry__meta"><span class="entry__date">2026-09-17</span></div>
+        <div class="entry__body">
+          <span class="tag">고침 0.2.7</span>
+          <h3>첫 설치자가 알림을 하나도 못 받았습니다</h3>
+          <p>권한을 받기 전에 만든 EKEventStore 는 그 세션 내내 이벤트 캘린더가 0개입니다. 그런데 권한 상태는 “있음”으로 보이고 15분 주기 재조회도 같은 store 를 읽어 스스로 낫지 않습니다. 지금은 허용을 받아낸 직후 store 를 되돌리고, 로그에 캘린더 개수를 남겨 “회의가 0건”과 “읽지 못한다”를 구분합니다.</p>
+        </div>
+      </article>
+      <article class="entry">
+        <div class="entry__meta"><span class="entry__date">SPEC §12 G4</span></div>
+        <div class="entry__body">
+          <span class="tag">의도된 선택</span>
+          <h3>샌드박스를 껐습니다</h3>
+          <p>켜면 로그가 컨테이너 안으로 숨어 사용자가 못 찾습니다. 로그는 ~/Library/Logs/Untillity/ 에 있어야 “왜 안 떴지”를 직접 볼 수 있습니다. 대가로 엔타이틀먼트가 아무것도 막아 주지 않는다는 것을 판 06에 적어 뒀습니다.</p>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ======================= 판 08 — 취급 절차 ======================= -->
+<section class="plate wrap" id="plate-08" aria-labelledby="t8">
+  <div class="grid12">
+    <div class="steps">
+      <p class="eyebrow">판 08 — 취급 절차</p>
+      <h2 id="t8">설치에 5분. 한 번만 하면 됩니다</h2>
+
+      <div class="stepList" data-steplist style="position:relative">
+        <div class="step__rail" style="top:0;z-index:2" aria-hidden="true"><i data-railfill></i></div>
+
+        <div class="step" data-step><span class="step__n">01</span><p class="step__body">요구 사항을 확인합니다 — <b>macOS 15.2 이상</b>.</p></div>
+        <div class="step" data-step><span class="step__n">02</span><p class="step__body"><b>Untillity-0.3.0.dmg</b> 를 받습니다. 2.2 MB 입니다.</p></div>
+        <div class="step" data-step><span class="step__n">03</span><p class="step__body">dmg 를 열고 앱을 <b>응용 프로그램 폴더로 끌어다 놓습니다</b>. dmg 안에서 바로 열지 마세요 — macOS 가 임시 경로에 복사해 실행해서, 로그인 자동 실행이 엉뚱한 경로로 등록됩니다.</p></div>
+
+        <div class="danger" data-danger>
+          <p class="danger__label">취급 주의</p>
+          <div class="step" data-step><span class="step__n">04</span><p class="step__body">응용 프로그램 폴더에서 두 번 눌러 엽니다. 경고가 뜨면 <b>「완료」</b>를 누릅니다.</p></div>
+          <div class="step" data-step><span class="step__n">05</span>
+            <div class="step__body">
+              <p style="margin:0">파란 기본 버튼은 <b>「휴지통으로 이동」</b>입니다. 안내 없이 return 을 누르면 앱이 삭제됩니다.</p>
+              <div class="dialog">
+                <p class="dialog__title">경고 창 버튼 배열 — 재현 (실제 스크린샷이 아닙니다)</p>
+                <div class="dialog__row">
+                  <span class="dbtn dbtn--primary">휴지통으로 이동<span class="dbtn__x" aria-hidden="true"></span><span class="dbtn__tag">누르지 마세요</span></span>
+                  <span class="dbtn">그래도 열기<span class="dbtn__tag dbtn__tag--ok">여기</span></span>
+                  <span class="dbtn">취소</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="step" data-step><span class="step__n">06</span><p class="step__body">시스템 설정 → 개인정보 보호 및 보안 → 맨 아래 「보안」에서 <b>「그래도 열기」</b>. 이 버튼은 앱을 연 뒤 약 1시간만 보입니다. 확인 창이 한 번 더 뜨는데 거기서도 맨 위가 「휴지통으로 이동」이라, 가운데 「그래도 열기」를 누르고 Touch ID 로 승인합니다.</p></div>
+        </div>
+
+        <div class="step" data-step><span class="step__n">07</span><p class="step__body">Dock 에 아무것도 안 뜨는 것이 정상입니다 — <b>메뉴 막대 전용 앱</b>입니다. 화면 오른쪽 위에서 종 아이콘을 확인하세요. 안 보이면 앱을 한 번 더 실행하면 설정 창이 열립니다.</p></div>
+        <div class="step" data-step><span class="step__n">08</span><p class="step__body">캘린더 접근을 물으면 <b>「전체 접근 허용」</b>. 읽기만 하고 어디에도 보내지 않습니다.</p></div>
+        <div class="step" data-step><span class="step__n">09</span><p class="step__body">설정 창에서 <b>「로그인할 때 언틸리티 시작」</b>을 켜두면 끝입니다.</p></div>
+      </div>
+    </div>
+
+    <aside class="handling__side">
+      <div class="reqcard">
+        <h4>요구 사항</h4>
+        <dl>
+          <div class="r"><dt>macOS</dt><dd>15.2 이상</dd></div>
+          <div class="r"><dt>권한</dt><dd>캘린더 전체 접근 하나 (읽기 전용)</dd></div>
+          <div class="r"><dt>요구 안 함</dt><dd>손쉬운 사용 · 화면 기록</dd></div>
+          <div class="r"><dt>용량</dt><dd>2.2 MB</dd></div>
+        </dl>
+        <button class="btn" type="button" disabled><span class="btn__dot" aria-hidden="true"></span>0.3.0 · 공개 준비 중</button>
+        <div class="reqcard__thumb">
+          <img src="../assets/settings.png" alt="언틸리티 설정 창 — 로그인할 때 시작, 미리 알림 시각, 캘린더 선택 항목이 보인다" width="960" height="1024" loading="lazy" decoding="async">
+        </div>
+        <p class="note reqcard__remove">지우는 법 — 설정에서 자동 실행을 끄고 앱을 휴지통으로. 권한까지 지우려면 <code>tccutil reset Calendar com.bonjugi.untillity</code> (sudo 필요 없습니다).</p>
+        <p class="note" style="margin-top:12px">같은 설치 안내(docs/INSTALL.md)가 dmg 안에도 함께 들어갑니다.</p>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<!-- ======================= 판권장 ======================= -->
+<footer class="colophon wrap">
+  <div class="colophon__rows">
+    <div class="colophon__mark"><img src="../assets/icon.png" alt="" width="16" height="16" decoding="async">표본 001 · UNTILLITY 0.3.0 · 2026-09</div>
+    <div>self-signed “Untillity Local Signing” · 2036-09-02 만료</div>
+    <div>SPEC.md · PROGRESS.md · docs/signing.md 가 저장소에 함께 있습니다</div>
+  </div>
+  <p class="kicker colophon__last" data-last>이 저장소는 코드보다 판단의 기록이 많습니다.</p>
+</footer>
+
+</main>
+
+<div class="mobilebar" data-mobilebar aria-hidden="true">
+  <span>Untillity 0.3.0 · 2.2 MB</span>
+  <span style="color:var(--caution)">공개 준비 중</span>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+var reduced = false;
+try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch(e){}
+var canHover = true;
+try { canHover = window.matchMedia('(hover: hover)').matches; } catch(e){}
+
+/* ---------------------------------------------------------------- 난수 */
+function rng(seed){
+  var s = seed >>> 0 || 1;
+  return function(){
+    s ^= s << 13; s >>>= 0; s ^= s >> 17; s ^= s << 5; s >>>= 0;
+    return s / 4294967296;
+  };
+}
+
+/* ================================================================
+   1. 구운 층 — 엠버의 광선 · 아지랑이 · 불씨
+   비주얼 정본 webRecreationNotes 를 Canvas 2D 로 옮긴 것.
+   한 번만 굽고 두 무대(표제지 · 분해도)가 나눠 쓴다.
+   ================================================================ */
+
+var BAKE_W = 1000, BAKE_H = 625;   /* 1.6:1 */
+var baked = {};
+
+function makeCanvas(w,h){
+  var c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  return c;
+}
+
+/* [6] 열기 광선 — 화로에서 위로 뻗는 부채 18줄 */
+function bakeRays(){
+  var c = makeCanvas(BAKE_W, BAKE_H), g = c.getContext('2d'), rand = rng(9173);
+  var ox = BAKE_W * 0.5, oy = BAKE_H * 1.12, reach = BAKE_H * 1.45;
+  g.globalCompositeOperation = 'lighter';
+  for (var i = 0; i < 18; i++){
+    var a = 0.30 + (Math.PI - 0.60) * ((i + 0.15 + rand() * 0.7) / 18);
+    var w = 0.02 + rand() * 0.05;
+    var r = reach * (0.66 + rand() * 0.5);
+    var gr = g.createRadialGradient(ox, oy, 0, ox, oy, r);
+    var a0 = 0.22 * (0.45 + rand() * 0.85);
+    gr.addColorStop(0, 'rgba(255,194,107,' + a0.toFixed(3) + ')');
+    gr.addColorStop(0.42, 'rgba(255,194,107,' + (a0 * 0.34).toFixed(3) + ')');
+    gr.addColorStop(1, 'rgba(255,194,107,0)');
+    g.fillStyle = gr;
+    g.beginPath();
+    g.moveTo(ox, oy);
+    g.arc(ox, oy, r, -a - w, -a + w);
+    g.closePath();
+    g.fill();
+  }
+  return c;
+}
+
+/* [5] 열기 아지랑이 — 세로 결. 위로 갈수록 식는 마스크를 곱한다 */
+function bakeHaze(){
+  var c = makeCanvas(BAKE_W, BAKE_H), g = c.getContext('2d'), rand = rng(3311);
+  g.globalCompositeOperation = 'lighter';
+  for (var i = 0; i < 30; i++){
+    var x = rand() * BAKE_W;
+    var bw = 34 + rand() * 128;
+    var bh = BAKE_H * (0.3 + rand() * 0.55);
+    var gr = g.createLinearGradient(0, BAKE_H, 0, BAKE_H - bh);
+    gr.addColorStop(0, 'rgba(255,186,118,' + (0.07 + rand() * 0.07).toFixed(3) + ')');
+    gr.addColorStop(0.55, 'rgba(255,205,150,' + (0.03 + rand() * 0.035).toFixed(3) + ')');
+    gr.addColorStop(1, 'rgba(255,205,150,0)');
+    g.fillStyle = gr;
+    g.beginPath();
+    g.ellipse(x, BAKE_H - bh * 0.42, bw * 0.5, bh * 0.58, 0, 0, Math.PI * 2);
+    g.fill();
+  }
+  /* 식는 마스크: 알파 1@바닥 · 0.55@30% · 0@72% 이상 */
+  g.globalCompositeOperation = 'destination-out';
+  var m = g.createLinearGradient(0, BAKE_H, 0, 0);
+  m.addColorStop(0, 'rgba(0,0,0,0)');
+  m.addColorStop(0.30, 'rgba(0,0,0,0.45)');
+  m.addColorStop(0.72, 'rgba(0,0,0,1)');
+  m.addColorStop(1, 'rgba(0,0,0,1)');
+  g.fillStyle = m;
+  g.fillRect(0, 0, BAKE_W, BAKE_H);
+  return c;
+}
+
+/* [7] 불씨 3겹 — 먼 것부터 작고 흐리다 */
+function bakeEmbers(){
+  var c = makeCanvas(BAKE_W, BAKE_H), g = c.getContext('2d'), rand = rng(5501);
+  var k = BAKE_W / 1920;
+  var cols = [[255,184,77],[255,143,56],[255,219,158],[245,107,41]];
+  var layers = [
+    { n: 300, r0: 0.6, r1: 1.5, a: 0.75 },
+    { n: 80,  r0: 1.5, r1: 3.2, a: 0.95 },
+    { n: 14,  r0: 3.4, r1: 5.2, a: 1.00 }
+  ];
+  g.globalCompositeOperation = 'lighter';
+  for (var L = 0; L < layers.length; L++){
+    var cfg = layers[L];
+    for (var i = 0; i < cfg.n; i++){
+      var x = rand() * BAKE_W;
+      var yv = rand();                              /* 아래=0 */
+      var y = BAKE_H * (1 - yv);
+      var r = (cfg.r0 + rand() * (cfg.r1 - cfg.r0)) * k;
+      var col = cols[(rand() * 4) | 0];
+      var a = (0.5 + rand() * 0.5) * cfg.a;
+      /* 마스크: 바닥 1 · 30% 1 · 꼭대기 0.15 */
+      var mask = yv < 0.3 ? 1 : 1 - (yv - 0.3) / 0.7 * 0.85;
+      a *= mask;
+      var base = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',';
+      var R = r > 2 * k ? r * 7 : r * 3.4;
+      var gr = g.createRadialGradient(x, y, 0, x, y, R);
+      gr.addColorStop(0, base + (r > 2 * k ? 0.55 * a : 0.26 * a).toFixed(3) + ')');
+      gr.addColorStop(0.35, base + (0.1 * a).toFixed(3) + ')');
+      gr.addColorStop(1, base + '0)');
+      g.fillStyle = gr;
+      g.fillRect(x - R, y - R, R * 2, R * 2);
+      g.beginPath();
+      g.arc(x, y, Math.max(0.45, r), 0, Math.PI * 2);
+      g.fillStyle = base + (0.9 * a).toFixed(3) + ')';
+      g.fill();
+    }
+  }
+  return c;
+}
+
+function bakeAll(){
+  if (baked.rays) return;
+  baked.rays = bakeRays();
+  baked.haze = bakeHaze();
+  baked.embers = bakeEmbers();
+}
+
+/* 작은 스프라이트 — 살아 있는 층 */
+function moteSprite(col, size){
+  var c = makeCanvas(size, size), g = c.getContext('2d');
+  var gr = g.createRadialGradient(size/2, size/2, 0, size/2, size/2, size/2);
+  var base = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',';
+  gr.addColorStop(0, base + '1)');
+  gr.addColorStop(0.35, base + '0.55)');
+  gr.addColorStop(1, base + '0)');
+  g.fillStyle = gr; g.fillRect(0,0,size,size);
+  return c;
+}
+function starSprite(col, size){
+  var c = makeCanvas(size, size), g = c.getContext('2d'), m = size/2;
+  var base = 'rgba(' + col[0] + ',' + col[1] + ',' + col[2] + ',';
+  var gr = g.createRadialGradient(m,m,0,m,m,m*0.28);
+  gr.addColorStop(0, base + '1)'); gr.addColorStop(1, base + '0)');
+  g.fillStyle = gr; g.fillRect(0,0,size,size);
+  g.globalCompositeOperation = 'lighter';
+  [[1,0],[0,1]].forEach(function(d){
+    var lg = g.createLinearGradient(m - m*d[0], m - m*d[1], m + m*d[0], m + m*d[1]);
+    lg.addColorStop(0, base + '0)'); lg.addColorStop(0.5, base + '0.75)'); lg.addColorStop(1, base + '0)');
+    g.fillStyle = lg;
+    g.fillRect(m - (d[0] ? m : 1.1), m - (d[1] ? m : 1.1), d[0] ? size : 2.2, d[1] ? size : 2.2);
+  });
+  return c;
+}
+var SP = null;
+function sprites(){
+  if (!SP) SP = { dust: moteSprite([255,179,97],24), star: starSprite([255,230,173],64), touch: moteSprite([255,219,158],24) };
+  return SP;
+}
+
+/* ================================================================
+   2. 표본 — 열한 겹의 판 한 벌.
+   스칼라 e 하나가 전부를 지배한다 (0 = 합쳐짐, 1 = 분해).
+   ================================================================ */
+
+function clamp(v,a,b){ return v < a ? a : v > b ? b : v; }
+
+function makeSpecimen(deck, opts){
+  opts = opts || {};
+  var exploded = !!opts.exploded;
+  var hitArea = opts.hit || deck;
+  var plates = [].slice.call(deck.querySelectorAll('.pl'));
+  var anchors = [].slice.call(deck.querySelectorAll('.anchor'));
+  var alertEl = deck.querySelector('[data-alert]');
+  var arts = {};
+  [].slice.call(deck.querySelectorAll('canvas[data-art]')).forEach(function(cv){
+    arts[cv.getAttribute('data-art')] = cv;
+  });
+  var living = arts.living, lg = living ? living.getContext('2d') : null;
+
+  var W = 0, H = 0, dpr = 1, quality = 1;
+  var motes = [], stars = [];
+  var e = 0, eTarget = 0;
+  var pointer = { x: .5, y: .5, has: false };
+  var cam = { x: 0, y: 0 };
+  var tiltMax = exploded ? 4 : 3.5;
+  var t = 0, last = 0, raf = 0, visible = false, running = false, painted = false;
+
+  if (reduced) { e = eTarget = exploded ? 0.55 : 0; }
+
+  function seed(){
+    var n = Math.round(320 * quality), rand = rng(0x9e3779b9);
+    motes = new Array(n);
+    for (var i = 0; i < n; i++){
+      motes[i] = { x: rand(), y: rand(), r: 0.6 + rand() * 2.4, a: 0.18 + rand() * 0.82,
+                   sp: 0.25 + rand(), z: 0.35 + rand() * 0.65, ph: rand() * Math.PI * 2 };
+    }
+    stars = new Array(14);
+    for (var j = 0; j < 14; j++){
+      stars[j] = { x: rand(), y: rand() * 0.8, s: 10 + rand() * 26, a: 0.35 + rand() * 0.65,
+                   ph: rand() * Math.PI * 2, sp: 0.4 + rand() * 0.9 };
+    }
+  }
+
+  function paintStatic(){
+    ['rays','haze','embers'].forEach(function(k){
+      var cv = arts[k]; if (!cv || !baked[k]) return;
+      cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+      var g = cv.getContext('2d');
+      g.clearRect(0, 0, cv.width, cv.height);
+      g.drawImage(baked[k], 0, 0, cv.width, cv.height);
+    });
+  }
+
+  function resize(){
+    var r = deck.getBoundingClientRect();
+    var w = Math.max(1, Math.round(r.width)), h = Math.max(1, Math.round(r.height));
+    if (w === W && h === H && painted) return;
+    W = w; H = h;
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    quality = W < 460 ? 0.5 : W < 700 ? 0.75 : 1;
+    if (living){
+      living.width = Math.round(W * dpr); living.height = Math.round(H * dpr);
+      lg.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    paintStatic();
+    seed();
+    if (alertEl) alertEl.style.setProperty('--u', (W / 1920).toFixed(4));
+    painted = true;
+    drawLiving(0);
+  }
+
+  function drawLiving(dt){
+    if (!lg) return;
+    var s = sprites();
+    var k = Math.max(0.42, W / 1920);
+    lg.setTransform(dpr, 0, 0, dpr, 0, 0);
+    lg.clearRect(0, 0, W, H);
+    lg.globalCompositeOperation = 'lighter';
+    var px = pointer.x * W, py = pointer.y * H;
+    var i, m, x, y;
+    for (i = 0; i < stars.length; i++){
+      var st = stars[i];
+      var tw = 0.55 + 0.45 * Math.sin(t * st.sp + st.ph);
+      var ss = st.s * k * 1.6;
+      lg.globalAlpha = st.a * tw * 0.9;
+      lg.drawImage(s.star, st.x * W - ss / 2, st.y * H - ss / 2, ss, ss);
+    }
+    var swirlR = 500 * k, reach = 175 * k;
+    for (i = 0; i < motes.length; i++){
+      m = motes[i];
+      m.x += (0.06 * m.sp * 50 * dt) / W;
+      m.y -= (1.0 * m.sp * 50 * dt) / H;
+      m.x += Math.sin(t * 0.21 + m.ph) * 0.00012 * m.sp;
+      if (m.y < -0.05){ m.y = 1.05; m.x = (m.x + 0.37) % 1; }
+      if (m.x > 1.05) m.x -= 1.1; else if (m.x < -0.05) m.x += 1.1;
+      x = m.x * W; y = m.y * H;
+      if (pointer.has){
+        var dx = x - px, dy = y - py, d = Math.sqrt(dx * dx + dy * dy) + 0.0001;
+        if (d < swirlR){
+          var kk = (1 - d / swirlR); kk *= kk;
+          var tang = (52 * k * kk) / d;
+          x += -dy * tang * 0.06; y += dx * tang * 0.06;
+          if (d < reach){
+            var pk = (1 - d / reach);
+            x -= (dx / d) * 13 * k * pk * pk * 0.9;
+            y -= (dy / d) * 13 * k * pk * pk * 0.9;
+          }
+        }
+      }
+      var near = pointer.has && Math.abs(x - px) < 90 * k && Math.abs(y - py) < 90 * k;
+      var sz = m.r * 6 * k;
+      lg.globalAlpha = m.a * 0.85 * (0.55 + 0.45 * Math.sin(t * 0.8 * m.sp + m.ph));
+      lg.drawImage(near ? s.touch : s.dust, x - sz / 2, y - sz / 2, sz, sz);
+    }
+    lg.globalAlpha = 1;
+    lg.globalCompositeOperation = 'source-over';
+  }
+
+  /* 카메라 — 앱의 sway + 포인터 추종을 같은 식으로 */
+  function camTarget(){
+    var swayX = 0.55 * Math.sin(0.062 * t) + 0.30 * Math.sin(0.151 * t + 2.1);
+    var swayY = 0.55 * Math.sin(0.051 * t + 1.3) + 0.30 * Math.sin(0.133 * t + 0.4);
+    var fx = pointer.has ? (pointer.x * 2 - 1) : 0;
+    var fy = pointer.has ? (pointer.y * 2 - 1) : 0;
+    return [ (swayX * 0.35 + fx), (swayY * 0.35 + fy) ];
+  }
+
+  function apply(){
+    deck.style.setProperty('--e', e.toFixed(4));
+    deck.style.setProperty('--py', (cam.x * tiltMax).toFixed(3) + 'deg');
+    deck.style.setProperty('--px', (-cam.y * tiltMax * 0.62).toFixed(3) + 'deg');
+  }
+
+  function frame(now){
+    if (!running){ raf = 0; return; }
+    var dt = Math.min(0.05, last ? (now - last) / 1000 : 0.016);
+    last = now; t += dt;
+
+    var k = eTarget > e ? 5.0 : 8.5;
+    e += (eTarget - e) * (1 - Math.exp(-k * dt));
+    if (Math.abs(eTarget - e) < 0.0004) e = eTarget;
+
+    var ct = camTarget();
+    cam.x += (ct[0] - cam.x) * (1 - Math.exp(-3 * dt));
+    cam.y += (ct[1] - cam.y) * (1 - Math.exp(-3 * dt));
+
+    apply();
+    drawLiving(dt);
+    if (opts.onFrame) opts.onFrame(e);
+    raf = requestAnimationFrame(frame);
+  }
+
+  function start(){
+    if (running || reduced) return;
+    running = true; last = 0;
+    raf = requestAnimationFrame(frame);
+  }
+  function stop(){
+    running = false;
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
+  }
+
+  /* 포인터 */
+  if (canHover){
+    hitArea.addEventListener('pointermove', function(ev){
+      var r = deck.getBoundingClientRect();
+      pointer.x = clamp((ev.clientX - r.left) / r.width, -0.4, 1.4);
+      pointer.y = clamp((ev.clientY - r.top) / r.height, -0.4, 1.4);
+      pointer.has = true;
+    }, { passive: true });
+    hitArea.addEventListener('pointerleave', function(){
+      pointer.has = false; pointer.x = 0.5; pointer.y = 0.5;
+    }, { passive: true });
+    if (exploded){
+      hitArea.addEventListener('pointerenter', function(){ if (!reduced) eTarget = 1; });
+      hitArea.addEventListener('pointerleave', function(){ if (!reduced) eTarget = 0; });
+    }
+  }
+
+  if (window.ResizeObserver){
+    new ResizeObserver(function(){ resize(); }).observe(deck);
+  } else {
+    window.addEventListener('resize', resize);
+  }
+
+  if (window.IntersectionObserver){
+    new IntersectionObserver(function(es){
+      es.forEach(function(en){
+        visible = en.isIntersecting;
+        if (visible){ resize(); start(); } else stop();
+      });
+    }, { threshold: 0.02 }).observe(deck);
+  }
+
+  resize();
+  apply();
+  if (reduced){ drawLiving(0.016); if (opts.onFrame) opts.onFrame(e); }
+  else start();
+
+  return {
+    setETarget: function(v){ eTarget = clamp(v, 0, 1); if (!running) start(); },
+    getE: function(){ return e; },
+    deck: deck, plates: plates, anchors: anchors,
+    resize: resize
+  };
+}
+
+/* ================================================================
+   3. 표본 두 벌을 세운다
+   ================================================================ */
+
+bakeAll();
+
+var heroDeck = document.querySelector('[data-deck="hero"]');
+var heroStage = heroDeck ? heroDeck.closest('.stage') : null;
+var hero = heroDeck ? makeSpecimen(heroDeck, { hit: heroStage }) : null;
+
+var exStageEl = document.querySelector('[data-stage]');
+var exSpec = null, leaders = null, legendItems = [];
+
+if (exStageEl && heroDeck){
+  var clone = heroDeck.cloneNode(true);
+  clone.setAttribute('data-deck', 'exploded');
+  clone.setAttribute('aria-hidden', 'true');
+  clone.removeAttribute('role');
+  clone.removeAttribute('aria-label');
+  exStageEl.appendChild(clone);
+
+  var svg = document.getElementById('leaders');
+  var exBody = document.querySelector('.ex__body');
+  var zaxis = document.querySelector('.zaxis');
+  legendItems = [].slice.call(document.querySelectorAll('[data-legend] li'));
+
+  /* 지시선 11개 */
+  var lines = [], dots = [];
+  var NS = 'http://www.w3.org/2000/svg';
+  for (var i = 0; i < 11; i++){
+    var pl = document.createElementNS(NS, 'polyline');
+    var ci = document.createElementNS(NS, 'circle');
+    ci.setAttribute('r', '2.5');
+    svg.appendChild(pl); svg.appendChild(ci);
+    lines.push(pl); dots.push(ci);
+  }
+
+  var lastE = -1;
+  function drawLeaders(e){
+    if (zaxis) zaxis.style.setProperty('--e', e.toFixed(3));
+    if (e < 0.02){
+      if (lastE >= 0.02) svg.style.display = 'none';
+      lastE = e; return;
+    }
+    svg.style.display = '';
+    lastE = e;
+    var sr = svg.getBoundingClientRect();
+    if (!sr.width) return;
+    svg.setAttribute('viewBox', '0 0 ' + Math.round(sr.width) + ' ' + Math.round(sr.height));
+    /* ① 읽기 — 한 번에 모아서 */
+    var pa = [], pb = [];
+    for (var i = 0; i < 11; i++){
+      pa.push(exSpec.anchors[i].getBoundingClientRect());
+      pb.push(legendItems[i] ? legendItems[i].getBoundingClientRect() : null);
+    }
+    /* ② 쓰기 */
+    for (i = 0; i < 11; i++){
+      if (!pb[i]){ lines[i].setAttribute('points',''); continue; }
+      var ax = pa[i].left - sr.left, ay = pa[i].top - sr.top;
+      var bx = pb[i].left - sr.left, by = pb[i].top - sr.top + 14;
+      var mx = bx - 22;
+      lines[i].setAttribute('points', ax + ',' + ay + ' ' + mx + ',' + ay + ' ' + bx + ',' + by);
+      lines[i].setAttribute('stroke-opacity', (0.28 * e).toFixed(3));
+      dots[i].setAttribute('cx', ax); dots[i].setAttribute('cy', ay);
+      dots[i].setAttribute('fill-opacity', (0.5 * e).toFixed(3));
+    }
+  }
+
+  exSpec = makeSpecimen(clone, { exploded: true, hit: exStageEl, onFrame: drawLeaders });
+
+  /* 역방향 조작 — 목록으로 스택을 뜯는다 */
+  function solo(idx){
+    var ps = clone.querySelectorAll('.pl');
+    if (idx === null){
+      clone.removeAttribute('data-solo');
+      [].forEach.call(ps, function(p){ p.classList.remove('is-solo'); });
+      legendItems.forEach(function(li){ li.classList.remove('is-on'); });
+      lines.forEach(function(l){ l.setAttribute('stroke-width','1'); });
+    } else {
+      clone.setAttribute('data-solo', idx);
+      [].forEach.call(ps, function(p,i){ p.classList.toggle('is-solo', i === idx); });
+      legendItems.forEach(function(li,i){ li.classList.toggle('is-on', i === idx); });
+      lines.forEach(function(l,i){ l.setAttribute('stroke-width', i === idx ? '1.5' : '1'); });
+      if (lines[idx]) lines[idx].setAttribute('stroke-opacity','.9');
+    }
+  }
+  legendItems.forEach(function(li, i){
+    ['pointerenter','focus'].forEach(function(ev){
+      li.addEventListener(ev, function(){ if (!reduced) exSpec.setETarget(1); solo(i); });
+    });
+    ['pointerleave','blur'].forEach(function(ev){
+      li.addEventListener(ev, function(){ solo(null); });
+    });
+  });
+  [].forEach.call(clone.querySelectorAll('.pl'), function(p, i){
+    p.addEventListener('pointerenter', function(){ if (exSpec.getE() > 0.4) solo(i); });
+    p.addEventListener('pointerleave', function(){ solo(null); });
+  });
+
+  /* 터치·키보드 — 섹션 진행도로 e 를 민다 */
+  if (!canHover && !reduced){
+    var sec = document.getElementById('plate-01');
+    var onScrollE = function(){
+      var r = sec.getBoundingClientRect(), vh = window.innerHeight;
+      exSpec.setETarget(clamp((vh * 0.75 - r.top) / (vh * 0.55), 0, 1));
+    };
+    var attached = false;
+    if (window.IntersectionObserver){
+      new IntersectionObserver(function(es){
+        es.forEach(function(en){
+          if (en.isIntersecting && !attached){ window.addEventListener('scroll', onScrollE, { passive: true }); attached = true; onScrollE(); }
+          else if (!en.isIntersecting && attached){ window.removeEventListener('scroll', onScrollE); attached = false; }
+        });
+      }, { threshold: 0 }).observe(sec);
+    }
+  }
+  if (reduced) drawLeaders(0.55);
+}
+
+/* ================================================================
+   4. 표본 안의 시계 — 이 페이지에는 시계가 하나 돌고 있다
+   ================================================================ */
+
+var startAt = Date.now() + 58000;
+function p2(n){ return n < 10 ? '0' + n : '' + n; }
+function ampm(d){
+  var h = d.getHours(), ap = h < 12 ? '오전' : '오후', hh = h % 12; if (!hh) hh = 12;
+  return { ap: ap, s: hh + ':' + p2(d.getMinutes()) };
+}
+function refreshAlerts(){
+  var now = Date.now();
+  var diff = Math.round((startAt - now) / 1000);
+  if (diff <= -75){ startAt = now + 58000; diff = 58; }
+  var txt;
+  if (diff > 0){
+    txt = diff >= 60 ? (Math.floor(diff / 60) + '분 ' + p2(diff % 60) + '초 뒤 시작') : (diff + '초 뒤 시작');
+  } else {
+    var el = -diff;
+    txt = el < 60 ? '시작됨' : ('시작됨 (' + Math.floor(el / 60) + '분 경과)');
+  }
+  var s = new Date(startAt), en = new Date(startAt + 30 * 60000);
+  var a = ampm(s), b = ampm(en);
+  var range = a.ap + ' ' + a.s + ' – ' + (a.ap === b.ap ? b.s : b.ap + ' ' + b.s);
+  var d = new Date();
+  var clock = p2(d.getHours()) + ':' + p2(d.getMinutes()) + ':' + p2(d.getSeconds());
+  var sn3 = ampm(new Date(now + 3 * 60000)), sn10 = ampm(new Date(now + 10 * 60000));
+  document.querySelectorAll('[data-alert]').forEach(function(al){
+    var c = al.querySelector('[data-count]'); if (c) c.textContent = txt;
+    var r = al.querySelector('[data-range]'); if (r) r.textContent = range;
+    var k = al.querySelector('[data-clock]'); if (k) k.textContent = clock;
+    var s3 = al.querySelector('[data-sn="3"]'); if (s3) s3.textContent = sn3.ap + ' ' + sn3.s;
+    var s10 = al.querySelector('[data-sn="10"]'); if (s10) s10.textContent = sn10.ap + ' ' + sn10.s;
+    var ss = al.querySelector('[data-sn="start"]'); if (ss) ss.textContent = a.ap + ' ' + a.s;
+  });
+}
+refreshAlerts();
+if (!reduced) setInterval(refreshAlerts, 1000);
+
+/* ================================================================
+   5. 지면 — 진입·교체·계측
+   IntersectionObserver 하나로 등장을 처리하고,
+   스크롤 핸들러는 rAF 로 묶어 하나만 둔다.
+   ================================================================ */
+
+var pending = [].slice.call(document.querySelectorAll(
+  '.rise, .front__stage, [data-spread], [data-banner], [data-card], [data-tone], [data-keytable], [data-sb], [data-ledger], [data-danger], [data-last]'
+));
+
+function reveal(el){
+  el.classList.add('in');
+  if (el.hasAttribute('data-banner') && !reduced) el.classList.add('loop');
+  if (el.hasAttribute('data-ledger')) countUp(el);
+}
+
+/* 사각형을 직접 잰다 — 배경 탭에서 IntersectionObserver 가
+   한 번도 울리지 않는 경우가 있어 등장을 거기에 맡기지 않는다. */
+function sweep(){
+  if (!pending.length) return;
+  var vh = window.innerHeight || 800;
+  for (var i = pending.length - 1; i >= 0; i--){
+    var el = pending[i], r = el.getBoundingClientRect();
+    if (r.bottom < -80 || r.top < vh * 0.94){
+      reveal(el);
+      pending.splice(i, 1);
+    }
+  }
+}
+
+/* --- 계측값 count-up ------------------------------------------- */
+function countUp(root){
+  if (reduced) return;
+  root.querySelectorAll('[data-num]').forEach(function(el){
+    var to = parseFloat(el.getAttribute('data-to'));
+    var dec = parseInt(el.getAttribute('data-dec'), 10) || 0;
+    var pre = el.getAttribute('data-pre') || '';
+    var suf = el.getAttribute('data-suf') || '';
+    var t0 = 0, dur = 900;
+    function ease(x){ return 1 - Math.pow(1 - x, 3); }
+    function step(now){
+      if (!t0) t0 = now;
+      var k = clamp((now - t0) / dur, 0, 1);
+      var v = to * ease(k);
+      el.textContent = pre + (dec ? v.toFixed(dec) : Math.round(v).toLocaleString('ko-KR')) + suf;
+      if (k < 1) requestAnimationFrame(step);
+      else el.textContent = pre + (dec ? to.toFixed(dec) : to.toLocaleString('ko-KR')) + suf;
+    }
+    el.textContent = pre + (dec ? (0).toFixed(dec) : '0') + suf;
+    requestAnimationFrame(step);
+  });
+}
+
+/* --- 판 03 — 표본 카드: 팔레트 · 영상 ------------------------- */
+document.querySelectorAll('[data-card]').forEach(function(card){
+  var vid = card.querySelector('[data-vid]');
+  if (!vid || reduced || !canHover) return;
+  var loaded = false;
+  card.addEventListener('pointerenter', function(){
+    if (!loaded){ vid.load(); loaded = true; }
+    var pr = vid.play();
+    if (pr && pr.catch) pr.catch(function(){});
+    vid.classList.add('on');
+  });
+  card.addEventListener('pointerleave', function(){
+    vid.classList.remove('on');
+    setTimeout(function(){ if (!vid.classList.contains('on')) vid.pause(); }, 500);
+  });
+});
+
+/* --- 판 04 — 검색표 행 ↔ 판정 로그 ---------------------------- */
+var LOGS = {
+  '1': ['제외 F2-1 취소된 일정', '[A팀] 스프린트 회고 (status == .canceled)'],
+  '2': ['제외 F2-2 끈 캘린더', '사내 전사 공지 (calendarId ∈ disabled)'],
+  '3': ['제외 F2-3 종일 일정', '사내 전사 공지 (isAllDay)'],
+  '4': ['제외 F2-4 내가 거절', '[B팀] 격주 싱크 (myResponse == .declined)'],
+  '5': ['제외 F2-5 미정으로 답함', '채용 인터뷰 (myResponse == .tentative)'],
+  '6': ['제외 F2-6 이미 끝난 일정', '[A팀] 데일리 (endsAt ≤ now)'],
+  '7': ['제외 F2-7 장시간 일정', '컨퍼런스 월~수 (26시간 12분)'],
+  '8': ['제외 F2-8 너무 짧은 일정', '알림 테스트 (0분)']
+};
+var logBox = document.querySelector('[data-log]');
+var logL2 = logBox ? logBox.querySelector('.log__l2') : null;
+var logTimer = 0, logCur = '7';
+function setLog(k){
+  if (!logL2 || k === logCur) return;
+  logCur = k;
+  var pair = LOGS[k];
+  var paint = function(){
+    logL2.innerHTML = '<span class="tag">[판정]</span> <span class="hit">' + pair[0] + '</span> — ' + pair[1];
+    logBox.classList.remove('fade');
+  };
+  if (reduced){ paint(); return; }
+  logBox.classList.add('fade');
+  clearTimeout(logTimer);
+  logTimer = setTimeout(paint, 120);
+}
+document.querySelectorAll('.keyrow').forEach(function(row){
+  var k = row.getAttribute('data-row');
+  ['pointerenter','focus'].forEach(function(ev){
+    row.addEventListener(ev, function(){
+      document.querySelectorAll('.keyrow').forEach(function(r){ r.classList.remove('is-on'); });
+      row.classList.add('is-on');
+      setLog(k);
+    });
+  });
+});
+
+/* --- 판 05 — 지시선 주석 · 힌트 줄 재현 ----------------------- */
+var sb = document.querySelector('[data-sb]');
+if (sb){
+  var hintImg = sb.querySelector('[data-hint]');
+  var hideTimer = 0;
+  sb.querySelectorAll('.sb__note').forEach(function(note){
+    var reveal = note.hasAttribute('data-reveal');
+    note.addEventListener('pointerenter', function(){
+      sb.classList.add('dim'); note.classList.add('on');
+      if (reveal && hintImg){ clearTimeout(hideTimer); hintImg.classList.add('on'); }
+    });
+    note.addEventListener('pointerleave', function(){
+      sb.classList.remove('dim'); note.classList.remove('on');
+      if (reveal && hintImg){
+        clearTimeout(hideTimer);
+        hideTimer = setTimeout(function(){ hintImg.classList.remove('on'); }, 2500);
+      }
+    });
+  });
+}
+
+/* --- 판 07 — 관찰 기록 카운터 --------------------------------- */
+var entries = [].slice.call(document.querySelectorAll('.entry'));
+var counter = document.querySelector('[data-counter] b');
+if (entries.length && window.IntersectionObserver){
+  var seen = 1;
+  var eio = new IntersectionObserver(function(es){
+    es.forEach(function(en){
+      var i = entries.indexOf(en.target);
+      if (en.isIntersecting){
+        en.target.classList.add('in');
+        if (i + 1 >= seen){ seen = i + 1; if (counter) counter.textContent = seen; }
+      }
+    });
+  }, { threshold: 0.35, rootMargin: '-20% 0px -35% 0px' });
+  entries.forEach(function(el){ eio.observe(el); });
+}
+
+/* --- 스크롤 하나로: 판 08 괘선 채움 · 모바일 바 --------------- */
+var railFill = document.querySelector('[data-railfill]');
+var stepList = document.querySelector('[data-steplist]');
+var mobilebar = document.querySelector('[data-mobilebar]');
+var plate08 = document.getElementById('plate-08');
+var ticking = false;
+
+function onScroll(){
+  if (ticking) return;
+  ticking = true;
+  requestAnimationFrame(function(){
+    ticking = false;
+    if (railFill && stepList){
+      var r = stepList.getBoundingClientRect();
+      var p = clamp((window.innerHeight * 0.58 - r.top) / Math.max(1, r.height), 0, 1);
+      railFill.style.setProperty('--fill', (p * 100).toFixed(1) + '%');
+    }
+    if (mobilebar && plate08){
+      var q = plate08.getBoundingClientRect();
+      mobilebar.classList.toggle('on', q.top < window.innerHeight * 0.6 && q.bottom > 120);
+    }
+    sweep();
+  });
+}
+window.addEventListener('scroll', onScroll, { passive: true });
+window.addEventListener('resize', onScroll, { passive: true });
+window.addEventListener('load', onScroll);
+document.addEventListener('visibilitychange', onScroll);
+onScroll();
+setTimeout(onScroll, 350);
+
+/* --- 러닝헤드의 판 번호 --------------------------------------- */
+var runNo = document.querySelector('.runhead__right');
+if (runNo && window.IntersectionObserver){
+  var secs = [].slice.call(document.querySelectorAll('section.plate'));
+  var sio = new IntersectionObserver(function(es){
+    es.forEach(function(en){
+      if (!en.isIntersecting) return;
+      var id = en.target.id || '';
+      var n = id.replace('plate-', '');
+      if (n) runNo.textContent = '판 ' + n + ' / 08';
+    });
+  }, { threshold: 0.3 });
+  secs.forEach(function(s){ sio.observe(s); });
+}
+
+})();
+</script>
+
+<!-- 시안 전환 띠 — 초안 비교용. 하나를 고르면 통째로 지운다. -->
+<style>
+#un-switch{position:fixed;right:14px;bottom:14px;z-index:2147483000;
+ display:flex;align-items:center;gap:2px;padding:5px;border-radius:999px;
+ background:rgba(14,14,16,.78);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+ border:1px solid rgba(255,255,255,.16);box-shadow:0 10px 34px -14px rgba(0,0,0,.85);
+ font:500 12px/1 -apple-system,BlinkMacSystemFont,"Noto Sans KR",system-ui,sans-serif;
+ max-width:calc(100vw - 28px);overflow:hidden;
+ transition:opacity .3s cubic-bezier(.22,.61,.36,1)}
+#un-switch .un-list{display:flex;align-items:center;gap:2px;max-width:0;overflow:hidden;
+ opacity:0;transition:max-width .45s cubic-bezier(.22,.61,.36,1),opacity .3s}
+#un-switch:hover .un-list,#un-switch:focus-within .un-list{max-width:min(62vw,560px);opacity:1}
+#un-switch a{color:rgba(255,255,255,.74);text-decoration:none;padding:7px 11px;border-radius:999px;
+ white-space:nowrap;transition:background .22s,color .22s}
+#un-switch a:hover{color:#fff;background:rgba(255,255,255,.12)}
+#un-switch a[aria-current]{color:#0b0b0c;background:#f2f0ec}
+#un-switch .un-tag{color:rgba(255,255,255,.5);padding:7px 10px;white-space:nowrap;letter-spacing:.06em}
+@media print{#un-switch{display:none}}
+@media (prefers-reduced-motion:reduce){#un-switch .un-list{transition:none}}
+</style>
+<nav id="un-switch" aria-label="시안 전환" tabindex="0">
+  <span class="un-tag" aria-hidden="true">시안</span>
+  <span class="un-list"><a href="../">목록</a><a href="../theatre/">극장</a><a href="../specimen/" aria-current="page">표본실</a><a href="../spec/">사양서</a><a href="../zine/">석간</a><a href="../playable/">만져 보는 것</a></span>
+</nav>
+</body>
+</html>
