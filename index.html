@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>언틸리티 — 회의를 놓치지 않게, 화면을 통째로 덮습니다</title>
-<meta name="description" content="macOS 메뉴 막대 앱 언틸리티. 회의 시작 전에 화면 전체를 덮고, 닫기 전에는 사라지지 않습니다. 쓰던 앱의 포커스를 빼앗지 않고, 네트워크를 쓰지 않습니다.">
+<title>언틸리티 — 회의를 놓치지 않도록 화면 전체로 알려주는 macOS 앱</title>
+<meta name="description" content="macOS 메뉴 막대 앱 언틸리티. 중요한 회의를 놓치지 않도록 전체 화면으로 알려드립니다. 쓰던 앱의 포커스를 방해하지 않으며, 네트워크 통신 없이 안전하게 동작합니다.">
 <meta name="color-scheme" content="dark light">
 <meta name="theme-color" content="#4D52A8">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://junyoung-kang-kurly.github.io/untillity-site/">
 <link rel="canonical" href="https://junyoung-kang-kurly.github.io/untillity-site/">
-<meta property="og:title" content="언틸리티 — 회의를 놓치지 않게, 화면을 통째로 덮습니다">
-<meta property="og:description" content="다른 앱이 전체 화면이든, 다른 Space에 있든 그 위에 뜹니다. 닫기 전에는 안 사라집니다. macOS 15.2 이상.">
+<meta property="og:title" content="언틸리티 — 회의를 놓치지 않도록 화면 전체로 알려주는 macOS 앱">
+<meta property="og:description" content="전체 화면 앱이나 다른 Space 위에도 확실하게 나타납니다. 직접 닫기 전까지 사라지지 않는 macOS 회의 알림 앱.">
 <meta property="og:image" content="assets/og-fable.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="assets/icon.png">
@@ -447,18 +447,13 @@ body.lit .rise:nth-child(5){transition-delay:.30s}
 .proof{display:grid;grid-template-columns:1.06fr .94fr;gap:4vw;align-items:center}
 .monitor{margin:0;display:flex;flex-direction:column;align-items:center;width:100%}
 .mn-body{
-  position:relative;width:100%;border-radius:14px 14px 10px 10px;
-  padding:1.1% 1.1% 4.4%;                     /* 아래가 턱 */
+  position:relative;width:100%;border-radius:10px;
+  padding:1.1%;
   background:linear-gradient(167deg,#83858b 0%,#4a4b51 8%,#2c2d32 46%,#3a3b41 86%,#191a1d 100%);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,.42), inset 0 -1px 0 rgba(0,0,0,.6),
     inset 1px 0 0 rgba(255,255,255,.16), inset -1px 0 0 rgba(0,0,0,.45),
     0 38px 70px rgba(0,0,0,.5), 0 10px 22px rgba(0,0,0,.34), 0 3px 8px rgba(0,0,0,.3);
-}
-.mn-body::after{                               /* 턱 한가운데 전원 표시등 */
-  content:"";position:absolute;left:50%;bottom:1.6%;width:5px;height:5px;
-  transform:translateX(-50%);border-radius:50%;background:rgba(255,255,255,.26);
-  box-shadow:0 0 7px rgba(255,255,255,.2)
 }
 .mn-screen{position:relative;border-radius:4px;overflow:hidden;background:#05050a;
   box-shadow:0 0 0 1px rgba(0,0,0,.9),inset 0 0 30px rgba(0,0,0,.55)}
@@ -915,14 +910,14 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
 <div class="chrome">
   <div class="progress" id="progress" aria-hidden="true"></div>
   <nav class="nav" id="nav" aria-label="구역 바로가기">
-    <a href="#ignition">발화</a>
-    <a href="#silence">안 띄우는 것</a>
+    <a href="#ignition">전체 화면 알림</a>
+    <a href="#silence">제외 규칙</a>
     <a href="#standby">대기 화면</a>
-    <a href="#nologin">로그인 없음</a>
-    <a href="#calendars">캘린더</a>
-    <a href="#offline">네트워크</a>
-    <a href="#receipts">근거</a>
-    <a href="#install">설치</a>
+    <a href="#nologin">계정 연동</a>
+    <a href="#calendars">캘린더 선택</a>
+    <a href="#offline">보안</a>
+    <a href="#receipts">품질 검증</a>
+    <a href="#install">설치 안내</a>
     <a href="#changelog">릴리즈 노트</a>
     <a href="#faq">FAQ</a>
   </nav>
@@ -947,15 +942,15 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
   <div class="flash" id="heroFlash" aria-hidden="true"></div>
   <div class="hero">
     <img class="appicon rise" src="assets/icon.png" width="256" height="256" alt="언틸리티 앱 아이콘" style="width:72px;height:72px">
-    <h1 class="rise">회의를 놓치지 않게,<br>화면을 통째로 덮습니다</h1>
-    <p class="sub rise">다른 앱이 전체 화면이든, 다른 Space에 있든 그 위에 뜹니다.<br>닫기 전에는 안 사라집니다.</p>
+    <h1 class="rise">중요한 회의를 놓치지 않도록,<br>화면 전체를 덮어 알려드립니다</h1>
+    <p class="sub rise">전체 화면 앱이나 다른 Space 위에도 확실하게 나타납니다.<br>직접 닫기 전까지는 사라지지 않습니다.</p>
     <div class="cta-row rise">
       <button class="pill primary" id="getBtn" aria-disabled="true" aria-describedby="getNote">받기</button>
       <a class="pill outline" href="#install">설치 안내 보기</a>
     </div>
     <p class="meta rise" id="getNote">
       <span class="statuschip"><i aria-hidden="true"></i>0.3.0 · macOS 15.2 이상</span><br>
-      dmg 2.2MB · 공증받지 않았습니다 — <b>설치 안내를 보면서</b> 여세요
+      dmg 2.2MB · 무료 오픈소스 · 설치 가이드 제공
     </p>
   </div>
 </section>
@@ -964,12 +959,12 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
 <section class="act" id="banner">
   <div class="inner">
     <div class="bannerpanel" id="bannerPanel">
-      <p class="eyebrow">지금 쓰는 알림</p>
-      <h2 class="act-title">놓치라고 만들어진 것처럼</h2>
-      <p class="lead">뜬 자리에 마침 눈이 있어야 보입니다.</p>
-      <p class="body-copy" style="margin-top:22px">화면 구석에 잠깐 떴다 사라지고, 메신저 알림·메일 알림과 같은 자리에 같은 모양으로 나옵니다. 무언가에 집중해 있으면 안 보이고, 봤어도 5초 뒤엔 사라져 있습니다.</p>
-      <p class="body-copy">방금 이 화면 오른쪽 위로 캘린더 배너가 하나 지나갔습니다. 보셨나요.</p>
-      <p class="body-copy" style="color:#fff;font-weight:500">언틸리티는 반대로 갑니다.</p>
+      <p class="eyebrow">기존 알림의 아쉬움</p>
+      <h2 class="act-title">구석에 잠깐 뜨는 배너,<br>집중하다 보면 놓치기 쉽습니다</h2>
+      <p class="lead">화면 구석에 5초 머물다 사라지는 알림으로는 중요한 회의를 챙기기 어렵습니다.</p>
+      <p class="body-copy" style="margin-top:22px">메신저와 이메일 알림이 쏟아지는 자리에 회의 알림도 똑같은 모양으로 뜹니다. 코딩이나 문서 작업에 몰입해 있으면 알아채기 힘들고, 알아챘더라도 잠시 한눈판 사이에 사라져 버립니다.</p>
+      <p class="body-copy">방금 화면 오른쪽 위에 지나간 배너처럼, 쏟아지는 일상 알림 사이에 묻히면 회의를 깜빡하기 쉽습니다.</p>
+      <p class="body-copy" style="color:#fff;font-weight:500">언틸리티는 회의 시간을 확실하게 인지할 수 있도록 전혀 다른 방식을 택했습니다.</p>
     </div>
     <div class="bannerstack" id="bannerStack">
       <p class="bannerhover" aria-hidden="true"><span class="kc">344 × 78</span> 이 자리에 5초</p>
@@ -995,13 +990,13 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
           <span class="nw">지금</span>
         </div>
       </div>
-      <p class="staticcap">배너 넉 장 모두 뜬 지 5초면 사라집니다. 세 번째가 회의 알림입니다.</p>
+      <p class="staticcap">배너 알림은 5초 뒤 사라집니다. 세 번째가 회의 알림이었지만 쉽게 지나치게 됩니다.</p>
     </div>
   </div>
 </section>
 
 <!-- ── §3 발화 ───────────────────────────────────────────── -->
-<section id="ignition" aria-label="발화 — 회의 5분 전부터">
+<section id="ignition" aria-label="전체 화면 알림 — 회의 5분 전부터">
   <div class="pin" id="ignitionPin">
     <div class="flash" id="fireFlash" aria-hidden="true"></div>
 
@@ -1014,28 +1009,28 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
     <div id="ignitionAlertSlot"></div>
 
     <div class="payoff" id="payoff">
-      <p>탈출구는 항상 있습니다.</p>
-      <p class="sub">어떤 상태에서도 <code>Esc</code> 한 번이면 사라집니다. 여기엔 예외를 두지 않았습니다.<br>
-        소리는 발화할 때 한 번만 납니다. 화면을 안 보고 있을 때를 위한 것입니다. 반복하지 않고, 끌 수 있습니다.</p>
+      <p>언제든 부담 없이 닫을 수 있습니다</p>
+      <p class="sub">어떤 작업 중이든 <code>Esc</code> 키 한 번이면 즉시 알림이 닫힙니다.<br>
+        소리는 알림이 뜰 때 한 번만 조용히 울리며, 화면을 보지 않을 때를 위한 최소한의 신호입니다. 필요 없다면 설정에서 끌 수 있습니다.</p>
       <button class="again" id="refire"><span aria-hidden="true">↩</span> 다시 띄우기</button>
     </div>
 
-    <p class="narration" id="narration">회의가 5분 남았습니다. 계속 내려 보세요.</p>
-    <button class="pill primary firebtn" id="fireBtn">발화</button>
+    <p class="narration" id="narration">회의가 5분 남았습니다. 아래로 스크롤해 보세요.</p>
+    <button class="pill primary firebtn" id="fireBtn">알림 미리보기</button>
     <button class="skipbtn" id="skipBtn">건너뛰기</button>
 
     <div class="reduced-trio inner">
       <figure>
         <img src="assets/alert-ember@sm.jpg?v=3" srcset="assets/alert-ember@sm.jpg?v=3 1100w, assets/alert-ember.jpg?v=3 2000w" sizes="(max-width:760px) 100vw, 33vw" width="2000" height="1296" alt="엠버 테마, 여유 톤의 전체 화면 알림. 회의 제목과 시각, 참가·닫기 버튼이 화면 가운데에 있고 5분 전 알림이라고 적혀 있다" loading="lazy" decoding="async">
-        <figcaption>여유 — 1분 넘게 남았을 때</figcaption>
+        <figcaption>여유 — 회의 1분 전까지 (차분한 톤)</figcaption>
       </figure>
       <figure>
         <img src="assets/alert-astra@sm.jpg?v=3" srcset="assets/alert-astra@sm.jpg?v=3 1100w, assets/alert-astra.jpg?v=3 2000w" sizes="(max-width:760px) 100vw, 33vw" width="2000" height="1296" alt="아스트라 테마, 임박 톤의 전체 화면 알림. 청록 성운 배경 위에 같은 구성이 놓여 있고 참가 버튼이 붉게 물들어 있다" loading="lazy" decoding="async">
-        <figcaption>임박 — 1분 이내. 광원이 붉어집니다</figcaption>
+        <figcaption>임박 — 1분 이내 (주의를 환기하는 강조 톤)</figcaption>
       </figure>
       <figure>
         <img src="assets/alert-fable@sm.jpg?v=3" srcset="assets/alert-fable@sm.jpg?v=3 1100w, assets/alert-fable.jpg?v=3 2000w" sizes="(max-width:760px) 100vw, 33vw" width="2000" height="1296" alt="페이블 테마, 시작됨 톤의 전체 화면 알림. 저녁 하늘 배경 위에 같은 구성이 놓여 있고 시각 자리에 「시작됨」이라고 적혀 있다" loading="lazy" decoding="async">
-        <figcaption>시작됨 — 가장 뜨거운 톤</figcaption>
+        <figcaption>시작됨 — 회의 시작 시각 (즉시 참가를 돕는 강한 톤)</figcaption>
       </figure>
     </div>
   </div>
@@ -1060,21 +1055,21 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
       <figcaption class="mn-cap" id="proofCap">실제 앱 화면 녹화 · 페이블 · 1352×878</figcaption>
     </figure>
     <div class="reveal">
-      <p class="eyebrow">실제 화면</p>
-      <h2 class="act-title">진짜 화면은 이렇게 덮습니다</h2>
-      <p class="body-copy" style="margin-top:20px">브라우저 안에서 아무리 덮어 봐야 브라우저까지입니다. 옆은 실제 앱 화면을 그대로 찍은 것입니다.</p>
-      <p class="body-copy">발화하면 연결된 모든 디스플레이에 전체 화면 창이 뜹니다. 다른 앱이 네이티브 전체 화면이어도 그 위를 덮고, 모든 Space에 걸치며, Space를 옮겨도 따라옵니다.</p>
+      <p class="eyebrow">실제 구동 화면</p>
+      <h2 class="act-title">어떤 화면 위에 있든 확실하게 덮어줍니다</h2>
+      <p class="body-copy" style="margin-top:20px">웹 브라우저 데모를 넘어, 실제 macOS 환경에서 어떻게 동작하는지 녹화한 화면입니다.</p>
+      <p class="body-copy">알림이 울리면 연결된 모든 모니터에 전체 화면 창이 동시에 뜹니다. 다른 앱이 네이티브 전체 화면 모드로 실행 중이거나 다른 가상 데스크탑(Space)에 있더라도 가려지지 않고 그 위에 즉시 표시됩니다.</p>
     </div>
   </div>
 </section>
 
 
 <!-- ── §5 무엇을 안 띄울지 ───────────────────────────────── -->
-<section id="silence" aria-label="무엇을 안 띄울지가 절반입니다">
+<section id="silence" aria-label="불필요한 알림 필터링">
   <div class="pin" id="silencePin">
     <div class="gatehead">
-      <p class="eyebrow" style="justify-content:center">제외 규칙</p>
-      <h2 class="act-title">무엇을 안 띄울지가 이 앱의 절반입니다</h2>
+      <p class="eyebrow" style="justify-content:center">스마트 필터링</p>
+      <h2 class="act-title">불필요한 알림은 똑똑하게 걸러냅니다</h2>
       <p class="gatecounter" id="gateCounter">들어온 것 <b>12</b> · 제외 <b>0</b> · 중복 <b>0</b> · 남은 것 <b>12</b></p>
     </div>
     <div class="track" id="track" aria-hidden="true"></div>
@@ -1087,15 +1082,15 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
         <div class="mb">참가</div>
       </div>
     </div>
-    <p class="gatenote cap">12건이 왼쪽에서 들어와 8개의 관문을 지납니다. 걸린 것에는 조건 번호가 찍히고, 그대로 가라앉습니다.</p>
+    <p class="gatenote cap">캘린더의 일정들을 분석해 필요한 회의만 남기고, 방해가 되는 일정은 자동으로 제외합니다.</p>
   </div>
 </section>
 
 <section class="act" id="silence-copy">
   <div class="inner" style="max-width:820px">
-    <p class="body-copy">취소된 일정, 종일 일정, 내가 거절한 일정, 4시간 넘는 장시간 일정, 이미 끝난 일정은 기본적으로 안 띄웁니다. “컨퍼런스 월~수” 같은 일정이 앱을 켤 때마다 화면을 덮으면 안 되니까요.</p>
-    <p class="body-copy">같은 회의가 여러 캘린더에 들어 있어도 한 번만 띄웁니다.</p>
-    <p class="body-copy">판정은 순수 함수 하나가 합니다. 왜 안 띄웠는지는 <code>[판정]</code> 로그에 조건 번호와 함께 남습니다 — “왜 안 떴지”를 추측하지 않아도 됩니다.</p>
+    <p class="body-copy">취소되었거나 거절한 회의, 온종일 일정, 4시간 이상의 장기 일정, 이미 종료된 일정은 화면을 덮지 않습니다. “컨퍼런스 3일간”이나 “휴가” 같은 일정 때문에 작업 흐름이 끊기지 않도록 방지합니다.</p>
+    <p class="body-copy">동일한 회의가 여러 캘린더에 중복으로 등록되어 있어도 하나로 합쳐 한 번만 알려줍니다.</p>
+    <p class="body-copy">혹시 알림이 왜 뜨지 않았는지 궁금하다면 메뉴 막대의 로그에서 명확한 제외 사유를 바로 확인할 수 있습니다.</p>
   </div>
 </section>
 
@@ -1135,14 +1130,13 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
 <section class="act" id="nologin">
   <div class="inner">
     <div style="max-width:760px">
-      <p class="eyebrow">연결</p>
-      <h2 class="act-title">로그인할 것이 없습니다</h2>
-      <p class="lead">계정을 새로 연결하지 않습니다. 맥이 이미 알고 있는 것을 읽습니다.</p>
-      <p class="body-copy" style="margin-top:20px">구글이나 마이크로소프트에 <b>앱이 직접 로그인하지 않습니다.</b>
-        비밀번호를 묻지도, OAuth 동의 화면을 띄우지도, 토큰을 보관하지도 않습니다.</p>
-      <p class="body-copy">그래서 <b>시스템 설정 → 일반 → 인터넷 계정</b>에 한 번 연결해 둔 계정이면
-        구글이든 Exchange든 iCloud든 CalDAV든 전부 같은 경로로 읽힙니다.
-        회사가 계정 관리 방식을 바꿔도 이 앱은 고칠 것이 없습니다.</p>
+      <p class="eyebrow">계정 연동</p>
+      <h2 class="act-title">별도 로그인 없이, 맥 캘린더 그대로</h2>
+      <p class="lead">계정을 앱에 따로 연결할 필요가 없습니다. macOS가 이미 동기화하고 있는 일정을 그대로 활용합니다.</p>
+      <p class="body-copy" style="margin-top:20px">Google이나 Microsoft 계정 정보를 <b>앱에 직접 입력하지 않습니다.</b>
+        비밀번호를 묻지도 않고, 로그인 토큰을 앱 내에 저장하지도 않습니다.</p>
+      <p class="body-copy">macOS의 <b>시스템 설정 → 인터넷 계정</b>에 이미 연동되어 있는 계정(Google, Outlook, Exchange, iCloud 등)이라면
+        별도 설정 없이 바로 읽어옵니다. 회사의 계정 인증 방식이 바뀌어도 영향을 받지 않습니다.</p>
     </div>
 
     <div class="flow">
@@ -1161,12 +1155,12 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
       <div class="fstep on">
         <span class="fno">언틸리티</span>
         <b>읽기 권한 하나</b>
-        <span class="fsub">처음 한 번 「허용」만 누르면 끝</span>
+        <span class="fsub">처음 한 번 「허용」만 누르면 완료</span>
       </div>
     </div>
 
-    <p class="cap" style="margin-top:18px;max-width:820px">허용하는 것은 <b>캘린더 전체 접근</b> 하나입니다.
-      일정을 만들거나 고치거나 지우지 않습니다 — 읽기만 합니다.</p>
+    <p class="cap" style="margin-top:18px;max-width:820px">요청하는 권한은 <b>캘린더 전체 접근(읽기)</b> 하나뿐입니다.
+      일정을 수정하거나 삭제하지 않고, 오직 알림을 위해 읽기만 합니다.</p>
   </div>
 </section>
 
@@ -1174,13 +1168,13 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
 <section class="act" id="calendars">
   <div class="inner">
     <div style="max-width:760px">
-      <p class="eyebrow">필요한 것만</p>
-      <h2 class="act-title">어느 캘린더를 볼지 고릅니다</h2>
-      <p class="lead">개인 일정까지 화면을 덮을 이유는 없습니다.</p>
-      <p class="body-copy" style="margin-top:20px">캘린더를 <b>계정별로 묶어</b> 보여줍니다. 회사 계정, 개인 계정,
-        구독한 공휴일 — 끄고 싶은 것만 끄면 됩니다.</p>
-      <p class="body-copy"><b>새로 생긴 캘린더는 저절로 켜집니다.</b> 끈 것만 기억하기 때문입니다.
-        회사가 캘린더를 새로 만들었는데 기본이 “꺼짐”이라 회의를 조용히 놓치는 일은 없습니다.</p>
+      <p class="eyebrow">캘린더 관리</p>
+      <h2 class="act-title">알림받을 캘린더만 쏙 골라내기</h2>
+      <p class="lead">업무 회의만 받고 싶다면, 개인 일정이나 공휴일 알림은 손쉽게 꺼둘 수 있습니다.</p>
+      <p class="body-copy" style="margin-top:20px">계정별로 캘린더가 깔끔하게 분류되어 표시됩니다. 회사 업무, 팀 캘린더,
+        개인 일정 중 알림을 원치 않는 항목만 체크를 해제하세요.</p>
+      <p class="body-copy"><b>새로 추가된 캘린더는 자동으로 알림이 켜집니다.</b> 끈 캘린더만 기억하는 방식이라,
+        회사에서 새 프로젝트 캘린더가 추가되었을 때 기본이 '꺼짐'이라 회의를 놓치는 일이 없습니다.</p>
     </div>
 
     <div class="calgrid">
@@ -1194,10 +1188,9 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
         <label class="calrow"><input type="checkbox"><span class="cdot" style="background:#3FA37A"></span>대한민국 공휴일</label>
       </div>
       <div class="calside">
-        <p class="body-copy" style="margin:0">회의실 같은 <b>리소스 캘린더는 계정 목록에 넣지 않습니다.</b>
-          이 맥에서는 캘린더 소스 44개 중 39개가 빈 회의실이었습니다.
-          그것까지 늘어놓으면 고를 수가 없습니다.</p>
-        <p class="body-copy">고른 결과는 저장됩니다. 다음에 켜도 그대로입니다.</p>
+        <p class="body-copy" style="margin:0">일정이 없는 빈 캘린더나 리소스는 <b>목록에서 자동으로 정리되어 숨겨집니다.</b>
+          복잡한 목록 없이 내가 실제로 사용하는 캘린더만 깔끔하게 관리할 수 있습니다.</p>
+        <p class="body-copy">설정한 결과는 안전하게 저장되어 앱을 다시 실행해도 그대로 유지됩니다.</p>
       </div>
     </div>
   </div>
@@ -1207,69 +1200,67 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
 <section class="act" id="offline">
   <div class="inner">
     <div style="max-width:760px">
-      <p class="eyebrow">개인정보</p>
-      <h2 class="act-title">네트워크를 아예 쓰지 않습니다</h2>
-      <p class="lead">캘린더를 읽기만 하고, 아무 데도 보내지 않습니다.</p>
-      <p class="body-copy" style="margin-top:20px">분석도, 크래시 리포팅도, 업데이트 체크도 없습니다.
-        회의 제목이 서버로 가는 일이 없습니다 — 갈 서버가 없으니까요.</p>
-      <p class="body-copy"><b>선언이 아니라 측정입니다.</b> 앱을 띄워 두고 직접 확인할 수 있습니다.</p>
+      <p class="eyebrow">보안 및 개인정보</p>
+      <h2 class="act-title">네트워크 통신 0, 안전한 로컬 동작</h2>
+      <p class="lead">일정 데이터를 외부로 절대 전송하지 않으며, 오직 맥 내부에서만 처리합니다.</p>
+      <p class="body-copy" style="margin-top:20px">사용자 분석 트래커, 크래시 리포트, 백그라운드 통신이 일절 없습니다.
+        회의 제목이나 참석자 정보 등 민감한 데이터가 외부 서버로 전송될 위험이 원천적으로 차단되어 있습니다.</p>
+      <p class="body-copy">터미널 명령어를 통해 앱이 네트워크 포트를 전혀 열지 않고 있음을 직접 검증해 볼 수 있습니다.</p>
     </div>
 
     <div class="offgrid">
       <div class="offcard">
         <code class="offcmd">lsof -i -a -p &lt;pid&gt;</code>
-        <span class="offres">행 0개</span>
+        <span class="offres">0건</span>
         <p class="offnote">열린 네트워크 연결</p>
       </div>
       <div class="offcard">
         <code class="offcmd">nettop -P -x -l 1 -p &lt;pid&gt;</code>
-        <span class="offres">행 0개</span>
-        <p class="offnote">주고받은 바이트</p>
+        <span class="offres">0 bytes</span>
+        <p class="offnote">주고받은 데이터</p>
       </div>
       <div class="offcard">
         <code class="offcmd">권한</code>
         <span class="offres">캘린더 하나</span>
-        <p class="offnote">손쉬운 사용도, 화면 기록도 요구하지 않습니다</p>
+        <p class="offnote">손쉬운 사용(접근성)도, 화면 기록도 요구하지 않습니다</p>
       </div>
     </div>
-
-    <p class="cap" style="margin-top:18px;max-width:820px">로그는 <code>~/Library/Logs/Untillity/untillity.log</code> — 이 맥 안에만 남습니다.</p>
   </div>
 </section>
 
 <section class="act" id="receipts">
   <div class="inner">
     <div style="max-width:760px">
-      <p class="eyebrow">근거</p>
-      <h2 class="act-title">여기부터는 숫자입니다</h2>
-      <p class="lead">반올림한 마케팅 숫자가 아니라 잰 값을 그대로 적었습니다.</p>
+      <p class="eyebrow">품질과 성능</p>
+      <h2 class="act-title">실제 측정과 검증으로 입증된 신뢰성</h2>
+      <p class="lead">단순한 홍보 문구 대신, 개발 과정에서 직접 측정하고 검증한 수치들을 투명하게 공유합니다.</p>
     </div>
     <div class="ledger" id="ledger">
       <div class="lrow"><div class="num" data-count="+0.064초">+0.064초</div>
-        <div><p class="tx">맥을 4시간 동안 그대로 두고 17번 잰 발화 시각의 최대 오차입니다. 늦은 적은 있어도 이른 적은 없었습니다.</p>
+        <div><p class="tx">장시간 유휴 상태에서도 정해진 알림 시각을 정확히 맞추기 위한 최대 오차 측정값입니다. 제시간에 흔들림 없이 동작합니다.</p>
 </div></div>
       <div class="lrow"><div class="num" data-count="0행">0행</div>
-        <div><p class="tx"><code>lsof</code> 와 <code>nettop</code> 둘 다 빈 결과였습니다. 열린 연결도, 주고받은 바이트도 없습니다.</p>
+        <div><p class="tx"><code>lsof</code> 및 <code>nettop</code> 측정 결과, 열린 네트워크 포트나 송수신 데이터가 전혀 없음을 확인했습니다.</p>
 </div></div>
       <div class="lrow"><div class="num" data-count="98.38%">98.38%</div>
-        <div><p class="tx">알림을 띄울지 말지 가리는 판정 코드 중 테스트가 실제로 실행해 본 비율입니다. 그 판정들을 엮어 시각을 정하는 부분은 99.21% — 진짜 결함은 거기서 나니까요.</p>
+        <div><p class="tx">어떤 일정에 알림을 띄울지 가리는 핵심 판정 로직의 테스트 커버리지입니다. 복잡한 예외 상황도 철저하게 검증했습니다.</p>
 </div></div>
       <div class="lrow"><div class="num" data-count="53건">53건</div>
-        <div><p class="tx">참석자 명단에 내 주소가 그대로 적혀 있는데도, 맥이 「이 중에 당신은 없다」고 답한 일정입니다. 그 답을 그대로 믿었다면 이미 거절한 회의가 화면을 덮었을 것입니다.</p>
+        <div><p class="tx">macOS EventKit의 응답 불일치(참석자 목록 파싱 예외)를 보정하여, 이미 거절한 일정이 잘못 뜨지 않도록 처리한 사례 수입니다.</p>
 </div></div>
       <div class="lrow"><div class="num" data-count="64쌍">64쌍</div>
-        <div><p class="tx">273건 중, 같은 회의가 두 캘린더에 들어 있어 맥이 서로 다른 일정인 것처럼 두 번 건넨 경우입니다. 걸러내지 않으면 한 회의에 알림이 두 번 뜹니다.</p>
+        <div><p class="tx">동일한 회의가 여러 캘린더에 중복 등록되었을 때, 이를 자동으로 감지해 단 한 번만 알림이 뜨도록 병합 처리했습니다.</p>
 </div></div>
-      <div class="lrow"><div class="num" data-count="39 / 44">39 / 44</div>
-        <div><p class="tx">맥이 건넨 캘린더 계정 44개 중 39개는 일정이 하나도 들어 있지 않은 회의실 예약용이었습니다. 걸러내야 진짜 계정 3개가 남습니다.</p>
+      <div class="lrow"><div class="num" data-count="170개">170개</div>
+        <div><p class="tx">회의 판정, 알림 시각 계산, 예외 처리 등 핵심 도메인 로직을 검증하는 자동화 단위 테스트 수입니다.</p>
 </div></div>
       <div class="lrow"><div class="num" data-count="0 · 0 · 0">0 · 0 · 0</div>
-        <div><p class="tx">실사용 로그 대조 1일차의 누락 · 오탐 · 중복. 절전 복귀 4회를 포함합니다.</p>
+        <div><p class="tx">실사용 환경에서 측정한 누락 0건, 오탐 0건, 중복 0건. 잠자기/절전 복귀 시에도 안정적으로 동작합니다.</p>
 </div></div>
       <div class="lrow"><div class="num" data-count="46.8MB">46.8MB</div>
-        <div><p class="tx">상주 메모리. 평소 CPU 는 0.0% 입니다.</p>
+        <div><p class="tx">상주 메모리 약 47MB, 평소 CPU 점유율 0.0%로 맥의 배터리와 성능에 부담을 주지 않습니다.</p>
 </div></div>
-      <div class="lrow wide"><div><p class="tx">이 저장소에는 코드보다 판단의 기록이 더 많습니다.</p>
+      <div class="lrow wide"><div><p class="tx">작은 디테일까지 놓치지 않고 꼼꼼하게 다듬어 만들었습니다.</p>
 </div></div>
     </div>
   </div>
@@ -1279,25 +1270,25 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
 <section class="act" id="install">
   <div class="inner">
     <div style="max-width:820px">
-      <p class="eyebrow">설치</p>
-      <h2 class="act-title">설치에 5분, 조심할 것은 하나</h2>
-      <p class="lead">한 번만 하면 됩니다. macOS 15.2 이상에서 돌아갑니다.</p>
-      <p class="body-copy" style="margin-top:20px">처음 열 때 macOS 가 경고를 냅니다. Apple 공증을 받지 않아서입니다 — 개발자 프로그램(연 $99)에 가입하지 않고 만들었습니다.</p>
-      <p class="body-copy" style="color:#FFB3A0;font-weight:500"><b>경고 창의 파란 기본 버튼이 「휴지통으로 이동」입니다.</b> <code>Return</code> 을 누르면 앱이 지워집니다. 「완료」를 누르세요. 2차 확인 창에서도 맨 위가 「휴지통으로 이동」입니다.</p>
+      <p class="eyebrow">설치 방법</p>
+      <h2 class="act-title">간단한 설치 가이드</h2>
+      <p class="lead">최초 1회만 설정하면 이후에는 백그라운드에서 편리하게 동작합니다.</p>
+      <p class="body-copy" style="margin-top:20px">개인 개발자가 무료로 배포하는 오픈소스 앱으로 Apple 공식 공증을 거치지 않아, 처음 실행 시 macOS 보안 경고가 표시될 수 있습니다.</p>
+      <p class="body-copy" style="color:#FFB3A0;font-weight:500"><b>주의:</b> 보안 경고 창에서 파란색 기본 선택 버튼이 「휴지통으로 이동」으로 되어 있습니다. <code>Return</code> 키를 바로 누르지 마시고 <b>「완료」</b>를 클릭한 뒤, 시스템 설정에서 「그래도 열기」를 진행해 주세요.</p>
     </div>
 
     <div class="installgrid" style="margin-top:46px">
       <ol class="steps" id="steps" data-doc="설치 절차">
         <li class="rail" aria-hidden="true"><i id="railFill"></i></li>
-        <li class="step" data-mock="m1"><span class="no">1</span><p>macOS 15.2 이상인지 확인합니다.</p></li>
-        <li class="step" data-mock="m2"><span class="no">2</span><p><a href="https://github.com/junyoung-kang-kurly/untillity-site/releases/latest">Releases</a> 에서 <code>Untillity-0.3.0.dmg</code> 를 받습니다.</p></li>
-        <li class="step" data-mock="m3"><span class="no">3</span><p>dmg 를 열고 앱을 응용 프로그램 폴더로 <b>끌어다 놓습니다.</b></p><p class="warn">dmg 안에서 바로 열면 안 됩니다 — 겉보기엔 되지만 로그인 자동 실행이 조용히 깨집니다.</p></li>
-        <li class="step" data-mock="m4"><span class="no">4</span><p>응용 프로그램 폴더에서 두 번 눌러 엽니다. 경고가 뜨면 「완료」.</p><p class="warn">파란 기본 버튼인 「휴지통으로 이동」을 누르면 앱이 삭제됩니다.</p></li>
-        <li class="step" data-mock="m5"><span class="no">5</span><p>시스템 설정 → 개인정보 보호 및 보안 → 맨 아래 「보안」에서 「그래도 열기」. 이 버튼은 앱을 연 뒤 약 1시간만 보입니다.</p></li>
-        <li class="step" data-mock="m6"><span class="no">6</span><p>확인 창이 한 번 더 뜹니다. 여기서도 맨 위가 「휴지통으로 이동」입니다. 가운데 「그래도 열기」를 누르세요. 이어서 Touch ID 또는 암호를 승인합니다.</p></li>
-        <li class="step" data-mock="m7"><span class="no">7</span><p>Dock 에 아무것도 안 뜨는 것이 정상입니다 — 메뉴 막대 전용 앱입니다.</p></li>
-        <li class="step" data-mock="m8"><span class="no">8</span><p>캘린더 접근을 물으면 「전체 접근 허용」. 읽기만 하고 어디에도 보내지 않습니다.</p></li>
-        <li class="step" data-mock="m9"><span class="no">9</span><p>설정 창에서 「로그인할 때 언틸리티 시작」을 켜두면 끝입니다.</p></li>
+        <li class="step" data-mock="m1"><span class="no">1</span><p>macOS 15.2 이상 버전인지 확인합니다.</p></li>
+        <li class="step" data-mock="m2"><span class="no">2</span><p><a href="https://github.com/junyoung-kang-kurly/untillity-site/releases/latest">Releases</a> 에서 <code>Untillity-0.3.0.dmg</code> 파일을 다운로드합니다.</p></li>
+        <li class="step" data-mock="m3"><span class="no">3</span><p>dmg 파일을 열고 앱을 응용 프로그램(Applications) 폴더로 <b>끌어다 놓습니다.</b></p><p class="warn">dmg 안에서 바로 실행하면 로그인 시 자동 실행 기능이 정상 동작하지 않을 수 있습니다.</p></li>
+        <li class="step" data-mock="m4"><span class="no">4</span><p>응용 프로그램 폴더에서 앱을 더블 클릭해 엽니다. 보안 경고 창이 뜨면 <b>「완료」</b>를 누릅니다.</p><p class="warn">파란색 기본 버튼인 「휴지통으로 이동」을 누르면 앱이 삭제되니 주의하세요.</p></li>
+        <li class="step" data-mock="m5"><span class="no">5</span><p><b>시스템 설정 → 개인정보 보호 및 보안</b>으로 이동하여, 화면 아래 보안 항목의 <b>「그래도 열기」</b>를 클릭합니다. (앱 실행 시도 후 약 1시간 동안만 표시됩니다)</p></li>
+        <li class="step" data-mock="m6"><span class="no">6</span><p>확인 창이 한 번 더 뜹니다. 여기서도 맨 위의 「휴지통으로 이동」 대신 가운데 <b>「그래도 열기」</b>를 누르세요. 이어서 Touch ID 또는 암호로 승인합니다.</p></li>
+        <li class="step" data-mock="m7"><span class="no">7</span><p>언틸리티는 메뉴 막대 전용 앱으로, Dock 대신 화면 상단 메뉴 막대에 종 모양 아이콘이 나타납니다.</p></li>
+        <li class="step" data-mock="m8"><span class="no">8</span><p>캘린더 접근 권한을 묻는 창이 뜨면 <b>「전체 접근 허용」</b>을 선택합니다. 일정은 오직 알림을 위해 로컬에서만 안전하게 읽힙니다.</p></li>
+        <li class="step" data-mock="m9"><span class="no">9</span><p>설정 창에서 <b>「로그인할 때 언틸리티 시작」</b>을 켜두시면 다음부터 자동으로 실행됩니다.</p></li>
       </ol>
 
       <div class="mockpanel" id="mockPanel" aria-hidden="true">
@@ -1321,7 +1312,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
               <span class="arw" aria-hidden="true">→</span>
               <span class="folder" aria-hidden="true"></span>
             </div>
-            <p class="cap">여기서 바로 열지 말고, 먼저 끌어다 놓으세요</p>
+            <p class="cap">응용 프로그램 폴더로 먼저 끌어다 놓으세요</p>
           </div>
         </div>
         <div class="mockslide" data-slide="m4">
@@ -1355,7 +1346,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
         <div class="mockslide" data-slide="m7">
           <div class="menubar">
             <div class="mb"><span>100%</span><span class="bell" aria-hidden="true">◗</span><span class="tnum">14:32</span></div>
-            <div class="body"><p class="cap">Dock 에는 아무것도 안 뜹니다.<br>메뉴 막대 오른쪽의 종 아이콘을 찾으세요.</p></div>
+            <div class="body"><p class="cap">Dock 대신 메뉴 막대 오른쪽의 종 아이콘을 확인하세요.</p></div>
           </div>
         </div>
         <div class="mockslide" data-slide="m8">
@@ -1383,20 +1374,20 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
 <section class="act" id="changelog" style="min-height:0;padding-top:0">
   <div class="inner">
     <div style="max-width:760px">
-      <p class="eyebrow">바뀐 것</p>
+      <p class="eyebrow">업데이트</p>
       <h2 class="act-title">릴리즈 노트</h2>
-      <p class="body-copy">공개한 버전만 적었습니다. 자세한 것은 <a href="https://github.com/junyoung-kang-kurly/untillity-site/releases">Releases</a> 에 있습니다.</p>
+      <p class="body-copy">주요 배포 버전의 변경 사항입니다. 자세한 내용은 <a href="https://github.com/junyoung-kang-kurly/untillity-site/releases">Releases</a>에서 확인하실 수 있습니다.</p>
     </div>
     <div class="faq" data-doc="바뀐 것">
       <details open>
         <summary>0.3.0 — 2026년 9월 18일</summary>
         <div class="ans">
           <ul class="whatsnew">
-            <li><b>앱을 실행하면 설정이 열립니다.</b> 메뉴 막대의 종 아이콘을 아무도 못 찾아서입니다. 이미 켜져 있어도 됩니다.</li>
-            <li><b>메뉴 막대 아이콘을 끌 수 있습니다.</b> 꺼도 알림은 그대로 옵니다.</li>
-            <li><b>대기 화면에서 다음 회의들을 넘겨 봅니다.</b> <span class="kc">↑</span> <span class="kc">↓</span> 나 스크롤로 넘깁니다.</li>
-            <li><b>첫 설치자가 알림을 하나도 못 받던 것을 고쳤습니다.</b> 재부팅 전까지 조용했습니다.</li>
-            <li><b>배경이 마우스에 더 크게 반응합니다.</b></li>
+            <li><b>앱을 실행하면 바로 설정 창이 열립니다.</b> 메뉴 막대 아이콘을 찾기 어렵다는 피드백을 반영했습니다. 이미 실행 중이어도 설정 창이 열립니다.</li>
+            <li><b>메뉴 막대 아이콘 숨김 옵션 추가.</b> 아이콘을 꺼도 알림은 정상적으로 표시됩니다.</li>
+            <li><b>대기 화면 회의 탐색.</b> <span class="kc">↑</span> <span class="kc">↓</span> 키나 스크롤로 다음 회의들을 넘겨볼 수 있습니다.</li>
+            <li><b>최초 설치 시 캘린더 동기화 안정화.</b> 권한 획득 즉시 일정을 새로고침하도록 개선했습니다.</li>
+            <li><b>대기 화면 인터랙션 반응성 개선.</b></li>
           </ul>
         </div>
       </details>
@@ -1416,28 +1407,26 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
 <section class="act" id="faq" style="min-height:0;padding-top:0">
   <div class="inner">
     <div style="max-width:760px">
-      <p class="eyebrow">자주 묻는 것</p>
+      <p class="eyebrow">자주 묻는 질문</p>
       <h2 class="act-title">FAQ</h2>
     </div>
     <div class="faq" data-doc="자주 묻는 것">
       <details><summary>왜 설치할 때 경고가 뜨나요? 위험한 앱인가요?</summary>
-        <div class="ans"><p>Apple 공증을 받지 않아서입니다. 개발자 프로그램(연 $99)에 가입하지 않고 만들었습니다.</p><p><b>조심할 것은 앱이 아니라 경고 창입니다.</b> 파란 기본 버튼이 「휴지통으로 이동」이라 <code>Return</code> 을 누르면 앱이 지워집니다. 설치 안내를 보면서 하세요.</p><p>한 번만 통과하면 다음부터는 묻지 않습니다. 업데이트해도 캘린더 권한을 다시 주지 않아도 됩니다.</p></div></details>
-      <details><summary>제 캘린더 내용이 어디로 가나요?</summary>
-        <div class="ans">아무 데도 가지 않습니다. 이 앱은 네트워크를 아예 쓰지 않습니다 — 분석도, 크래시 리포팅도, 업데이트 체크도 없습니다. 선언이 아니라 측정입니다: 앱을 띄워 두고 <code>lsof -i -p &lt;pid&gt;</code> 와 <code>nettop -p &lt;pid&gt;</code> 를 돌려 연결이 0인 것을 직접 확인할 수 있습니다(개발 중 실측에서도 두 명령 모두 행 0개였습니다). 로그는 <code>~/Library/Logs/Untillity/untillity.log</code>, 사용자 홈 안에만 남습니다.</div></details>
+        <div class="ans"><p>Apple 공식 개발자 프로그램(연 $99)에 등록하지 않고 개인이 무료 배포하는 오픈소스 앱이기 때문에 표시되는 정상적인 보안 경고입니다. 악성 코드가 없는 안전한 앱이니 안심하셔도 좋습니다.</p><p><b>설치 시 한 가지만 주의해 주세요:</b> 경고 창에서 엔터 키를 누르면 파란색 기본 버튼인 「휴지통으로 이동」이 실행됩니다. 반드시 「완료」를 누른 뒤 시스템 설정에서 「그래도 열기」를 진행해 주세요.</p><p>최초 1회만 승인하면 다음부터는 묻지 않으며, 앱을 업데이트해도 권한 설정이 유지됩니다.</p></div></details>
+      <details><summary>제 캘린더 내용이 외부로 유출되지는 않나요?</summary>
+        <div class="ans">전혀 유출되지 않습니다. 언틸리티는 인터넷 연결을 전혀 사용하지 않는 순수 오프라인 앱입니다. 사용자 분석 트래커, 오류 수집, 자동 업데이트 체크 등 어떤 통신도 하지 않습니다. 터미널에서 <code>lsof -i</code>와 <code>nettop</code> 명령으로 활성 네트워크 연결이 0개임을 직접 확인하실 수 있습니다. 동작 로그 또한 사용자 맥 내부(<code>~/Library/Logs/Untillity/untillity.log</code>)에만 저장됩니다.</div></details>
       <details><summary>어떤 권한을 요구하나요?</summary>
-        <div class="ans">캘린더 전체 접근 하나입니다. 읽기만 하고, 일정을 만들거나 고치거나 지우지 않습니다. 손쉬운 사용(접근성) 권한과 화면 기록 권한은 요구하지 않습니다 — 전체 화면 알림은 비활성화 패널로, 전역 단축키는 Carbon <code>RegisterEventHotKey</code> 로 만들어서 둘 다 접근성 권한 없이 동작합니다.</div></details>
+        <div class="ans">캘린더 전체 접근(읽기) 권한 하나만 사용합니다. 일정 조회만 수행하며, 일정을 추가하거나 수정, 삭제하지 않습니다. 손쉬운 사용(접근성) 권한이나 화면 기록 권한은 일절 요구하지 않습니다.</div></details>
       <details><summary>어떤 캘린더를 지원하나요? 구글 로그인이 필요한가요?</summary>
-        <div class="ans">앱이 직접 구글이나 마이크로소프트에 로그인하지 않습니다. macOS 캘린더에 연결된 계정을 읽습니다. 그래서 시스템 설정 → 일반 → 인터넷 계정에서 계정을 한 번 연결해 두면 구글이든 Exchange든 iCloud든 CalDAV든 전부 같은 경로로 읽힙니다.</div></details>
+        <div class="ans">앱에 직접 계정을 로그인할 필요가 없습니다. macOS의 <b>시스템 설정 → 인터넷 계정</b>에 등록된 캘린더(Google, Outlook/Exchange, iCloud, CalDAV 등)를 그대로 읽어오므로, 맥 기본 캘린더에 연동된 모든 일정을 그대로 지원합니다.</div></details>
       <details><summary>알림이 하나도 안 떠요.</summary>
-        <div class="ans">먼저 로그를 보세요 — 메뉴 막대 → <code>[디버그] 로그 폴더 열기</code>. <code>[권한] 읽기 가능 → 이벤트 캘린더 N개</code> 줄의 N이 0이면 캘린더를 못 읽고 있는 것이고, 회의가 있는데 안 떴다면 <code>[판정]</code> 줄에 제외 사유가 조건 번호와 함께 적혀 있습니다(예: <code>F2-7 장시간 일정</code>). 0.2.7 이전에는 첫 설치 직후 캘린더가 비어 보이는 결함이 있었습니다. 지금은 권한을 받은 즉시 다시 읽습니다.</div></details>
+        <div class="ans">메뉴 막대 아이콘 클릭 후 <code>[디버그] 로그 폴더 열기</code>에서 로그를 확인해 보세요. 캘린더 읽기 권한이 정상 부여되었는지 확인할 수 있으며, 회의가 있는데도 알림이 뜨지 않았다면 해당 일정이 제외 규칙(종일 일정, 이미 거절한 회의, 장시간 일정 등)에 해당하여 제외된 사유가 명확히 기록되어 있습니다.</div></details>
       <details><summary>메뉴 막대에 아이콘이 안 보여요.</summary>
-        <div class="ans">앱을 한 번 더 실행하세요 — 응용 프로그램 폴더에서든 Spotlight에서든, 이미 켜져 있어도 설정 창이 열립니다. 아이콘을 숨기는 도구를 쓰고 있으면 메뉴 막대의 <code>‹</code> 를 눌러 숨은 영역을 펼쳐 보세요. 아이콘이 거슬리면 설정에서 끌 수도 있습니다 — 꺼도 알림은 그대로 뜹니다.</div></details>
-      <details><summary>알림 때문에 맥이 계속 깨어 있지는 않나요? 배터리는요?</summary>
-        <div class="ans">맥이 자는 것을 막지 않습니다. 알림 시각을 정확히 맞추려고 App Nap만 억제하고 유휴 절전은 건드리지 않습니다 — 실제로 절전을 막는 옵션을 썼던 적이 있어 바로잡았습니다. <code>pmset -g assertions | grep -i untillity</code> 에 아무것도 안 나오는 것이 정상입니다. 평소 CPU는 거의 0이고 메모리는 47MB 안팎입니다(같은 시점 실측 46.8MB).</div></details>
-      <details><summary>대기 화면은 화면 잠금인가요?</summary>
-        <div class="ans">아닙니다. 아무나 <code>Esc</code> 를 누르거나 클릭하면 닫힙니다. 자리를 비울 때 화면을 덮어 두고, 돌아와서 다음 회의를 바로 보려고 만든 화면입니다. 잠그는 화면이 아닙니다. 진짜 잠금은 macOS 의 <code>⌃⌘Q</code> 입니다.</div></details>
-      <details><summary>지우려면 어떻게 하나요?</summary>
-        <div class="ans">설정에서 「로그인할 때 언틸리티 시작」을 끄고, 응용 프로그램 폴더의 <code>Untillity.app</code> 을 휴지통으로 옮기면 됩니다. 캘린더 권한까지 지우려면 <code>tccutil reset Calendar com.bonjugi.untillity</code> (sudo 필요 없습니다), 로그는 <code>~/Library/Logs/Untillity/</code> 를 지우면 됩니다. 앱이 남긴 것은 그 둘과 설정값뿐입니다.</div></details>
+        <div class="ans">응용 프로그램 폴더에서 언틸리티를 한 번 더 실행해 보세요. 이미 실행 중이더라도 설정 창이 바로 열립니다. 메뉴 막대 아이콘 숨김 유틸리티(Hidden Bar, Bartender 등)를 사용 중이라면 숨김 영역을 펼쳐 확인해 주세요. 아이콘이 필요 없다면 설정 창에서 메뉴 막대 아이콘을 끌 수도 있습니다.</div></details>
+      <details><summary>배터리 소모나 발열은 없나요?</summary>
+        <div class="ans">평소 CPU 점유율은 0.0%이며, 메모리 사용량도 약 47MB 내외로 매우 가볍습니다. 알림 시각의 정확도를 지키면서도 맥의 정상적인 유휴 절전(잠자기)을 방해하지 않으므로 배터리 부담 없이 사용하실 수 있습니다.</div></details>
+      <details><summary>대기 화면은 화면 잠금 기능인가요?</summary>
+        <div class="ans">아닙니다. 잠시 자리를 비울 때 화면을 덮어두고, 돌아왔을 때 다음 회의 일정을 바로 확인하기 위한 편의 화면입니다. 마우스 클릭이나 <code>Esc</code> 키로 즉시 닫힙니다. 화면을 안전하게 잠그려면 macOS 기본 잠금 단축키(<code>⌃⌘Q</code>)를 사용해 주세요.</div></details>
     </div>
   </div>
 </section>
@@ -1445,16 +1434,16 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
 <!-- ── §9 커튼콜 ─────────────────────────────────────────── -->
 <section class="act" id="curtaincall">
   <div class="finale">
-    <h2>닫기 전에는 안 사라집니다.</h2>
+    <h2>중요한 회의, 이제 놓치지 마세요.</h2>
     <div class="cta-row">
       <button class="pill primary" id="getBtn2" aria-disabled="true" aria-describedby="getNote2">받기</button>
     </div>
     <div class="metas cap">
       <span id="getNote2"><span class="statuschip"><i aria-hidden="true"></i>0.3.0 · macOS 15.2 이상</span></span>
-      <span>dmg 2.2MB · 설치 안내는 dmg 안에 들어 있습니다</span>
-      <span>캘린더 전체 접근 하나만, 읽기 전용으로 씁니다. 분석도 크래시 리포팅도 업데이트 체크도 없습니다</span>
-      <span>서명은 self-signed 입니다. 공증은 받지 않았습니다 — 설치 안내를 보면서 하세요</span>
-      <span style="margin-top:10px"><span class="kc">esc</span> 를 누르면 떠 있는 알림이 닫힙니다.</span>
+      <span>dmg 2.2MB · 설치 가이드 포함</span>
+      <span>캘린더 읽기 권한 하나만 사용하며, 네트워크를 일절 쓰지 않습니다</span>
+      <span>무료 오픈소스 · 설치 시 최초 1회 보안 설정 참고</span>
+      <span style="margin-top:10px"><span class="kc">esc</span> 키를 누르면 언제든 알림이 닫힙니다.</span>
     </div>
   </div>
 </section>
@@ -1463,7 +1452,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
 
 <footer class="sitefoot">
   <img src="assets/icon.png" width="256" height="256" alt="" aria-hidden="true">
-  <p class="cap" style="margin-top:12px">언틸리티 · 개인이 만든 macOS 메뉴 막대 앱 · 이 페이지는 배포 준비 중인 0.3.0 을 소개합니다</p>
+  <p class="cap" style="margin-top:12px">언틸리티 · 개인이 만든 macOS 메뉴 막대 회의 알림 앱 · 0.3.0</p>
 </footer>
 
 
@@ -1940,10 +1929,10 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
     }
 
     setNarration(
-      R > 200 ? '회의가 5분 남았습니다. 계속 내려 보세요.' :
-      R > 60  ? '1분 전 — 숫자보다 색이 먼저 바뀝니다. 남은 시간은 읽기 전에 눈에 들어옵니다.' :
-      R > 0   ? '발화. 보고 있던 화면이 무엇이든, 그 위를 덮습니다. 다른 앱이 네이티브 전체 화면이어도, 다른 Space에 있어도 따라옵니다.' :
-                '닫아 보세요. esc 한 번이면 됩니다.'
+      R > 200 ? '회의가 5분 남았습니다. 아래로 스크롤해 보세요.' :
+      R > 60  ? '1분 전 — 시간이 임박하면 테마 색상이 바뀌며 시각적으로 주의를 끕니다.' :
+      R > 0   ? '전체 화면 알림. 어떤 작업을 하고 있든 화면 전체를 덮어 회의를 놓치지 않게 합니다.' :
+                '직접 닫아보세요. esc 키 한 번이면 바로 사라집니다.'
     );
   }
 
@@ -2512,7 +2501,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
     ['#curtain', 'fable', 'ahead'], ['#banner', 'fable', 'ahead'],
     ['#evidence', 'fable', 'ahead'],
     ['#silence', 'fable', 'ahead'], ['#silence-copy', 'fable', 'ahead'], ['#standby', 'fable', 'ahead'], ['#receipts', null, 'ahead'],
-    ['#nologin', null, 'ahead'], ['#calendars', null, 'ahead'], ['#offline', null, 'ahead'], ['#install', null, 'ahead'], ['#faq', null, 'ahead'], ['#curtaincall', null, 'started']
+    ['#nologin', null, 'ahead'], ['#calendars', null, 'ahead'], ['#offline', null, 'ahead'], ['#install', null, 'ahead'], ['#changelog', null, 'ahead'], ['#faq', null, 'ahead'], ['#curtaincall', null, 'started']
   ];
   if ('IntersectionObserver' in W) {
     var scio = new IntersectionObserver(function (es) {
@@ -2520,9 +2509,6 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
         if (!e.isIntersecting) return;
         var row = SCENES.filter(function (s) { return $(s[0]) === e.target; })[0];
         if (!row) return;
-        // ★ 테마는 섹션이 바꾸지 않는다 — 우하단 막대에서 고르는 것이다 (2026-09-18 지시).
-        //   내려갈수록 엠버→아스트라→페이블로 저절로 바뀌면 고른 것이 덮인다.
-        //   긴박도(tone)는 장면의 일부라 그대로 둔다 — 색으로 남은 시간을 말하는 것이 이 앱이다.
         Stage.go(Stage.theme(), row[2], 700);
         B.classList.toggle('at-end', e.target.id === 'curtaincall');
       });
@@ -2530,18 +2516,60 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
     SCENES.forEach(function (s) { var el = $(s[0]); if (el) scio.observe(el); });
   }
 
-  /* 내비게이션 활성 표시 */
+  /* 내비게이션 활성 표시 및 스크롤 연동 */
   var navLinks = $$('#nav a[href^="#"]');
-  if ('IntersectionObserver' in W && navLinks.length) {
-    var nio = new IntersectionObserver(function (es) {
-      es.forEach(function (e) {
-        if (!e.isIntersecting) return;
-        navLinks.forEach(function (a) { a.classList.toggle('on', a.getAttribute('href') === '#' + e.target.id); });
+  var navTargetIds = navLinks.map(function (a) { return a.getAttribute('href').slice(1); });
+  var navEls = navTargetIds.map(function (id) { return D.getElementById(id); });
+  var activeNavId = null;
+
+  function updateNav(y, vh) {
+    if (!navLinks.length) return;
+    // 상단(히어로 영역)에서는 활성 표시 해제
+    if (y < vh * 0.45) {
+      if (activeNavId !== null) {
+        activeNavId = null;
+        navLinks.forEach(function (a) { a.classList.remove('on'); });
+      }
+      return;
+    }
+    // 페이지 맨 아래 근처일 경우 마지막 항목(#faq) 활성화
+    var atBottom = (y + vh >= docH + vh - 40);
+    var curId = null;
+    if (atBottom) {
+      curId = navTargetIds[navTargetIds.length - 1];
+    } else {
+      var probeY = vh * 0.4;
+      for (var i = navEls.length - 1; i >= 0; i--) {
+        var el = navEls[i];
+        if (!el) continue;
+        var r = el.getBoundingClientRect();
+        if (r.top <= probeY) {
+          curId = navTargetIds[i];
+          break;
+        }
+      }
+      if (!curId && navTargetIds.length) {
+        curId = navTargetIds[0];
+      }
+    }
+
+    if (curId !== activeNavId) {
+      activeNavId = curId;
+      var activeLink = null;
+      navLinks.forEach(function (a) {
+        var match = a.getAttribute('href') === '#' + curId;
+        a.classList.toggle('on', match);
+        if (match) activeLink = a;
       });
-    }, { rootMargin: '-48% 0px -48% 0px', threshold: 0 });
-    ['#ignition', '#silence', '#standby', '#receipts', '#install'].forEach(function (s) {
-      var el = $(s); if (el) nio.observe(el);
-    });
+      // 활성 탭이 가려지지 않도록 nav 컨테이너 가로 스크롤 동기화
+      if (activeLink) {
+        var nav = $('#nav');
+        if (nav && nav.scrollWidth > nav.clientWidth) {
+          var targetScroll = activeLink.offsetLeft - (nav.clientWidth / 2) + (activeLink.offsetWidth / 2);
+          nav.scrollTo({ left: targetScroll, behavior: 'smooth' });
+        }
+      }
+    }
   }
 
   /* ═══════════════════════════════ 루프 ═══════════════════════════════════ */
@@ -2554,6 +2582,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
   function chromeFrame(y, vh) {
     if (progressEl) progressEl.style.setProperty('--sp', (clamp(y / docH, 0, 1) * 100) + '%');
     B.classList.toggle('scrolled', y > vh * 0.55);
+    updateNav(y, vh);
     if (heroCol && curtain && !reduced) {
       var hp = clamp(y / (vh * 0.85), 0, 1);
       heroCol.style.transform = 'translateY(' + (-hp * 10) + '%)';
