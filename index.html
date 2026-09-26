@@ -143,17 +143,12 @@ body.light-theme .fstep.on .fno,
 body.light-theme .fstep.on .fsub,
 body.light-theme .fstep.on b{text-shadow:none}
 
-.statelabel{
-  position:absolute; bottom:22px; left:26px; display:flex; gap:7px; align-items:center;
-}
 .kc{
   display:inline-block; padding:3px 7px; border-radius:5px;
   background:var(--w-10); border:1px solid rgba(255,255,255,.16);
   font:600 11px/1.35 var(--f-ui); color:rgba(255,255,255,.7); letter-spacing:normal;
   white-space:nowrap;
 }
-.statelabel .dotmark{width:5px;height:5px;border-radius:50%;background:var(--accent);
-  box-shadow:0 0 10px var(--accent);transition:background .7s var(--ease-io)}
 
 .escnote{
   position:absolute; top:18px; right:calc(26px + 92px); display:flex; gap:6px; align-items:center;
@@ -817,7 +812,7 @@ body.light-theme .dim{background:rgba(41,26,66,.64)}
 .doc{display:none;position:relative;z-index:50;background:var(--doc-bg);min-height:100dvh;
   padding:72px var(--gut) 120px}
 body.docmode{background:var(--doc-bg)}
-body.docmode .play,body.docmode .chrome .nav,body.docmode .chrome .statelabel,
+body.docmode .play,body.docmode .chrome .nav,
 body.docmode .chrome .escnote,body.docmode .sitefoot{display:none}
 body.docmode .doc{display:block}
 body.docmode .stage{opacity:0;transform:scale(1.02)}
@@ -853,7 +848,6 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
 @media (max-width:760px){
   .act{padding:12vh var(--gut)}
   .clock{top:14px;right:16px;font-size:13px}
-  .statelabel{bottom:16px;left:16px}
   .nav{left:12px;top:10px;max-width:calc(100vw - 96px)}
   .escnote{display:none}
   #silence{height:auto}
@@ -922,7 +916,6 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
     <a href="#faq">FAQ</a>
   </nav>
   <div class="clock tnum" id="clock" aria-label="현재 시각">00:00:00</div>
-  <div class="statelabel"><span class="kc" id="stateChip"><span class="dotmark" aria-hidden="true"></span> 페이블 · 여유</span></div>
   <div class="escnote" aria-hidden="true"><span class="kc">esc</span><span>닫기</span></div>
 </div>
 
@@ -949,7 +942,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
       <a class="pill outline" href="#install">설치 안내 보기</a>
     </div>
     <p class="meta rise" id="getNote">
-      <span class="statuschip"><i aria-hidden="true"></i>0.3.3 · macOS 15.2 이상</span><br>
+      <span class="statuschip"><i aria-hidden="true"></i>0.3.4 · macOS 15.2 이상</span><br>
       dmg 2.2MB · 무료 오픈소스 · 설치 가이드 제공
     </p>
   </div>
@@ -1282,10 +1275,9 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
         <li class="rail" aria-hidden="true"><i id="railFill"></i></li>
         <li class="step" data-mock="m3"><span class="no">1</span><p>받은 dmg 파일을 열고 앱을 응용 프로그램(Applications) 폴더로 <b>끌어다 놓습니다.</b></p><p class="warn">dmg 안에서 바로 실행하면 로그인 시 자동 실행 기능이 정상 동작하지 않을 수 있습니다.</p></li>
         <li class="step" data-mock="m4"><span class="no">2</span><p>응용 프로그램 폴더에서 앱을 더블 클릭해 엽니다. 보안 경고 창이 뜨면 <b>「완료」</b>를 누릅니다.</p><p class="warn">파란색 기본 버튼인 「휴지통으로 이동」을 누르면 앱이 삭제되니 주의하세요.</p></li>
-        <li class="step" data-mock="m5"><span class="no">3</span><p><b>시스템 설정 → 개인정보 보호 및 보안</b>으로 이동하여, 화면 아래 보안 항목의 <b>「그래도 열기」</b>를 클릭합니다. (앱 실행 시도 후 약 1시간 동안만 표시됩니다)</p></li>
+        <li class="step" data-mock="m5"><span class="no">3</span><p><b>시스템 설정 → 개인정보 보호 및 보안</b>으로 이동하여, 화면 아래 보안 항목의 <b>「그래도 열기」</b>를 클릭합니다.</p></li>
         <li class="step" data-mock="m6"><span class="no">4</span><p>확인 창이 한 번 더 뜹니다. 여기서도 맨 위의 「휴지통으로 이동」 대신 가운데 <b>「그래도 열기」</b>를 누르세요. 이어서 Touch ID 또는 암호로 승인합니다.</p></li>
-        <li class="step" data-mock="m8"><span class="no">5</span><p>캘린더 접근 권한을 묻는 창이 뜨면 <b>「전체 접근 허용」</b>을 선택합니다. 일정은 오직 알림을 위해 로컬에서만 안전하게 읽힙니다.</p></li>
-        <li class="step" data-mock="m9"><span class="no">6</span><p>설정 창에서 <b>「로그인할 때 언틸리티 시작」</b>을 켜두시면 다음부터 자동으로 실행됩니다.</p></li>
+        <li class="step" data-mock="m8"><span class="no">5</span><p>캘린더 접근 권한을 묻는 창이 뜨면 <b>「전체 접근 허용」</b>을 선택합니다.</p></li>
       </ol>
 
       <div class="mockpanel" id="mockPanel" aria-hidden="true">
@@ -1337,11 +1329,6 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
             <div class="osbtn plain" style="margin-top:8px">허용 안 함</div>
           </div>
         </div>
-        <div class="mockslide tall" data-slide="m9">
-          <div class="shot">
-            <img src="assets/settings.png" width="960" height="1024" alt="언틸리티 설정 창의 「알림」 탭 — 1분·3분·5분·10분·15분·30분 전 알림 스위치와 테마 목록" loading="lazy" decoding="async">
-          </div>
-        </div>
       </div>
     </div>
 
@@ -1359,6 +1346,15 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
     </div>
     <div class="faq" data-doc="바뀐 것">
       <details open>
+        <summary>0.3.4 — 2026년 9월 26일</summary>
+        <div class="ans">
+          <ul class="whatsnew">
+            <li>처음 실행하면 로그인 자동 실행이 켜짐</li>
+            <li>설치 안내 더 줄임</li>
+          </ul>
+        </div>
+      </details>
+      <details>
         <summary>0.3.3 — 2026년 9월 26일</summary>
         <div class="ans">
           <ul class="whatsnew">
@@ -1448,7 +1444,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
       <button class="pill primary" id="getBtn2" aria-disabled="true" aria-describedby="getNote2">받기</button>
     </div>
     <div class="metas cap">
-      <span id="getNote2"><span class="statuschip"><i aria-hidden="true"></i>0.3.3 · macOS 15.2 이상</span></span>
+      <span id="getNote2"><span class="statuschip"><i aria-hidden="true"></i>0.3.4 · macOS 15.2 이상</span></span>
       <span>dmg 2.2MB · 설치 가이드 포함</span>
       <span>캘린더 읽기 권한 하나만 사용하며, 네트워크를 일절 쓰지 않습니다</span>
       <span>무료 오픈소스 · 설치 시 최초 1회 보안 설정 참고</span>
@@ -1461,7 +1457,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
 
 <footer class="sitefoot">
   <img src="assets/icon.png" width="256" height="256" alt="" aria-hidden="true">
-  <p class="cap" style="margin-top:12px">언틸리티 · 개인이 만든 macOS 메뉴 막대 회의 알림 앱 · 0.3.3</p>
+  <p class="cap" style="margin-top:12px">언틸리티 · 개인이 만든 macOS 메뉴 막대 회의 알림 앱 · 0.3.4</p>
 </footer>
 
 
@@ -1543,7 +1539,6 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
   catch (e) { canvasOK = false; }
   if (canvasOK && (navigator.hardwareConcurrency || 8) < 4) canvasOK = false;
 
-  var stateChip = $('#stateChip');
   var fallbackEl = $('#stageFallback');
 
   var Stage = (function () {
@@ -1560,10 +1555,6 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
       root.style.setProperty('--on-accent', tk['--on-accent']);
       root.style.setProperty('--f-theme', THEME_FONT[t]);
       B.classList.toggle('light-theme', t === 'fable');
-      if (stateChip) {
-        stateChip.innerHTML = '<span class="dotmark" aria-hidden="true"></span> ' +
-          THEME_NAME[t];
-      }
       $$('.tchip').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.theme === t)); });
       $$('.gcard').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.theme === t)); });
       if (!canvasOK && fallbackEl) fallbackEl.style.backgroundImage = 'url("' + FALLBACK_IMG[t] + '")';
@@ -2400,7 +2391,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
   /* 「받기」 — 릴리스를 게시하면 **아래 한 줄에 dmg 주소를 넣는 것으로 끝난다.**
      그러면 점선 테두리가 풀리고 버튼이 진짜 링크처럼 동작한다.
      ★ `disabled` 를 쓰면 안 된다 — 클릭 이벤트가 아예 안 와서 안내조차 못 띄운다 (2026-09-18). */
-  var RELEASE_URL = 'https://github.com/junyoung-kang-kurly/untillity-site/releases/download/v0.3.3/Untillity-0.3.3.dmg';
+  var RELEASE_URL = 'https://github.com/junyoung-kang-kurly/untillity-site/releases/download/v0.3.4/Untillity-0.3.4.dmg';
   $$('#getBtn, #getBtn2').forEach(function (b) {
     if (RELEASE_URL) {
       b.removeAttribute('aria-disabled');
@@ -2408,7 +2399,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
       return;
     }
     b.addEventListener('click', function () {
-      toast('0.3.3 은 아직 공개 전입니다. 릴리스가 올라오면 이 버튼으로 바로 받을 수 있습니다.');
+      toast('0.3.4 는 아직 공개 전입니다. 릴리스가 올라오면 이 버튼으로 바로 받을 수 있습니다.');
       var note = D.getElementById(b.getAttribute('aria-describedby') || '');
       var chip = note && note.querySelector('.statuschip');
       if (!chip) return;
