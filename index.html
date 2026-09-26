@@ -949,7 +949,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
       <a class="pill outline" href="#install">설치 안내 보기</a>
     </div>
     <p class="meta rise" id="getNote">
-      <span class="statuschip"><i aria-hidden="true"></i>0.3.2 · macOS 15.2 이상</span><br>
+      <span class="statuschip"><i aria-hidden="true"></i>0.3.3 · macOS 15.2 이상</span><br>
       dmg 2.2MB · 무료 오픈소스 · 설치 가이드 제공
     </p>
   </div>
@@ -1021,16 +1021,16 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
 
     <div class="reduced-trio inner">
       <figure>
-        <img src="assets/alert-ember@sm.jpg?v=3" srcset="assets/alert-ember@sm.jpg?v=3 1100w, assets/alert-ember.jpg?v=3 2000w" sizes="(max-width:760px) 100vw, 33vw" width="2000" height="1296" alt="엠버 테마, 여유 톤의 전체 화면 알림. 회의 제목과 시각, 참가·닫기 버튼이 화면 가운데에 있고 5분 전 알림이라고 적혀 있다" loading="lazy" decoding="async">
-        <figcaption>여유 — 회의 1분 전까지 (차분한 톤)</figcaption>
+        <img src="assets/alert-ember@sm.jpg?v=3" srcset="assets/alert-ember@sm.jpg?v=3 1100w, assets/alert-ember.jpg?v=3 2000w" sizes="(max-width:760px) 100vw, 33vw" width="2000" height="1296" alt="엠버 테마의 전체 화면 알림. 회의 제목과 시각, 참가·닫기 버튼이 화면 가운데에 있고 5분 전 알림이라고 적혀 있다" loading="lazy" decoding="async">
+        <figcaption>엠버 — 따뜻한 어둠</figcaption>
       </figure>
       <figure>
-        <img src="assets/alert-astra@sm.jpg?v=3" srcset="assets/alert-astra@sm.jpg?v=3 1100w, assets/alert-astra.jpg?v=3 2000w" sizes="(max-width:760px) 100vw, 33vw" width="2000" height="1296" alt="아스트라 테마, 임박 톤의 전체 화면 알림. 청록 성운 배경 위에 같은 구성이 놓여 있고 참가 버튼이 붉게 물들어 있다" loading="lazy" decoding="async">
-        <figcaption>임박 — 1분 이내 (주의를 환기하는 강조 톤)</figcaption>
+        <img src="assets/alert-astra@sm.jpg?v=3" srcset="assets/alert-astra@sm.jpg?v=3 1100w, assets/alert-astra.jpg?v=3 2000w" sizes="(max-width:760px) 100vw, 33vw" width="2000" height="1296" alt="아스트라 테마의 전체 화면 알림. 청록 성운 배경 위에 같은 구성이 놓여 있고 참가 버튼이 붉게 물들어 있다" loading="lazy" decoding="async">
+        <figcaption>아스트라 — 깊은 밤하늘</figcaption>
       </figure>
       <figure>
-        <img src="assets/alert-fable@sm.jpg?v=3" srcset="assets/alert-fable@sm.jpg?v=3 1100w, assets/alert-fable.jpg?v=3 2000w" sizes="(max-width:760px) 100vw, 33vw" width="2000" height="1296" alt="페이블 테마, 시작됨 톤의 전체 화면 알림. 저녁 하늘 배경 위에 같은 구성이 놓여 있고 시각 자리에 「시작됨」이라고 적혀 있다" loading="lazy" decoding="async">
-        <figcaption>시작됨 — 회의 시작 시각 (즉시 참가를 돕는 강한 톤)</figcaption>
+        <img src="assets/alert-fable@sm.jpg?v=3" srcset="assets/alert-fable@sm.jpg?v=3 1100w, assets/alert-fable.jpg?v=3 2000w" sizes="(max-width:760px) 100vw, 33vw" width="2000" height="1296" alt="페이블 테마의 전체 화면 알림. 저녁 하늘 배경 위에 같은 구성이 놓여 있고 시각 자리에 「시작됨」이라고 적혀 있다" loading="lazy" decoding="async">
+        <figcaption>페이블 — 저녁 하늘</figcaption>
       </figure>
     </div>
   </div>
@@ -1280,31 +1280,16 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
     <div class="installgrid" style="margin-top:46px">
       <ol class="steps" id="steps" data-doc="설치 절차">
         <li class="rail" aria-hidden="true"><i id="railFill"></i></li>
-        <li class="step" data-mock="m1"><span class="no">1</span><p>macOS 15.2 이상 버전인지 확인합니다.</p></li>
-        <li class="step" data-mock="m2"><span class="no">2</span><p><a href="https://github.com/junyoung-kang-kurly/untillity-site/releases/latest">Releases</a> 에서 <code>Untillity-0.3.2.dmg</code> 파일을 다운로드합니다.</p></li>
-        <li class="step" data-mock="m3"><span class="no">3</span><p>dmg 파일을 열고 앱을 응용 프로그램(Applications) 폴더로 <b>끌어다 놓습니다.</b></p><p class="warn">dmg 안에서 바로 실행하면 로그인 시 자동 실행 기능이 정상 동작하지 않을 수 있습니다.</p></li>
-        <li class="step" data-mock="m4"><span class="no">4</span><p>응용 프로그램 폴더에서 앱을 더블 클릭해 엽니다. 보안 경고 창이 뜨면 <b>「완료」</b>를 누릅니다.</p><p class="warn">파란색 기본 버튼인 「휴지통으로 이동」을 누르면 앱이 삭제되니 주의하세요.</p></li>
-        <li class="step" data-mock="m5"><span class="no">5</span><p><b>시스템 설정 → 개인정보 보호 및 보안</b>으로 이동하여, 화면 아래 보안 항목의 <b>「그래도 열기」</b>를 클릭합니다. (앱 실행 시도 후 약 1시간 동안만 표시됩니다)</p></li>
-        <li class="step" data-mock="m6"><span class="no">6</span><p>확인 창이 한 번 더 뜹니다. 여기서도 맨 위의 「휴지통으로 이동」 대신 가운데 <b>「그래도 열기」</b>를 누르세요. 이어서 Touch ID 또는 암호로 승인합니다.</p></li>
-        <li class="step" data-mock="m7"><span class="no">7</span><p>언틸리티는 메뉴 막대 전용 앱으로, Dock 대신 화면 상단 메뉴 막대에 종 모양 아이콘이 나타납니다.</p></li>
-        <li class="step" data-mock="m8"><span class="no">8</span><p>캘린더 접근 권한을 묻는 창이 뜨면 <b>「전체 접근 허용」</b>을 선택합니다. 일정은 오직 알림을 위해 로컬에서만 안전하게 읽힙니다.</p></li>
-        <li class="step" data-mock="m9"><span class="no">9</span><p>설정 창에서 <b>「로그인할 때 언틸리티 시작」</b>을 켜두시면 다음부터 자동으로 실행됩니다.</p></li>
+        <li class="step" data-mock="m3"><span class="no">1</span><p>받은 dmg 파일을 열고 앱을 응용 프로그램(Applications) 폴더로 <b>끌어다 놓습니다.</b></p><p class="warn">dmg 안에서 바로 실행하면 로그인 시 자동 실행 기능이 정상 동작하지 않을 수 있습니다.</p></li>
+        <li class="step" data-mock="m4"><span class="no">2</span><p>응용 프로그램 폴더에서 앱을 더블 클릭해 엽니다. 보안 경고 창이 뜨면 <b>「완료」</b>를 누릅니다.</p><p class="warn">파란색 기본 버튼인 「휴지통으로 이동」을 누르면 앱이 삭제되니 주의하세요.</p></li>
+        <li class="step" data-mock="m5"><span class="no">3</span><p><b>시스템 설정 → 개인정보 보호 및 보안</b>으로 이동하여, 화면 아래 보안 항목의 <b>「그래도 열기」</b>를 클릭합니다. (앱 실행 시도 후 약 1시간 동안만 표시됩니다)</p></li>
+        <li class="step" data-mock="m6"><span class="no">4</span><p>확인 창이 한 번 더 뜹니다. 여기서도 맨 위의 「휴지통으로 이동」 대신 가운데 <b>「그래도 열기」</b>를 누르세요. 이어서 Touch ID 또는 암호로 승인합니다.</p></li>
+        <li class="step" data-mock="m8"><span class="no">5</span><p>캘린더 접근 권한을 묻는 창이 뜨면 <b>「전체 접근 허용」</b>을 선택합니다. 일정은 오직 알림을 위해 로컬에서만 안전하게 읽힙니다.</p></li>
+        <li class="step" data-mock="m9"><span class="no">6</span><p>설정 창에서 <b>「로그인할 때 언틸리티 시작」</b>을 켜두시면 다음부터 자동으로 실행됩니다.</p></li>
       </ol>
 
       <div class="mockpanel" id="mockPanel" aria-hidden="true">
-        <div class="mockslide on" data-slide="m1">
-          <div style="text-align:center">
-            <p style="font:700 clamp(22px,3vw,34px)/1.2 var(--f-ui)">macOS 15.2+</p>
-            <p class="cap" style="margin-top:10px">Apple 실리콘 · 인텔 모두. dmg 2.2MB</p>
-          </div>
-        </div>
-        <div class="mockslide" data-slide="m2">
-          <div style="text-align:center">
-            <span class="statuschip"><i aria-hidden="true"></i>0.3.2 · macOS 15.2 이상</span>
-            <p class="cap" style="margin-top:12px">공개되면 이 자리에 dmg 링크가 생깁니다.<br>지금은 링크가 없습니다.</p>
-          </div>
-        </div>
-        <div class="mockslide" data-slide="m3">
+        <div class="mockslide on" data-slide="m3">
           <div class="dmgwin">
             <div class="bar"><i></i><i></i><i></i></div>
             <div class="bd">
@@ -1343,12 +1328,6 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
             <div class="osbtn plain" style="margin-top:8px">취소</div>
           </div>
         </div>
-        <div class="mockslide" data-slide="m7">
-          <div class="menubar">
-            <div class="mb"><span>100%</span><span class="bell" aria-hidden="true">◗</span><span class="tnum">14:32</span></div>
-            <div class="body"><p class="cap">Dock 대신 메뉴 막대 오른쪽의 종 아이콘을 확인하세요.</p></div>
-          </div>
-        </div>
         <div class="mockslide" data-slide="m8">
           <div class="osdialog">
             <img src="assets/icon.png" width="256" height="256" alt="언틸리티 앱 아이콘" loading="lazy" decoding="async">
@@ -1376,16 +1355,26 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
     <div style="max-width:760px">
       <p class="eyebrow">업데이트</p>
       <h2 class="act-title">릴리즈 노트</h2>
-      <p class="body-copy">주요 배포 버전의 변경 사항입니다. 자세한 내용은 <a href="https://github.com/junyoung-kang-kurly/untillity-site/releases">Releases</a>에서 확인하실 수 있습니다.</p>
+      <p class="body-copy">자세한 내용은 <a href="https://github.com/junyoung-kang-kurly/untillity-site/releases">Releases</a>에서 볼 수 있습니다.</p>
     </div>
     <div class="faq" data-doc="바뀐 것">
       <details open>
+        <summary>0.3.3 — 2026년 9월 26일</summary>
+        <div class="ans">
+          <ul class="whatsnew">
+            <li>테마별 배경 색 강도 (대기 화면에서 <span class="kc">←</span> <span class="kc">→</span>)</li>
+            <li>시간에 따른 색 변화 제거</li>
+            <li>설치 안내 간소화</li>
+          </ul>
+        </div>
+      </details>
+      <details>
         <summary>0.3.2 — 2026년 9월 26일</summary>
         <div class="ans">
           <ul class="whatsnew">
-            <li><b>잠금을 풀었을 때 키보드가 알림 창에 닿지 않던 문제 수정.</b> 알림이나 대기 화면을 띄운 채 화면을 잠갔다 풀면, 키 입력이 창 뒤의 앱으로 가서 <span class="kc">esc</span> 가 먹지 않았습니다. 이제 잠금 해제·절전 복귀·Space 전환 뒤에 창이 키 입력을 다시 가져옵니다.</li>
-            <li><b>오래 떠 있는 알림은 스스로 내려갑니다.</b> 자리를 비운 사이 뜬 알림이 몇 시간씩 남아 있지 않도록, 알림이 뜨고 10분(회의가 아직 시작 전이면 시작하고 10분)이 지나면 닫힙니다. 설정에서 5분부터 1시간까지, 또는 닫지 않음으로 바꿀 수 있습니다.</li>
-            <li><b>넘겨 볼 회의 범위 설정.</b> 대기 화면과 알림 화면에서 앞으로 몇 시간 안의 회의까지 보여 줄지 고를 수 있습니다 (1·3·6·12시간·전부). 다음 회의 하나는 범위 밖이어도 보입니다.</li>
+            <li>잠금 해제 뒤 키 입력이 안 되던 문제 수정</li>
+            <li>오래 떠 있는 알림 자동 닫힘 (기본 10분)</li>
+            <li>넘겨 볼 회의 범위 설정</li>
           </ul>
         </div>
       </details>
@@ -1393,10 +1382,10 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
         <summary>0.3.1 — 2026년 9월 21일</summary>
         <div class="ans">
           <ul class="whatsnew">
-            <li><b>알림 화면과 대기 화면 레이아웃 일원화.</b> 알림 화면에서도 큰 시계와 날짜가 상단에 표시되고, 불필요한 장식(강조 막대, 계정 칩 등)을 덜어내어 시각적 일관성을 확보했습니다.</li>
-            <li><b>알림 화면 타임라인 탐색.</b> 알림이 떴을 때도 <span class="kc">↑</span> <span class="kc">↓</span> 방향키로 앞뒤 회의를 편하게 훑어볼 수 있습니다.</li>
-            <li><b>회의실 정보 정돈.</b> 위치 텍스트에서 불필요한 빌딩명과 인원수 표기를 정제하여 깔끔한 회의실 칩(📍)으로 보여줍니다.</li>
-            <li><b>Google Calendar 바로가기 연동.</b> 미팅 제목을 누르면 해당 일정의 구글 캘린더 웹페이지가 브라우저로 열립니다.</li>
+            <li>알림·대기 화면 레이아웃 통일</li>
+            <li>알림 화면에서도 <span class="kc">↑</span> <span class="kc">↓</span> 로 회의 넘기기</li>
+            <li>회의실 표시 정리</li>
+            <li>제목을 누르면 구글 캘린더 열기</li>
           </ul>
         </div>
       </details>
@@ -1404,11 +1393,10 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
         <summary>0.3.0 — 2026년 9월 18일</summary>
         <div class="ans">
           <ul class="whatsnew">
-            <li><b>앱을 실행하면 바로 설정 창이 열립니다.</b> 메뉴 막대 아이콘을 찾기 어렵다는 피드백을 반영했습니다. 이미 실행 중이어도 설정 창이 열립니다.</li>
-            <li><b>메뉴 막대 아이콘 숨김 옵션 추가.</b> 아이콘을 꺼도 알림은 정상적으로 표시됩니다.</li>
-            <li><b>대기 화면 회의 탐색.</b> <span class="kc">↑</span> <span class="kc">↓</span> 키나 스크롤로 다음 회의들을 넘겨볼 수 있습니다.</li>
-            <li><b>최초 설치 시 캘린더 동기화 안정화.</b> 권한 획득 즉시 일정을 새로고침하도록 개선했습니다.</li>
-            <li><b>대기 화면 인터랙션 반응성 개선.</b></li>
+            <li>실행하면 설정 창 열림</li>
+            <li>메뉴 막대 아이콘 숨기기</li>
+            <li>대기 화면에서 회의 넘기기</li>
+            <li>첫 설치 때 캘린더가 비던 문제 수정</li>
           </ul>
         </div>
       </details>
@@ -1416,7 +1404,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
         <summary>0.1.1 — 2026년 9월 8일</summary>
         <div class="ans">
           <ul class="whatsnew">
-            <li><b>첫 공개.</b> 전체 화면 알림, 세 가지 테마, 대기 화면, 회의 링크 자동 추출, 로그인 자동 실행.</li>
+            <li>첫 공개</li>
           </ul>
         </div>
       </details>
@@ -1460,7 +1448,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
       <button class="pill primary" id="getBtn2" aria-disabled="true" aria-describedby="getNote2">받기</button>
     </div>
     <div class="metas cap">
-      <span id="getNote2"><span class="statuschip"><i aria-hidden="true"></i>0.3.2 · macOS 15.2 이상</span></span>
+      <span id="getNote2"><span class="statuschip"><i aria-hidden="true"></i>0.3.3 · macOS 15.2 이상</span></span>
       <span>dmg 2.2MB · 설치 가이드 포함</span>
       <span>캘린더 읽기 권한 하나만 사용하며, 네트워크를 일절 쓰지 않습니다</span>
       <span>무료 오픈소스 · 설치 시 최초 1회 보안 설정 참고</span>
@@ -1473,7 +1461,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
 
 <footer class="sitefoot">
   <img src="assets/icon.png" width="256" height="256" alt="" aria-hidden="true">
-  <p class="cap" style="margin-top:12px">언틸리티 · 개인이 만든 macOS 메뉴 막대 회의 알림 앱 · 0.3.2</p>
+  <p class="cap" style="margin-top:12px">언틸리티 · 개인이 만든 macOS 메뉴 막대 회의 알림 앱 · 0.3.3</p>
 </footer>
 
 
@@ -1534,7 +1522,6 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
   /* ══════════════════════════════════ 무대 ══════════════════════════════════ */
 
   var THEME_NAME = { ember: '엠버', astra: '아스트라', fable: '페이블' };
-  var TONE_NAME  = { ahead: '여유', imminent: '임박', started: '시작됨' };
   var THEME_FONT = {
     ember: '"SF Pro Rounded", ui-rounded, "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif',
     astra: '-apple-system, BlinkMacSystemFont, "SF Pro Text", "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif',
@@ -1575,7 +1562,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
       B.classList.toggle('light-theme', t === 'fable');
       if (stateChip) {
         stateChip.innerHTML = '<span class="dotmark" aria-hidden="true"></span> ' +
-          THEME_NAME[t] + ' · ' + TONE_NAME[cur.tone];
+          THEME_NAME[t];
       }
       $$('.tchip').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.theme === t)); });
       $$('.gcard').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.theme === t)); });
@@ -1939,8 +1926,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
       if (fired) ignAlert.setCount(leftText(R));
       ignAlert.setHead(R > 60 ? '5분 전 알림' : '1분 전 알림');
     }
-    var tone = R > 60 ? 'ahead' : (R > 0 ? 'imminent' : 'started');
-    if (tone !== Stage.tone()) Stage.go(userTheme || Stage.theme(), tone, 700);
+    // 0.3.3 — 앱처럼 시간은 색을 바꾸지 않는다 (SPEC F4.14 개정). 남은 시간은 카운트다운 글자가 말한다.
 
     if (R <= 60 && !fired) {
       if (!fireArm) fireArm = setTimeout(function () { fireArm = 0; if (R <= 60) fire(); }, 250);
@@ -1951,7 +1937,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
 
     setNarration(
       R > 200 ? '회의가 5분 남았습니다. 아래로 스크롤해 보세요.' :
-      R > 60  ? '1분 전 — 시간이 임박하면 테마 색상이 바뀌며 시각적으로 주의를 끕니다.' :
+      R > 60  ? '정한 시각이 되면 알림이 뜹니다. 미리 알림은 1분·3분·5분 전처럼 여러 번 고를 수 있습니다.' :
       R > 0   ? '전체 화면 알림. 어떤 작업을 하고 있든 화면 전체를 덮어 회의를 놓치지 않게 합니다.' :
                 '직접 닫아보세요. esc 키 한 번이면 바로 사라집니다.'
     );
@@ -2414,7 +2400,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
   /* 「받기」 — 릴리스를 게시하면 **아래 한 줄에 dmg 주소를 넣는 것으로 끝난다.**
      그러면 점선 테두리가 풀리고 버튼이 진짜 링크처럼 동작한다.
      ★ `disabled` 를 쓰면 안 된다 — 클릭 이벤트가 아예 안 와서 안내조차 못 띄운다 (2026-09-18). */
-  var RELEASE_URL = 'https://github.com/junyoung-kang-kurly/untillity-site/releases/download/v0.3.2/Untillity-0.3.2.dmg';
+  var RELEASE_URL = 'https://github.com/junyoung-kang-kurly/untillity-site/releases/download/v0.3.3/Untillity-0.3.3.dmg';
   $$('#getBtn, #getBtn2').forEach(function (b) {
     if (RELEASE_URL) {
       b.removeAttribute('aria-disabled');
@@ -2422,7 +2408,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
       return;
     }
     b.addEventListener('click', function () {
-      toast('0.3.2 는 아직 공개 전입니다. 릴리스가 올라오면 이 버튼으로 바로 받을 수 있습니다.');
+      toast('0.3.3 은 아직 공개 전입니다. 릴리스가 올라오면 이 버튼으로 바로 받을 수 있습니다.');
       var note = D.getElementById(b.getAttribute('aria-describedby') || '');
       var chip = note && note.querySelector('.statuschip');
       if (!chip) return;
