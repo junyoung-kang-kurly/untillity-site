@@ -942,7 +942,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
       <a class="pill outline" href="#install">설치 안내 보기</a>
     </div>
     <p class="meta rise" id="getNote">
-      <span class="statuschip"><i aria-hidden="true"></i>0.3.4 · macOS 15.2 이상</span><br>
+      <span class="statuschip"><i aria-hidden="true"></i>0.3.2 · macOS 15.2 이상</span><br>
       dmg 2.2MB · 무료 오픈소스 · 설치 가이드 제공
     </p>
   </div>
@@ -1345,31 +1345,16 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
     </div>
     <div class="faq" data-doc="바뀐 것">
       <details open>
-        <summary>0.3.4 — 2026년 9월 26일</summary>
-        <div class="ans">
-          <ul class="whatsnew">
-            <li>처음 실행하면 로그인 자동 실행이 켜짐</li>
-            <li>설치 안내 더 줄임</li>
-          </ul>
-        </div>
-      </details>
-      <details>
-        <summary>0.3.3 — 2026년 9월 26일</summary>
+        <summary>0.3.2 — 2026년 9월 26일</summary>
         <div class="ans">
           <ul class="whatsnew">
             <li>테마별 배경 색 강도 (대기 화면에서 <span class="kc">←</span> <span class="kc">→</span>)</li>
             <li>시간에 따른 색 변화 제거</li>
-            <li>설치 안내 간소화</li>
-          </ul>
-        </div>
-      </details>
-      <details>
-        <summary>0.3.2 — 2026년 9월 26일</summary>
-        <div class="ans">
-          <ul class="whatsnew">
-            <li>잠금 해제 뒤 키 입력이 안 되던 문제 수정</li>
             <li>오래 떠 있는 알림 자동 닫힘 (기본 10분)</li>
             <li>넘겨 볼 회의 범위 설정</li>
+            <li>잠금 해제 뒤 키 입력이 안 되던 문제 수정</li>
+            <li>처음 실행하면 로그인 자동 실행이 켜짐</li>
+            <li>설치 안내 간소화</li>
           </ul>
         </div>
       </details>
@@ -1443,7 +1428,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
       <button class="pill primary" id="getBtn2" aria-disabled="true" aria-describedby="getNote2">받기</button>
     </div>
     <div class="metas cap">
-      <span id="getNote2"><span class="statuschip"><i aria-hidden="true"></i>0.3.4 · macOS 15.2 이상</span></span>
+      <span id="getNote2"><span class="statuschip"><i aria-hidden="true"></i>0.3.2 · macOS 15.2 이상</span></span>
       <span>dmg 2.2MB · 설치 가이드 포함</span>
       <span>캘린더 읽기 권한 하나만 사용하며, 네트워크를 일절 쓰지 않습니다</span>
       <span>무료 오픈소스 · 설치 시 최초 1회 보안 설정 참고</span>
@@ -1456,7 +1441,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
 
 <footer class="sitefoot">
   <img src="assets/icon.png" width="256" height="256" alt="" aria-hidden="true">
-  <p class="cap" style="margin-top:12px">언틸리티 · 개인이 만든 macOS 메뉴 막대 회의 알림 앱 · 0.3.4</p>
+  <p class="cap" style="margin-top:12px">언틸리티 · 개인이 만든 macOS 메뉴 막대 회의 알림 앱 · 0.3.2</p>
 </footer>
 
 
@@ -1916,7 +1901,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
       if (fired) ignAlert.setCount(leftText(R));
       ignAlert.setHead(R > 60 ? '5분 전 알림' : '1분 전 알림');
     }
-    // 0.3.3 — 앱처럼 시간은 색을 바꾸지 않는다 (SPEC F4.14 개정). 남은 시간은 카운트다운 글자가 말한다.
+    // 0.3.2 — 앱처럼 시간은 색을 바꾸지 않는다 (SPEC F4.14 개정). 남은 시간은 카운트다운 글자가 말한다.
 
     if (R <= 60 && !fired) {
       if (!fireArm) fireArm = setTimeout(function () { fireArm = 0; if (R <= 60) fire(); }, 250);
@@ -2390,7 +2375,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
   /* 「받기」 — 릴리스를 게시하면 **아래 한 줄에 dmg 주소를 넣는 것으로 끝난다.**
      그러면 점선 테두리가 풀리고 버튼이 진짜 링크처럼 동작한다.
      ★ `disabled` 를 쓰면 안 된다 — 클릭 이벤트가 아예 안 와서 안내조차 못 띄운다 (2026-09-18). */
-  var RELEASE_URL = 'https://github.com/junyoung-kang-kurly/untillity-site/releases/download/v0.3.4/Untillity-0.3.4.dmg';
+  var RELEASE_URL = 'https://github.com/junyoung-kang-kurly/untillity-site/releases/download/v0.3.2/Untillity-0.3.2.dmg';
   $$('#getBtn, #getBtn2').forEach(function (b) {
     if (RELEASE_URL) {
       b.removeAttribute('aria-disabled');
@@ -2398,7 +2383,7 @@ body.docmode .stage{opacity:0;transform:scale(1.02)}
       return;
     }
     b.addEventListener('click', function () {
-      toast('0.3.4 는 아직 공개 전입니다. 릴리스가 올라오면 이 버튼으로 바로 받을 수 있습니다.');
+      toast('0.3.2 는 아직 공개 전입니다. 릴리스가 올라오면 이 버튼으로 바로 받을 수 있습니다.');
       var note = D.getElementById(b.getAttribute('aria-describedby') || '');
       var chip = note && note.querySelector('.statuschip');
       if (!chip) return;
